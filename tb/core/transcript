@@ -1,0 +1,109 @@
+# Reading pref.tcl
+# //  Questa Sim-64
+# //  Version 10.7b_1 linux_x86_64 Jul 26 2018
+# //
+# //  Copyright 1991-2018 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  QuestaSim and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# vsim "+firmware=custom/hello_world.hex" -gui -debugdb tb_top_vopt -do "vsim.tcl" 
+# Start time: 17:08:57 on Nov 19,2019
+# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_121595/linux_x86_64_gcc-5.3.0/export_tramp.so
+# Loading sv_std.std
+# Loading work.tb_top(fast)
+# Loading work.riscv_wrapper(fast)
+# Loading work.fpnew_pkg(fast)
+# Loading work.riscv_defines(fast)
+# Loading work.apu_core_package(fast)
+# Loading work.riscv_core_sv_unit(fast)
+# Loading work.riscv_core(fast)
+# Loading work.cluster_clock_gating(fast)
+# Loading work.riscv_if_stage_sv_unit(fast)
+# Loading work.riscv_if_stage(fast)
+# Loading work.riscv_prefetch_L0_buffer(fast)
+# Loading work.riscv_L0_buffer(fast)
+# Loading work.riscv_hwloop_controller(fast)
+# Loading work.riscv_compressed_decoder_sv_unit(fast)
+# Loading work.riscv_compressed_decoder(fast)
+# Loading work.riscv_id_stage_sv_unit(fast)
+# Loading work.riscv_id_stage(fast)
+# Loading work.register_file_test_wrap(fast)
+# Loading work.riscv_register_file(fast)
+# Loading work.riscv_decoder_sv_unit(fast)
+# Loading work.riscv_decoder(fast)
+# Loading work.riscv_controller_sv_unit(fast)
+# Loading work.riscv_controller(fast)
+# Loading work.riscv_int_controller_sv_unit(fast)
+# Loading work.riscv_int_controller(fast)
+# Loading work.riscv_hwloop_regs(fast)
+# Loading work.riscv_ex_stage_sv_unit(fast)
+# Loading work.riscv_ex_stage(fast)
+# Loading work.riscv_alu_sv_unit(fast)
+# Loading work.riscv_alu(fast)
+# Loading work.alu_popcnt(fast)
+# Loading work.alu_ff(fast)
+# Loading work.riscv_alu_div(fast)
+# Loading work.riscv_mult_sv_unit(fast)
+# Loading work.riscv_mult(fast)
+# Loading work.riscv_load_store_unit(fast)
+# Loading work.riscv_cs_registers_sv_unit(fast)
+# Loading work.riscv_cs_registers(fast)
+# Loading work.riscv_pmp_sv_unit(fast)
+# Loading work.riscv_pmp(fast)
+# Loading work.riscv_tracer_defines(fast)
+# Loading work.riscv_tracer_sv_unit(fast)
+# Loading work.riscv_tracer(fast)
+# Loading work.mm_ram(fast)
+# Loading work.dp_ram(fast)
+# Loading work.perturbation_defines(fast)
+# Loading work.riscv_random_stall_sv_unit(fast)
+# Loading work.riscv_random_stall(fast)
+# Loading work.riscv_random_stall(fast__1)
+# Loading work.riscv_random_interrupt_generator_sv_unit(fast)
+# Loading work.riscv_random_interrupt_generator(fast)
+# ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_core_i'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(51).
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/instr_random_stalls File: mm_ram.sv Line: 570
+# ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_mem_o'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(52).
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/instr_random_stalls File: mm_ram.sv Line: 570
+# ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_core_i'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(51).
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 606
+# ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_mem_o'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(52).
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 606
+# Compiling /tmp/bettatia@larain1.ee.ethz.ch_dpi_121595/linux_x86_64_gcc-5.3.0/exportwrapper.c
+# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_121595/linux_x86_64_gcc-5.3.0/vsim_auto_compile.so
+# ** Note: (vsim-8716) Reusing existing debug database vsim.dbg.
+# do vsim.tcl
+# 1
+# [CORE] Core settings: PULP_SECURE =           1, N_PMP_ENTRIES =          16, N_PMP_CFG           4
+# ** Warning: (vsim-8315) No condition is true in the unique/priority if/case statement.
+#    Time: 0 ns  Iteration: 0  Process: /tb_top/riscv_wrapper_i/riscv_core_i/RISCY_PMP/pmp_unit_i/#ALWAYS#673 File: ../../rtl/riscv_pmp.sv Line: 677
+# ** Warning: (vsim-8315) No condition is true in the unique/priority if/case statement.
+#    Time: 0 ns  Iteration: 1  Process: /tb_top/riscv_wrapper_i/riscv_core_i/RISCY_PMP/pmp_unit_i/#ALWAYS#673 File: ../../rtl/riscv_pmp.sv Line: 677
+# ecall exception handler entered
+# 
+# 0
+# 1
+# 2
+# 3
+# 4
+# 1
+# 6
+# 1
+# 8
+# 1
+# EXIT SUCCESS
+# ** Note: $finish    : tb_top.sv(137)
+#    Time: 122140 ns  Iteration: 1  Instance: /tb_top
+# 1
+# Break in Module tb_top at tb_top.sv line 137
+# Can't move the Now cursor.
+# Can't move the Now cursor.
+# Can't move the Now cursor.
+# Can't move the Now cursor.

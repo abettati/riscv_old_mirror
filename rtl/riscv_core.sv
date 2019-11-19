@@ -1052,7 +1052,7 @@ module riscv_core
 
   //  CSR access
   assign csr_access   =  csr_access_ex;
-  assign csr_addr     =  csr_addr_int;
+  assign csr_addr     =  csr_num_e'(csr_addr_int);
   assign csr_wdata    =  alu_operand_a_ex;
   assign csr_op       =  csr_op_ex;
 

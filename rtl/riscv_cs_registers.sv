@@ -61,7 +61,7 @@ module riscv_cs_registers
 
   // Interface to registers (SRAM like)
   input  logic                    csr_access_i,
-  input  csr_num_e                csr_addr_i,
+  input  riscv_defines::csr_num_e                csr_addr_i,
   input  logic [31:0]             csr_wdata_i,
   input  logic  [1:0]             csr_op_i,
   output logic [31:0]             csr_rdata_o,
@@ -1072,6 +1072,7 @@ end //PULP_SECURE
       dscratch0_q <= '0;
       dscratch1_q <= '0;
       mscratch_q  <= '0;
+      mie_q       <= '0;
     end
     else
     begin
@@ -1101,6 +1102,7 @@ end //PULP_SECURE
       dscratch0_q<= dscratch0_n;
       dscratch1_q<= dscratch1_n;
       mscratch_q <= mscratch_n;
+      mie_q      <= mie_d;
     end
   end
 
