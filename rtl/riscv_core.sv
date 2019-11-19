@@ -124,6 +124,8 @@ module riscv_core
 
   input  logic [N_EXT_PERF_COUNTERS-1:0] ext_perf_counters_i
 );
+  // abet Import the riscv_defines pkg
+  import riscv_defines::*;
 
   localparam N_HWLP      = 2;
   localparam N_HWLP_BITS = $clog2(N_HWLP);
@@ -249,7 +251,7 @@ module riscv_core
 
   logic        csr_access;
   logic  [1:0] csr_op;
-  logic [11:0] csr_addr;
+  csr_num_e    csr_addr;
   logic [11:0] csr_addr_int;
   logic [31:0] csr_rdata;
   logic [31:0] csr_wdata;

@@ -60,11 +60,11 @@ module riscv_cs_registers
   input  logic [30:0]     boot_addr_i,
 
   // Interface to registers (SRAM like)
-  input  logic            csr_access_i,
-  input  logic [11:0]     csr_addr_i,
-  input  logic [31:0]     csr_wdata_i,
-  input  logic  [1:0]     csr_op_i,
-  output logic [31:0]     csr_rdata_o,
+  input  logic                    csr_access_i,
+  input  csr_num_e                csr_addr_i,
+  input  logic [31:0]             csr_wdata_i,
+  input  logic  [1:0]             csr_op_i,
+  output logic [31:0]             csr_rdata_o,
 
   output logic [2:0]         frm_o,
   output logic [C_PC-1:0]    fprec_o,
@@ -205,6 +205,14 @@ module riscv_cs_registers
     logic mprv;
   } Status_t;
 
+  //abet struct for mip/mie CSRs
+  typedef struct packed {
+    logic        irq_software;
+    logic        irq_timer;
+    logic        irq_external;
+    logic [14:0] irq_fast; // 15 fast interrupts,
+                           // one interrupt is reserved for NMI (not visible through mip/mie)
+  } Interrupts_t;
 
   typedef struct packed{
       logic [31:28] xdebugver;
@@ -263,6 +271,10 @@ module riscv_cs_registers
   logic [23:0] mtvec_n, mtvec_q;
   logic [23:0] utvec_n, utvec_q;
 
+  // abet
+  Interrupts_t mip;
+  Interrupts_t mie_q, mie_d;
+
   logic is_irq;
   PrivLvl_t priv_lvl_n, priv_lvl_q, priv_lvl_reg_q;
   Pmp_t pmp_reg_q, pmp_reg_n;
@@ -313,7 +325,7 @@ if(PULP_SECURE==1) begin
       12'h003: csr_rdata_int = (FPU == 1) ? {24'b0, frm_q, fflags_q} : '0;
       12'h006: csr_rdata_int = (FPU == 1) ? {27'b0, fprec_q}         : '0; // Optional precision control for FP DIV/SQRT Unit
       // mstatus
-      12'h300: csr_rdata_int = {
+      CSR_MSTATUS: csr_rdata_int = {
                                   14'b0,
                                   mstatus_q.mprv,
                                   4'b0,
@@ -328,17 +340,34 @@ if(PULP_SECURE==1) begin
                                 };
 
       // misa: machine isa register
-      12'h301: csr_rdata_int = MISA_VALUE;
+      CSR_MISA: csr_rdata_int = MISA_VALUE;
+
+      // abet mie: machine interrupt enable
+      CSR_MIE: begin
+        csr_rdata_int                                     = '0;
+        csr_rdata_int[CSR_MSIX_BIT]                       = mie_q.irq_software;
+        csr_rdata_int[CSR_MTIX_BIT]                       = mie_q.irq_timer;
+        csr_rdata_int[CSR_MEIX_BIT]                       = mie_q.irq_external;
+        csr_rdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW] = mie_q.irq_fast;
+      end
       // mtvec: machine trap-handler base address
-      12'h305: csr_rdata_int = {mtvec_q, 6'h0, MTVEC_MODE};
+      CSR_MTVEC: csr_rdata_int = {mtvec_q, 6'h0, MTVEC_MODE};
       // mscratch: machine scratch
-      12'h340: csr_rdata_int = mscratch_q;
+      CSR_MSCRATCH: csr_rdata_int = mscratch_q;
       // mepc: exception program counter
-      12'h341: csr_rdata_int = mepc_q;
+      CSR_MEPC: csr_rdata_int = mepc_q;
       // mcause: exception cause
-      12'h342: csr_rdata_int = {mcause_q[5], 26'b0, mcause_q[4:0]};
+      CSR_MCAUSE: csr_rdata_int = {mcause_q[5], 26'b0, mcause_q[4:0]};
+      // abet mip: interrupt pending - put zero just for testing
+      CSR_MIP: begin
+        csr_rdata_int                                     = '0;
+        csr_rdata_int[CSR_MSIX_BIT]                       = '0;
+        csr_rdata_int[CSR_MTIX_BIT]                       = '0;
+        csr_rdata_int[CSR_MEIX_BIT]                       = '0;
+        csr_rdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW] = 15'b0;
+      end
       // mhartid: unique hardware thread id
-      12'hF14: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
+      CSR_MHARTID: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
 
       CSR_DCSR:
                csr_rdata_int = dcsr_q;//
@@ -358,29 +387,29 @@ if(PULP_SECURE==1) begin
       HWLoop1_COUNTER: csr_rdata_int = hwlp_cnt_i[1];
 
       // PMP config registers
-      12'h3A0: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[0] : '0;
-      12'h3A1: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[1] : '0;
-      12'h3A2: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[2] : '0;
-      12'h3A3: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[3] : '0;
-
+      CSR_PMPCFG0: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[0] : '0;
+      CSR_PMPCFG1: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[1] : '0;
+      CSR_PMPCFG2: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[2] : '0;
+      CSR_PMPCFG3: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[3] : '0;
+      // TODO abet how do I write this with mnemonics?
       12'h3Bx: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpaddr[csr_addr_i[3:0]] : '0;
 
       /* USER CSR */
       // ustatus
-      12'h000: csr_rdata_int = {
+      CSR_USTATUS: csr_rdata_int = {
                                   27'b0,
                                   mstatus_q.upie,
                                   3'h0,
                                   mstatus_q.uie
                                 };
       // utvec: user trap-handler base address
-      12'h005: csr_rdata_int = {utvec_q, 6'h0, MTVEC_MODE};
-      // dublicated mhartid: unique hardware thread id (not official)
+      CSR_UTVEC: csr_rdata_int = {utvec_q, 6'h0, MTVEC_MODE};
+      // duplicated mhartid: unique hardware thread id (not official)
       12'h014: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
       // uepc: exception program counter
-      12'h041: csr_rdata_int = uepc_q;
+      CSR_UEPC: csr_rdata_int = uepc_q;
       // ucause: exception cause
-      12'h042: csr_rdata_int = {ucause_q[5], 26'h0, ucause_q[4:0]};
+      CSR_UCAUSE: csr_rdata_int = {ucause_q[5], 26'h0, ucause_q[4:0]};
       // current priv level (not official)
       12'hC10: csr_rdata_int = {30'h0, priv_lvl_q};
       default:
@@ -399,7 +428,7 @@ end else begin //PULP_SECURE == 0
       12'h003: csr_rdata_int = (FPU == 1) ? {24'b0, frm_q, fflags_q} : '0;
       12'h006: csr_rdata_int = (FPU == 1) ? {27'b0, fprec_q}         : '0; // Optional precision control for FP DIV/SQRT Unit
       // mstatus: always M-mode, contains IE bit
-      12'h300: csr_rdata_int = {
+      CSR_MSTATUS: csr_rdata_int = {
                                   14'b0,
                                   mstatus_q.mprv,
                                   4'b0,
@@ -413,17 +442,33 @@ end else begin //PULP_SECURE == 0
                                   mstatus_q.uie
                                 };
       // misa: machine isa register
-      12'h301: csr_rdata_int = MISA_VALUE;
+      CSR_MISA: csr_rdata_int = MISA_VALUE;
+      // abet mie: machine interrupt enable
+      CSR_MIE: begin
+        csr_rdata_int                                     = '0;
+        csr_rdata_int[CSR_MSIX_BIT]                       = mie_q.irq_software;
+        csr_rdata_int[CSR_MTIX_BIT]                       = mie_q.irq_timer;
+        csr_rdata_int[CSR_MEIX_BIT]                       = mie_q.irq_external;
+        csr_rdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW] = mie_q.irq_fast;
+      end
       // mtvec: machine trap-handler base address
-      12'h305: csr_rdata_int = {mtvec_q, 6'h0, MTVEC_MODE};
+      CSR_MTVEC: csr_rdata_int = {mtvec_q, 6'h0, MTVEC_MODE};
       // mscratch: machine scratch
-      12'h340: csr_rdata_int = mscratch_q;
+      CSR_MSCRATCH: csr_rdata_int = mscratch_q;
       // mepc: exception program counter
-      12'h341: csr_rdata_int = mepc_q;
+      CSR_MEPC: csr_rdata_int = mepc_q;
       // mcause: exception cause
-      12'h342: csr_rdata_int = {mcause_q[5], 26'b0, mcause_q[4:0]};
+      CSR_MCAUSE: csr_rdata_int = {mcause_q[5], 26'b0, mcause_q[4:0]};
+      // abet mip: interrupt pending - put zero just for testing
+      CSR_MIP: begin
+        csr_rdata_int                                     = '0;
+        csr_rdata_int[CSR_MSIX_BIT]                       = '0;
+        csr_rdata_int[CSR_MTIX_BIT]                       = '0;
+        csr_rdata_int[CSR_MEIX_BIT]                       = '0;
+        csr_rdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW] = 15'b0;
+      end
       // mhartid: unique hardware thread id
-      12'hF14: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
+      CSR_MHARTID: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
 
       CSR_DCSR:
                csr_rdata_int = dcsr_q;//
@@ -481,6 +526,9 @@ if(PULP_SECURE==1) begin
     pmpaddr_we               = '0;
     pmpcfg_we                = '0;
 
+    // abet
+    mie_d = mie_q;
+
     if (FPU == 1) if (fflags_we_i) fflags_n = fflags_i | fflags_q;
 
     casex (csr_addr_i)
@@ -494,7 +542,7 @@ if(PULP_SECURE==1) begin
       12'h006: if (csr_we_int) fprec_n = (FPU == 1) ? csr_wdata_int[C_PC-1:0]    : '0;
 
       // mstatus: IE bit
-      12'h300: if (csr_we_int) begin
+      CSR_MSTATUS: if (csr_we_int) begin
         mstatus_n = '{
           uie:  csr_wdata_int[`MSTATUS_UIE_BITS],
           mie:  csr_wdata_int[`MSTATUS_MIE_BITS],
@@ -504,21 +552,28 @@ if(PULP_SECURE==1) begin
           mprv: csr_wdata_int[`MSTATUS_MPRV_BITS]
         };
       end
+      // abet mie: machine interrupt enable
+      CSR_MIE: if(csr_we_int) begin
+        mie_d.irq_software = csr_wdata_int[CSR_MSIX_BIT];
+        mie_d.irq_timer    = csr_wdata_int[CSR_MTIX_BIT];
+        mie_d.irq_external = csr_wdata_int[CSR_MEIX_BIT];
+        mie_d.irq_fast     = csr_wdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW];
+      end
       // mtvec: machine trap-handler base address
-      12'h305: if (csr_we_int) begin
+      CSR_MTVEC: if (csr_we_int) begin
         mtvec_n    = csr_wdata_int[31:8];
       end
       // mscratch: machine scratch
-      12'h340: if (csr_we_int) begin
+      CSR_MSCRATCH: if (csr_we_int) begin
         mscratch_n = csr_wdata_int;
       end
       // mepc: exception program counter
-      12'h341: if (csr_we_int) begin
+      CSR_MEPC: if (csr_we_int) begin
         mepc_n = csr_wdata_int & ~32'b1; // force 16-bit alignment
       end
       // mcause
-      12'h342: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[4:0]};
-
+      CSR_MCAUSE: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[4:0]};
+      // TODO abet: should mip (h344) be added in write logic?
       CSR_DCSR:
                if (csr_we_int)
                begin
@@ -561,17 +616,17 @@ if(PULP_SECURE==1) begin
 
 
       // PMP config registers
-      12'h3A0: if (csr_we_int) begin pmp_reg_n.pmpcfg_packed[0] = csr_wdata_int; pmpcfg_we[3:0]   = 4'b1111; end
-      12'h3A1: if (csr_we_int) begin pmp_reg_n.pmpcfg_packed[1] = csr_wdata_int; pmpcfg_we[7:4]   = 4'b1111; end
-      12'h3A2: if (csr_we_int) begin pmp_reg_n.pmpcfg_packed[2] = csr_wdata_int; pmpcfg_we[11:8]  = 4'b1111; end
-      12'h3A3: if (csr_we_int) begin pmp_reg_n.pmpcfg_packed[3] = csr_wdata_int; pmpcfg_we[15:12] = 4'b1111; end
+      CSR_PMPCFG0: if (csr_we_int) begin pmp_reg_n.pmpcfg_packed[0] = csr_wdata_int; pmpcfg_we[3:0]   = 4'b1111; end
+      CSR_PMPCFG1: if (csr_we_int) begin pmp_reg_n.pmpcfg_packed[1] = csr_wdata_int; pmpcfg_we[7:4]   = 4'b1111; end
+      CSR_PMPCFG2: if (csr_we_int) begin pmp_reg_n.pmpcfg_packed[2] = csr_wdata_int; pmpcfg_we[11:8]  = 4'b1111; end
+      CSR_PMPCFG3: if (csr_we_int) begin pmp_reg_n.pmpcfg_packed[3] = csr_wdata_int; pmpcfg_we[15:12] = 4'b1111; end
 
       12'h3BX: if (csr_we_int) begin pmp_reg_n.pmpaddr[csr_addr_i[3:0]]   = csr_wdata_int; pmpaddr_we[csr_addr_i[3:0]] = 1'b1;  end
 
 
       /* USER CSR */
       // ucause: exception cause
-      12'h000: if (csr_we_int) begin
+      CSR_USTATUS: if (csr_we_int) begin
         mstatus_n = '{
           uie:  csr_wdata_int[`MSTATUS_UIE_BITS],
           mie:  mstatus_q.mie,
@@ -582,15 +637,15 @@ if(PULP_SECURE==1) begin
         };
       end
       // utvec: user trap-handler base address
-      12'h005: if (csr_we_int) begin
+      CSR_UTVEC: if (csr_we_int) begin
         utvec_n    = csr_wdata_int[31:8];
       end
       // uepc: exception program counter
-      12'h041: if (csr_we_int) begin
+      CSR_UEPC: if (csr_we_int) begin
         uepc_n     = csr_wdata_int;
       end
       // ucause: exception cause
-      12'h042: if (csr_we_int) ucause_n = {csr_wdata_int[31], csr_wdata_int[4:0]};
+      CSR_UCAUSE: if (csr_we_int) ucause_n = {csr_wdata_int[31], csr_wdata_int[4:0]};
     endcase
 
     // exception controller gets priority over other writes
@@ -753,7 +808,7 @@ end else begin //PULP_SECURE == 0
       12'h006: if (csr_we_int) fprec_n = (FPU == 1) ? csr_wdata_int[C_PC-1:0]    : '0;
 
       // mstatus: IE bit
-      12'h300: if (csr_we_int) begin
+      CSR_MSTATUS: if (csr_we_int) begin
         mstatus_n = '{
           uie:  csr_wdata_int[`MSTATUS_UIE_BITS],
           mie:  csr_wdata_int[`MSTATUS_MIE_BITS],
@@ -763,17 +818,24 @@ end else begin //PULP_SECURE == 0
           mprv: csr_wdata_int[`MSTATUS_MPRV_BITS]
         };
       end
+      // abet mie: machine interrupt enable
+      CSR_MIE: if(csr_we_int) begin
+        mie_d.irq_software = csr_wdata_int[CSR_MSIX_BIT];
+        mie_d.irq_timer    = csr_wdata_int[CSR_MTIX_BIT];
+        mie_d.irq_external = csr_wdata_int[CSR_MEIX_BIT];
+        mie_d.irq_fast     = csr_wdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW];
+      end
       // mscratch: machine scratch
-      12'h340: if (csr_we_int) begin
+      CSR_MSCRATCH: if (csr_we_int) begin
         mscratch_n = csr_wdata_int;
       end
       // mepc: exception program counter
-      12'h341: if (csr_we_int) begin
+      CSR_MEPC: if (csr_we_int) begin
         mepc_n = csr_wdata_int & ~32'b1; // force 16-bit alignment
       end
       // mcause
-      12'h342: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[4:0]};
-
+      CSR_MCAUSE: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[4:0]};
+      // TODO abet: should mip (h344) be added in write logic?
       CSR_DCSR:
                if (csr_we_int)
                begin
@@ -1226,4 +1288,3 @@ end //PULP_SECURE
   end
 
 endmodule
-
