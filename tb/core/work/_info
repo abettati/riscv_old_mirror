@@ -28,7 +28,7 @@ Z9 F../../rtl/riscv_alu.sv
 L0 1157
 Z10 OL;L;10.7b_1;67
 31
-Z11 !s108 1574175308.000000
+Z11 !s108 1574248001.000000
 Z12 !s107 ../../rtl/include/riscv_config.sv|../../rtl/include/apu_macros.sv|mm_ram.sv|tb_top.sv|cluster_clock_gating.sv|dp_ram.sv|riscv_wrapper.sv|../../tb/tb_riscv/riscv_random_interrupt_generator.sv|../../tb/tb_riscv/riscv_random_stall.sv|../../rtl/riscv_controller.sv|../../rtl/riscv_alu.sv|../../rtl/riscv_apu_disp.sv|../../rtl/riscv_pmp.sv|../../rtl/riscv_alu_basic.sv|../../rtl/riscv_ex_stage.sv|../../rtl/riscv_int_controller.sv|../../rtl/register_file_test_wrap.sv|../../rtl/riscv_mult.sv|../../rtl/riscv_hwloop_regs.sv|../../rtl/riscv_prefetch_L0_buffer.sv|../../rtl/riscv_alu_div.sv|../../rtl/riscv_fetch_fifo.sv|../../rtl/riscv_compressed_decoder.sv|../../rtl/riscv_core.sv|../../rtl/riscv_id_stage.sv|../../rtl/riscv_load_store_unit.sv|../../rtl/riscv_register_file.sv|../../rtl/riscv_cs_registers.sv|../../rtl/riscv_L0_buffer.sv|../../rtl/riscv_prefetch_buffer.sv|../../rtl/riscv_tracer.sv|../../rtl/riscv_decoder.sv|../../rtl/riscv_hwloop_controller.sv|../../rtl/riscv_if_stage.sv|../../rtl/include/../../tb/tb_riscv/include/perturbation_defines.sv|../../rtl/include/riscv_tracer_defines.sv|../../rtl/include/riscv_defines.sv|../../rtl/include/apu_core_package.sv|fpnew/src/fpnew_pkg.sv|
 Z13 !s90 -work|work|+incdir+../../rtl/include|-pedanticerrors|-suppress|2577|-suppress|2583|fpnew/src/fpnew_pkg.sv|../../rtl/include/apu_core_package.sv|../../rtl/include/riscv_defines.sv|../../rtl/include/riscv_tracer_defines.sv|../../rtl/include/../../tb/tb_riscv/include/perturbation_defines.sv|../../rtl/riscv_if_stage.sv|../../rtl/riscv_hwloop_controller.sv|../../rtl/riscv_decoder.sv|../../rtl/riscv_tracer.sv|../../rtl/riscv_prefetch_buffer.sv|../../rtl/riscv_L0_buffer.sv|../../rtl/riscv_cs_registers.sv|../../rtl/riscv_register_file.sv|../../rtl/riscv_load_store_unit.sv|../../rtl/riscv_id_stage.sv|../../rtl/riscv_core.sv|../../rtl/riscv_compressed_decoder.sv|../../rtl/riscv_fetch_fifo.sv|../../rtl/riscv_alu_div.sv|../../rtl/riscv_prefetch_L0_buffer.sv|../../rtl/riscv_hwloop_regs.sv|../../rtl/riscv_mult.sv|../../rtl/register_file_test_wrap.sv|../../rtl/riscv_int_controller.sv|../../rtl/riscv_ex_stage.sv|../../rtl/riscv_alu_basic.sv|../../rtl/riscv_pmp.sv|../../rtl/riscv_apu_disp.sv|../../rtl/riscv_alu.sv|../../rtl/riscv_controller.sv|../../tb/tb_riscv/riscv_random_stall.sv|../../tb/tb_riscv/riscv_random_interrupt_generator.sv|riscv_wrapper.sv|dp_ram.sv|cluster_clock_gating.sv|tb_top.sv|mm_ram.sv|
 !i113 0
@@ -64,7 +64,7 @@ R15
 R16
 Xapu_core_package
 R1
-Z17 !s110 1574175308
+Z17 !s110 1574248001
 !i10b 1
 !s100 bDiC[h[idlDL[0g5iD6l63
 IVm0O1JLWP;3;V41Y9[[=U0
@@ -88,7 +88,7 @@ R15
 R16
 vcluster_clock_gating
 R1
-R17
+Z18 !s110 1574248002
 !i10b 1
 !s100 E90Uk_A8JmH@m@5j7b?Z53
 IOiZ:ncgjJc6jH=GNP_Cbg1
@@ -99,7 +99,7 @@ R0
 R7
 8cluster_clock_gating.sv
 Fcluster_clock_gating.sv
-Z18 L0 11
+Z19 L0 11
 R10
 r1
 !s85 0
@@ -113,7 +113,7 @@ R15
 R16
 vdp_ram
 R1
-R17
+R18
 !i10b 1
 !s100 2;gaEMY41`RQB5=_[C_df3
 I>@O2XdhTS9Ul:2AobY<eC2
@@ -124,7 +124,7 @@ R0
 R7
 8dp_ram.sv
 Fdp_ram.sv
-Z19 L0 12
+Z20 L0 12
 R10
 r1
 !s85 0
@@ -148,7 +148,7 @@ R0
 w1574162313
 8fpnew/src/fpnew_pkg.sv
 Ffpnew/src/fpnew_pkg.sv
-Z20 L0 14
+Z21 L0 14
 R10
 r1
 !s85 0
@@ -162,7 +162,7 @@ R15
 R16
 vmm_ram
 R1
-R17
+R18
 !i10b 1
 !s100 7WGACbG=7SfnUWMkK`41I3
 IBk3g:0?EI2Ph0nbciS;fa0
@@ -194,7 +194,7 @@ IRleHk:;`^KI?E1USNOIDK1
 VRleHk:;`^KI?E1USNOIDK1
 S1
 R0
-Z21 w1574160279
+Z22 w1574160279
 8../../rtl/include/../../tb/tb_riscv/include/perturbation_defines.sv
 F../../rtl/include/../../tb/tb_riscv/include/perturbation_defines.sv
 L0 23
@@ -211,7 +211,7 @@ R15
 R16
 vregister_file_test_wrap
 R1
-R17
+R18
 !i10b 1
 !s100 dbHDGo9A=h2Rk7Z8L7<j@3
 Ilnao^W?9T;U>3:j3IGRL@2
@@ -251,7 +251,7 @@ R0
 R7
 R8
 R9
-Z22 L0 31
+Z23 L0 31
 R10
 31
 R11
@@ -276,9 +276,9 @@ II]YHkahjZO47UEL``9K>B1
 S1
 R0
 R7
-Z23 8../../rtl/riscv_alu_basic.sv
-Z24 F../../rtl/riscv_alu_basic.sv
-Z25 L0 30
+Z24 8../../rtl/riscv_alu_basic.sv
+Z25 F../../rtl/riscv_alu_basic.sv
+Z26 L0 30
 R10
 31
 R11
@@ -302,9 +302,9 @@ IS2]XZJkEM?f3RGNd8iiU81
 S1
 R0
 R7
-R23
 R24
-Z26 L0 28
+R25
+Z27 L0 28
 R10
 31
 R11
@@ -316,7 +316,7 @@ R15
 R16
 vriscv_alu_div
 R1
-R17
+R18
 !i10b 1
 !s100 39?MUBCc[lAdFcB<29D<50
 IZ0bSZf@_cN@icbJVY@A651
@@ -327,7 +327,7 @@ R0
 R7
 8../../rtl/riscv_alu_div.sv
 F../../rtl/riscv_alu_div.sv
-Z27 L0 26
+Z28 L0 26
 R10
 r1
 !s85 0
@@ -355,7 +355,7 @@ R0
 R7
 R8
 R9
-Z28 L0 29
+Z29 L0 29
 R10
 31
 R11
@@ -367,7 +367,7 @@ R15
 R16
 vriscv_apu_disp
 R1
-Z29 DXx4 work 16 apu_core_package 0 22 Vm0O1JLWP;3;V41Y9[[=U0
+Z30 DXx4 work 16 apu_core_package 0 22 Vm0O1JLWP;3;V41Y9[[=U0
 DXx4 work 22 riscv_apu_disp_sv_unit 0 22 KEEMWng8akL1CzbE<=^Tj2
 R5
 r1
@@ -379,9 +379,9 @@ IE_M17V4HO_]lz5f_O?MG72
 S1
 R0
 R7
-Z30 8../../rtl/riscv_apu_disp.sv
-Z31 F../../rtl/riscv_apu_disp.sv
-Z32 L0 27
+Z31 8../../rtl/riscv_apu_disp.sv
+Z32 F../../rtl/riscv_apu_disp.sv
+Z33 L0 27
 R10
 31
 R11
@@ -393,7 +393,7 @@ R15
 R16
 Xriscv_apu_disp_sv_unit
 R1
-R29
+R30
 VKEEMWng8akL1CzbE<=^Tj2
 r1
 !s85 0
@@ -404,10 +404,10 @@ IKEEMWng8akL1CzbE<=^Tj2
 S1
 R0
 R7
-R30
 R31
-Z33 F../../rtl/include/apu_macros.sv
-Z34 L0 15
+R32
+Z34 F../../rtl/include/apu_macros.sv
+Z35 L0 15
 R10
 31
 R11
@@ -432,9 +432,9 @@ IH<Y@^Va0]9L59[Wf?jFK>0
 S1
 R0
 R7
-Z35 8../../rtl/riscv_compressed_decoder.sv
-Z36 F../../rtl/riscv_compressed_decoder.sv
-R25
+Z36 8../../rtl/riscv_compressed_decoder.sv
+Z37 F../../rtl/riscv_compressed_decoder.sv
+R26
 R10
 31
 R11
@@ -458,9 +458,9 @@ INSc_36dQlAPWT_:He_zYz0
 S1
 R0
 R7
-R35
 R36
-R26
+R37
+R27
 R10
 31
 R11
@@ -485,9 +485,9 @@ I_nOLEGNP9G[P35RYYWoMC3
 S1
 R0
 R7
-Z37 8../../rtl/riscv_controller.sv
-Z38 F../../rtl/riscv_controller.sv
-Z39 L0 32
+Z38 8../../rtl/riscv_controller.sv
+Z39 F../../rtl/riscv_controller.sv
+Z40 L0 32
 R10
 31
 R11
@@ -511,9 +511,9 @@ IJR72PS6OVA=G7M5<HKHGD2
 S1
 R0
 R7
-R37
 R38
-R25
+R39
+R26
 R10
 31
 R11
@@ -525,7 +525,7 @@ R15
 R16
 vriscv_core
 R1
-R29
+R30
 R2
 R3
 DXx4 work 18 riscv_core_sv_unit 0 22 W7?:ILL73_;I15IQ4dRR>0
@@ -533,14 +533,14 @@ R5
 r1
 !s85 0
 !i10b 1
-!s100 @`[P_;JOXf8m<S0IZl3V@2
-IF1Pi<oOKz_]P?^2GX1oEJ3
+!s100 L<gN9g[CKnDmZ`BL<2W?L1
+I6nY7gI>AE[oEM_X@iYIa32
 !s105 riscv_core_sv_unit
 S1
 R0
-Z40 w1574174705
-Z41 8../../rtl/riscv_core.sv
-Z42 F../../rtl/riscv_core.sv
+Z41 w1574247802
+Z42 8../../rtl/riscv_core.sv
+Z43 F../../rtl/riscv_core.sv
 L0 38
 R10
 31
@@ -553,7 +553,7 @@ R15
 R16
 Xriscv_core_sv_unit
 R1
-R29
+R30
 R2
 R3
 VW7?:ILL73_;I15IQ4dRR>0
@@ -565,11 +565,11 @@ IW7?:ILL73_;I15IQ4dRR>0
 !i103 1
 S1
 R0
-R40
 R41
 R42
-Z43 F../../rtl/include/riscv_config.sv
-R39
+R43
+Z44 F../../rtl/include/riscv_config.sv
+R40
 R10
 31
 R11
@@ -588,15 +588,15 @@ R5
 r1
 !s85 0
 !i10b 1
-!s100 B;OL`3cDbJaUO:PSU`X`63
-IH`zkSQ`h[Tm0nbdm2F0;c0
+!s100 8:5^]P30G^75`ERD2QB3I1
+I_l0Yo<RZK37T?U9Ufa3kO0
 !s105 riscv_cs_registers_sv_unit
 S1
 R0
-Z44 w1574175251
-Z45 8../../rtl/riscv_cs_registers.sv
-Z46 F../../rtl/riscv_cs_registers.sv
-Z47 L0 37
+Z45 w1574247761
+Z46 8../../rtl/riscv_cs_registers.sv
+Z47 F../../rtl/riscv_cs_registers.sv
+Z48 L0 37
 R10
 31
 R11
@@ -619,10 +619,10 @@ IJJNX_eKzInL0X6:ieP_<43
 !i103 1
 S1
 R0
-R44
 R45
 R46
-R28
+R47
+R29
 R10
 31
 R11
@@ -634,7 +634,7 @@ R15
 R16
 vriscv_decoder
 R1
-R29
+R30
 R2
 R3
 DXx4 work 21 riscv_decoder_sv_unit 0 22 ?d?bNE`nQGK<K1>e]:6Eb1
@@ -647,10 +647,10 @@ I]NjnT;1B;GoF7@]ZeL_;12
 !s105 riscv_decoder_sv_unit
 S1
 R0
-R7
-Z48 8../../rtl/riscv_decoder.sv
-Z49 F../../rtl/riscv_decoder.sv
-R39
+Z49 w1574247876
+Z50 8../../rtl/riscv_decoder.sv
+Z51 F../../rtl/riscv_decoder.sv
+R40
 R10
 31
 R11
@@ -662,7 +662,7 @@ R15
 R16
 Xriscv_decoder_sv_unit
 R1
-R29
+R30
 R2
 R3
 V?d?bNE`nQGK<K1>e]:6Eb1
@@ -674,11 +674,11 @@ I?d?bNE`nQGK<K1>e]:6Eb1
 !i103 1
 S1
 R0
-R7
-R48
 R49
-R33
+R50
+R51
 R34
+R35
 R10
 31
 R11
@@ -698,10 +698,10 @@ I8Z;oM`7UU1TBejXUZgo?T0
 V8Z;oM`7UU1TBejXUZgo?T0
 S1
 R0
-w1574174251
+w1574247827
 8../../rtl/include/riscv_defines.sv
 F../../rtl/include/riscv_defines.sv
-R27
+R28
 R10
 r1
 !s85 0
@@ -715,7 +715,7 @@ R15
 R16
 vriscv_ex_stage
 R1
-R29
+R30
 R2
 R3
 DXx4 work 22 riscv_ex_stage_sv_unit 0 22 V1W0PnQ@g[;=h4a=oY2ZQ3
@@ -729,9 +729,9 @@ I]ZkiBjlJCX?aG[59XZTO<1
 S1
 R0
 R7
-Z50 8../../rtl/riscv_ex_stage.sv
-Z51 F../../rtl/riscv_ex_stage.sv
-Z52 L0 40
+Z52 8../../rtl/riscv_ex_stage.sv
+Z53 F../../rtl/riscv_ex_stage.sv
+Z54 L0 40
 R10
 31
 R11
@@ -743,7 +743,7 @@ R15
 R16
 Xriscv_ex_stage_sv_unit
 R1
-R29
+R30
 R2
 R3
 VV1W0PnQ@g[;=h4a=oY2ZQ3
@@ -756,10 +756,10 @@ IV1W0PnQ@g[;=h4a=oY2ZQ3
 S1
 R0
 R7
-R50
-R51
-R33
+R52
+R53
 R34
+R35
 R10
 31
 R11
@@ -771,7 +771,7 @@ R15
 R16
 vriscv_fetch_fifo
 R1
-R17
+R18
 !i10b 1
 !s100 Nozlk87J6Rbbl<_V9JPWe2
 IPkbXzKfeL^VI3YjWKCR`k0
@@ -782,7 +782,7 @@ R0
 R7
 8../../rtl/riscv_fetch_fifo.sv
 F../../rtl/riscv_fetch_fifo.sv
-Z53 L0 25
+Z55 L0 25
 R10
 r1
 !s85 0
@@ -807,7 +807,7 @@ R0
 R7
 8../../rtl/riscv_hwloop_controller.sv
 F../../rtl/riscv_hwloop_controller.sv
-R53
+R55
 R10
 r1
 !s85 0
@@ -821,7 +821,7 @@ R15
 R16
 vriscv_hwloop_regs
 R1
-R17
+R18
 !i10b 1
 !s100 WnlAIXM51>znzNJAFO:zW0
 I1`kYO9WnWgazk>2I:ZU^>0
@@ -832,7 +832,7 @@ R0
 R7
 8../../rtl/riscv_hwloop_regs.sv
 F../../rtl/riscv_hwloop_regs.sv
-R53
+R55
 R10
 r1
 !s85 0
@@ -848,7 +848,7 @@ vriscv_id_stage
 R1
 R2
 R3
-R29
+R30
 DXx4 work 22 riscv_id_stage_sv_unit 0 22 VL2k`6>7k0cCIT5EC2XD[1
 R5
 r1
@@ -860,9 +860,9 @@ IBJ>24d2SOcZM:RE05>YG;1
 S1
 R0
 R7
-Z54 8../../rtl/riscv_id_stage.sv
-Z55 F../../rtl/riscv_id_stage.sv
-R52
+Z56 8../../rtl/riscv_id_stage.sv
+Z57 F../../rtl/riscv_id_stage.sv
+R54
 R10
 31
 R11
@@ -876,7 +876,7 @@ Xriscv_id_stage_sv_unit
 R1
 R2
 R3
-R29
+R30
 VVL2k`6>7k0cCIT5EC2XD[1
 r1
 !s85 0
@@ -887,9 +887,9 @@ IVL2k`6>7k0cCIT5EC2XD[1
 S1
 R0
 R7
-R54
-R55
-R25
+R56
+R57
+R26
 R10
 31
 R11
@@ -914,9 +914,9 @@ II8SK>UScMYiQ_=AzP8l]I3
 S1
 R0
 R7
-Z56 8../../rtl/riscv_if_stage.sv
-Z57 F../../rtl/riscv_if_stage.sv
-R22
+Z58 8../../rtl/riscv_if_stage.sv
+Z59 F../../rtl/riscv_if_stage.sv
+R23
 R10
 31
 R11
@@ -940,9 +940,9 @@ I1g;FJJUL1hC`4F[D>ocm`2
 S1
 R0
 R7
-R56
-R57
-R28
+R58
+R59
+R29
 R10
 31
 R11
@@ -967,9 +967,9 @@ IECYh0O:;5HP1QbE:H1HhI0
 S1
 R0
 R7
-Z58 8../../rtl/riscv_int_controller.sv
-Z59 F../../rtl/riscv_int_controller.sv
-R27
+Z60 8../../rtl/riscv_int_controller.sv
+Z61 F../../rtl/riscv_int_controller.sv
+R28
 R10
 31
 R11
@@ -993,8 +993,8 @@ I67]NMf>3H2co1Szo`NN_Q0
 S1
 R0
 R7
-R58
-R59
+R60
+R61
 L0 24
 R10
 31
@@ -1007,7 +1007,7 @@ R15
 R16
 vriscv_L0_buffer
 R1
-R17
+R18
 !i10b 1
 !s100 BDaz=0FhCoJcjZQA6OOX:2
 ILUH2gi3fbaV5OEDfz1L`52
@@ -1018,7 +1018,7 @@ R0
 R7
 8../../rtl/riscv_L0_buffer.sv
 F../../rtl/riscv_L0_buffer.sv
-R18
+R19
 R10
 r1
 !s85 0
@@ -1033,7 +1033,7 @@ R16
 nriscv_@l0_buffer
 vriscv_load_store_unit
 R1
-R17
+R18
 !i10b 1
 !s100 T?@X4K^:PcnRdk@E0?Z[c2
 IR3<YP4alJeYA?f4z4kO`^0
@@ -1044,7 +1044,7 @@ R0
 R7
 8../../rtl/riscv_load_store_unit.sv
 F../../rtl/riscv_load_store_unit.sv
-R32
+R33
 R10
 r1
 !s85 0
@@ -1071,9 +1071,9 @@ IKZaL2O1g;0WjY=g4V=QA;3
 S1
 R0
 R7
-Z60 8../../rtl/riscv_mult.sv
-Z61 F../../rtl/riscv_mult.sv
-R25
+Z62 8../../rtl/riscv_mult.sv
+Z63 F../../rtl/riscv_mult.sv
+R26
 R10
 31
 R11
@@ -1097,9 +1097,9 @@ IDJJ7B_X<71AF1EQfNMPFf3
 S1
 R0
 R7
-R60
-R61
-R26
+R62
+R63
+R27
 R10
 31
 R11
@@ -1124,8 +1124,8 @@ IE[KJ[A6anf?SWOZKTmkNM0
 S1
 R0
 R7
-Z62 8../../rtl/riscv_pmp.sv
-Z63 F../../rtl/riscv_pmp.sv
+Z64 8../../rtl/riscv_pmp.sv
+Z65 F../../rtl/riscv_pmp.sv
 L0 106
 R10
 31
@@ -1150,8 +1150,8 @@ I6V;F[m[MB0GaedS5bW1VT2
 S1
 R0
 R7
-R62
-R63
+R64
+R65
 L0 104
 R10
 31
@@ -1164,7 +1164,7 @@ R15
 R16
 vriscv_prefetch_buffer
 R1
-R17
+R18
 !i10b 1
 !s100 _?XAMS=5IcPUnQLg8=;TO1
 IM2VeM>9OV0=hkYk;gKLR81
@@ -1175,7 +1175,7 @@ R0
 R7
 8../../rtl/riscv_prefetch_buffer.sv
 F../../rtl/riscv_prefetch_buffer.sv
-R32
+R33
 R10
 r1
 !s85 0
@@ -1189,7 +1189,7 @@ R15
 R16
 vriscv_prefetch_L0_buffer
 R1
-R17
+R18
 !i10b 1
 !s100 <_zaLJX@5QnAQJ9a41IU[1
 I6fZT[8J]fn[YhefbAliK61
@@ -1200,7 +1200,7 @@ R0
 R7
 8../../rtl/riscv_prefetch_L0_buffer.sv
 F../../rtl/riscv_prefetch_L0_buffer.sv
-R27
+R28
 R10
 r1
 !s85 0
@@ -1217,7 +1217,7 @@ vriscv_random_interrupt_generator
 R1
 R2
 R3
-Z64 DXx4 work 20 perturbation_defines 0 22 RleHk:;`^KI?E1USNOIDK1
+Z66 DXx4 work 20 perturbation_defines 0 22 RleHk:;`^KI?E1USNOIDK1
 DXx4 work 40 riscv_random_interrupt_generator_sv_unit 0 22 <1W2z<2eaen3B]joZHYWE0
 R5
 r1
@@ -1228,10 +1228,10 @@ IU20be4O4`KJPZE=K3HYJf3
 !s105 riscv_random_interrupt_generator_sv_unit
 S1
 R0
-R21
-Z65 8../../tb/tb_riscv/riscv_random_interrupt_generator.sv
-Z66 F../../tb/tb_riscv/riscv_random_interrupt_generator.sv
-R25
+R22
+Z67 8../../tb/tb_riscv/riscv_random_interrupt_generator.sv
+Z68 F../../tb/tb_riscv/riscv_random_interrupt_generator.sv
+R26
 R10
 31
 R11
@@ -1245,7 +1245,7 @@ Xriscv_random_interrupt_generator_sv_unit
 R1
 R2
 R3
-R64
+R66
 V<1W2z<2eaen3B]joZHYWE0
 r1
 !s85 0
@@ -1255,11 +1255,11 @@ I<1W2z<2eaen3B]joZHYWE0
 !i103 1
 S1
 R0
-R21
-R65
-R66
-R43
-R27
+R22
+R67
+R68
+R44
+R28
 R10
 31
 R11
@@ -1273,7 +1273,7 @@ vriscv_random_stall
 R1
 R2
 R3
-R64
+R66
 DXx4 work 26 riscv_random_stall_sv_unit 0 22 0Io]YJS7K_c5il9>9>dHT3
 R5
 r1
@@ -1284,10 +1284,10 @@ IA;ID8FK<GG5G_lI^cRA7?0
 !s105 riscv_random_stall_sv_unit
 S1
 R0
-R21
-Z67 8../../tb/tb_riscv/riscv_random_stall.sv
-Z68 F../../tb/tb_riscv/riscv_random_stall.sv
-R28
+R22
+Z69 8../../tb/tb_riscv/riscv_random_stall.sv
+Z70 F../../tb/tb_riscv/riscv_random_stall.sv
+R29
 R10
 31
 R11
@@ -1301,7 +1301,7 @@ Xriscv_random_stall_sv_unit
 R1
 R2
 R3
-R64
+R66
 V0Io]YJS7K_c5il9>9>dHT3
 r1
 !s85 0
@@ -1311,11 +1311,11 @@ I0Io]YJS7K_c5il9>9>dHT3
 !i103 1
 S1
 R0
-R21
-R67
-R68
-R43
-R53
+R22
+R69
+R70
+R44
+R55
 R10
 31
 R11
@@ -1327,7 +1327,7 @@ R15
 R16
 vriscv_register_file
 R1
-R17
+R18
 !i10b 1
 !s100 >OJoNUbNE72a6A@7RjB`>3
 IO_9FRDKRY7LG_>_hHXlhf3
@@ -1338,7 +1338,7 @@ R0
 R7
 8../../rtl/riscv_register_file.sv
 F../../rtl/riscv_register_file.sv
-R25
+R26
 R10
 r1
 !s85 0
@@ -1354,7 +1354,7 @@ vriscv_tracer
 R1
 R2
 R3
-Z69 DXx4 work 20 riscv_tracer_defines 0 22 >6gMS_L1E0BoS<>m8g2a_2
+Z71 DXx4 work 20 riscv_tracer_defines 0 22 >6gMS_L1E0BoS<>m8g2a_2
 DXx4 work 20 riscv_tracer_sv_unit 0 22 ]d8H@>bAJPSBA?LiK0:XX2
 R5
 r1
@@ -1366,9 +1366,9 @@ IlgEogTlIn`Q@Xh2<<V1B23
 S1
 R0
 R7
-Z70 8../../rtl/riscv_tracer.sv
-Z71 F../../rtl/riscv_tracer.sv
-R47
+Z72 8../../rtl/riscv_tracer.sv
+Z73 F../../rtl/riscv_tracer.sv
+R48
 R10
 31
 R11
@@ -1392,7 +1392,7 @@ R0
 R7
 8../../rtl/include/riscv_tracer_defines.sv
 F../../rtl/include/riscv_tracer_defines.sv
-R19
+R20
 R10
 r1
 !s85 0
@@ -1408,7 +1408,7 @@ Xriscv_tracer_sv_unit
 R1
 R2
 R3
-R69
+R71
 V]d8H@>bAJPSBA?LiK0:XX2
 r1
 !s85 0
@@ -1419,9 +1419,9 @@ I]d8H@>bAJPSBA?LiK0:XX2
 S1
 R0
 R7
-R70
-R71
-R32
+R72
+R73
+R33
 R10
 31
 R11
@@ -1433,7 +1433,7 @@ R15
 R16
 vriscv_wrapper
 R1
-R17
+R18
 !i10b 1
 !s100 EPIWN]@=SZ5NB]Mi^XMRc2
 IPkWN:J5a7>>:FKO?L<N>G0
@@ -1441,10 +1441,10 @@ R5
 !s105 riscv_wrapper_sv_unit
 S1
 R0
-Z72 w1574160278
+Z74 w1574160278
 8riscv_wrapper.sv
 Friscv_wrapper.sv
-R20
+R21
 R10
 r1
 !s85 0
@@ -1458,7 +1458,7 @@ R15
 R16
 vtb_top
 R1
-R17
+R18
 !i10b 1
 !s100 :0ED7=<XlmN8a_eOZf3C[1
 ID>AgejD7?>@:mn9g3k8af0
@@ -1466,7 +1466,7 @@ R5
 !s105 tb_top_sv_unit
 S1
 R0
-R72
+R74
 8tb_top.sv
 Ftb_top.sv
 L0 16
@@ -1482,8 +1482,8 @@ R14
 R15
 R16
 Ttb_top_vopt
-!s110 1574175309
-VNG=9[N`nzEigWW92>>E`a2
+!s110 1574248003
+VDFZZJXjT`JI?lYQ`9zDaJ0
 04 6 4 work tb_top fast 0
 o-work work -debugdb -fsmdebug -pedanticerrors +acc
 R16
