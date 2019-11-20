@@ -61,9 +61,9 @@ module riscv_cs_registers
 
   // Interface to registers (SRAM like)
   input  logic                    csr_access_i,
-  input  riscv_defines::csr_num_e                csr_addr_i,
+  input  riscv_defines::csr_num_e csr_addr_i,
   input  logic [31:0]             csr_wdata_i,
-  input  logic  [1:0]             csr_op_i,
+  input  logic [1:0]              csr_op_i,
   output logic [31:0]             csr_rdata_o,
 
   output logic [2:0]         frm_o,
@@ -273,7 +273,7 @@ module riscv_cs_registers
 
   // abet
   Interrupts_t mip;
-  Interrupts_t mie_q, mie_d;
+  Interrupts_t mie_q, mie_n;
 
   logic is_irq;
   PrivLvl_t priv_lvl_n, priv_lvl_q, priv_lvl_reg_q;
@@ -527,7 +527,7 @@ if(PULP_SECURE==1) begin
     pmpcfg_we                = '0;
 
     // abet
-    mie_d = mie_q;
+    mie_n = mie_q;
 
     if (FPU == 1) if (fflags_we_i) fflags_n = fflags_i | fflags_q;
 
@@ -554,10 +554,10 @@ if(PULP_SECURE==1) begin
       end
       // abet mie: machine interrupt enable
       CSR_MIE: if(csr_we_int) begin
-        mie_d.irq_software = csr_wdata_int[CSR_MSIX_BIT];
-        mie_d.irq_timer    = csr_wdata_int[CSR_MTIX_BIT];
-        mie_d.irq_external = csr_wdata_int[CSR_MEIX_BIT];
-        mie_d.irq_fast     = csr_wdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW];
+        mie_n.irq_software = csr_wdata_int[CSR_MSIX_BIT];
+        mie_n.irq_timer    = csr_wdata_int[CSR_MTIX_BIT];
+        mie_n.irq_external = csr_wdata_int[CSR_MEIX_BIT];
+        mie_n.irq_fast     = csr_wdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW];
       end
       // mtvec: machine trap-handler base address
       CSR_MTVEC: if (csr_we_int) begin
@@ -794,6 +794,8 @@ end else begin //PULP_SECURE == 0
     pmpaddr_we               = '0;
     pmpcfg_we                = '0;
 
+    //abet
+    mie_n                    = mie_q;
 
     if (FPU == 1) if (fflags_we_i) fflags_n = fflags_i | fflags_q;
 
@@ -820,10 +822,10 @@ end else begin //PULP_SECURE == 0
       end
       // abet mie: machine interrupt enable
       CSR_MIE: if(csr_we_int) begin
-        mie_d.irq_software = csr_wdata_int[CSR_MSIX_BIT];
-        mie_d.irq_timer    = csr_wdata_int[CSR_MTIX_BIT];
-        mie_d.irq_external = csr_wdata_int[CSR_MEIX_BIT];
-        mie_d.irq_fast     = csr_wdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW];
+        mie_n.irq_software = csr_wdata_int[CSR_MSIX_BIT];
+        mie_n.irq_timer    = csr_wdata_int[CSR_MTIX_BIT];
+        mie_n.irq_external = csr_wdata_int[CSR_MEIX_BIT];
+        mie_n.irq_fast     = csr_wdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW];
       end
       // mscratch: machine scratch
       CSR_MSCRATCH: if (csr_we_int) begin
@@ -1102,7 +1104,7 @@ end //PULP_SECURE
       dscratch0_q<= dscratch0_n;
       dscratch1_q<= dscratch1_n;
       mscratch_q <= mscratch_n;
-      mie_q      <= mie_d;
+      mie_q      <= mie_n;
     end
   end
 

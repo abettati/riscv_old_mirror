@@ -261,7 +261,7 @@ typedef enum logic[11:0] {
   // CSR_MINSTRETH          = 12'hB82
 } csr_num_e;
 
-// CSR operations
+// abet CSR operations
 parameter CSR_OP_NONE  = 2'b00;
 parameter CSR_OP_WRITE = 2'b01;
 parameter CSR_OP_SET   = 2'b10;

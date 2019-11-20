@@ -13,9 +13,9 @@
 # //  is prohibited from disclosure under the Trade Secrets Act,
 # //  18 U.S.C. Section 1905.
 # //
-# vsim "+firmware=custom/hello_world.hex" -gui -debugdb tb_top_vopt -do "vsim.tcl" 
-# Start time: 17:08:57 on Nov 19,2019
-# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_121595/linux_x86_64_gcc-5.3.0/export_tramp.so
+# vsim -gui -debugdb tb_top_vopt -do "vsim.tcl" 
+# Start time: 14:27:22 on Nov 20,2019
+# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_102715/linux_x86_64_gcc-5.3.0/export_tramp.so
 # Loading sv_std.std
 # Loading work.tb_top(fast)
 # Loading work.riscv_wrapper(fast)
@@ -76,34 +76,15 @@
 #    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 606
 # ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_mem_o'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(52).
 #    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 606
-# Compiling /tmp/bettatia@larain1.ee.ethz.ch_dpi_121595/linux_x86_64_gcc-5.3.0/exportwrapper.c
-# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_121595/linux_x86_64_gcc-5.3.0/vsim_auto_compile.so
+# Compiling /tmp/bettatia@larain1.ee.ethz.ch_dpi_102715/linux_x86_64_gcc-5.3.0/exportwrapper.c
+# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_102715/linux_x86_64_gcc-5.3.0/vsim_auto_compile.so
 # ** Note: (vsim-8716) Reusing existing debug database vsim.dbg.
 # do vsim.tcl
 # 1
-# [CORE] Core settings: PULP_SECURE =           1, N_PMP_ENTRIES =          16, N_PMP_CFG           4
-# ** Warning: (vsim-8315) No condition is true in the unique/priority if/case statement.
-#    Time: 0 ns  Iteration: 0  Process: /tb_top/riscv_wrapper_i/riscv_core_i/RISCY_PMP/pmp_unit_i/#ALWAYS#673 File: ../../rtl/riscv_pmp.sv Line: 677
-# ** Warning: (vsim-8315) No condition is true in the unique/priority if/case statement.
-#    Time: 0 ns  Iteration: 1  Process: /tb_top/riscv_wrapper_i/riscv_core_i/RISCY_PMP/pmp_unit_i/#ALWAYS#673 File: ../../rtl/riscv_pmp.sv Line: 677
-# ecall exception handler entered
-# 
-# 0
+# No firmware specified
+# ** Note: $finish    : tb_top.sv(74)
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top
 # 1
-# 2
-# 3
-# 4
-# 1
-# 6
-# 1
-# 8
-# 1
-# EXIT SUCCESS
-# ** Note: $finish    : tb_top.sv(137)
-#    Time: 122140 ns  Iteration: 1  Instance: /tb_top
-# 1
-# Break in Module tb_top at tb_top.sv line 137
-# Can't move the Now cursor.
-# Can't move the Now cursor.
-# Can't move the Now cursor.
-# Can't move the Now cursor.
+# Break in NamedBeginStat load_prog at tb_top.sv line 74
+# End time: 14:27:32 on Nov 20,2019, Elapsed time: 0:00:10
+# Errors: 0, Warnings: 4

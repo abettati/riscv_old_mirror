@@ -5,8 +5,16 @@ int main(int argc, char *argv[])
 {
     /* inline assembly */
     asm volatile("ecall");
+    int regVal = 0x88;
+    asm volatile("csrw 0x304, %[regTmp]"
+                  : : [regTmp] "r" (regVal));
 
-    asm volatile("csrwi 0x304, 3");
+    // int a, b, c;
+    // asm volatile("add %[res], %[a], %[b]"
+    //               // ouput          // input          
+    //               : [res] "+r" (c) : [a] "r" (a), [b] "r" (b))
+
+    // asm volatile("csrwi 0x304, 0x88");
 
     int a = 5;
     int count = 10;

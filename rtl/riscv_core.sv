@@ -246,13 +246,13 @@ module riscv_core
 
   // CSR control
   logic        csr_access_ex;
-  logic  [1:0] csr_op_ex;
+  logic [1:0]  csr_op_ex;
   logic [23:0] mtvec, utvec;
 
   logic        csr_access;
-  logic  [1:0] csr_op;
+  logic [1:0]  csr_op;
   csr_num_e    csr_addr;
-  logic [11:0] csr_addr_int;
+  csr_num_e    csr_addr_int;
   logic [31:0] csr_rdata;
   logic [31:0] csr_wdata;
   PrivLvl_t    current_priv_lvl;
@@ -1052,11 +1052,11 @@ module riscv_core
 
   //  CSR access
   assign csr_access   =  csr_access_ex;
-  assign csr_addr     =  csr_num_e'(csr_addr_int);
+  assign csr_addr     =  csr_addr_int;
   assign csr_wdata    =  alu_operand_a_ex;
   assign csr_op       =  csr_op_ex;
 
-  assign csr_addr_int = csr_access_ex ? alu_operand_b_ex[11:0] : '0;
+  assign csr_addr_int = csr_num_e'(csr_access_ex ? alu_operand_b_ex[11:0] : '0);
 
 
 
