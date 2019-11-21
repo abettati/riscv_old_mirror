@@ -346,14 +346,12 @@ module riscv_core
   logic                             instr_err_pmp;
 
   // abet
-  logic        m_IE,         // interrupt enable bit from CSR (M mode)
-  logic        u_IE,         // interrupt enable bit from CSR (U mode)
   // handshake signals to/from controller
-  logic        irq_ctrl_ack,
-  logic        irq_ctrl_kill,
-  logic        irq_req_ctrl,
-  logic        irq_sec_ctrl,
-  logic  [4:0] irq_id_ctrl,
+  logic        irq_ctrl_ack;
+  logic        irq_ctrl_kill;
+  logic        irq_req_ctrl;
+  logic        irq_sec_ctrl;
+  logic  [4:0] irq_id_ctrl;
 
   //Simchecker signal
   logic is_interrupt;
@@ -1151,16 +1149,17 @@ module riscv_core
   #(
     .PULP_SECURE(PULP_SECURE)
   )
+  int_controller_i
   (
     .clk                     ( clk                ),
     .rst_n                   ( rst_ni             ),
 
-    // irq_req for controller
+    // irq_req to controller
     .irq_req_ctrl_o           (irq_req_ctrl        ),
     .irq_sec_ctrl_o           (irq_sec_ctrl        ),
     .irq_id_ctrl_o            (irq_id_ctrl         ),
 
-    // handshake signals to controller
+    // handshake signals from controller
     .ctrl_ack_i              (irq_ctrl_ack        ),
     .ctrl_kill_i             (irq_ctrl_kill       ),
 
@@ -1169,8 +1168,8 @@ module riscv_core
     .irq_sec_i               (irq_sec_i           ),      // interrupt secure bit from EU
     .irq_id_i                (irq_id_i            ),       // interrupt id [0,1,....31]
 
-    .m_IE                    (m_IE                ),
-    .u_IE                    (u_IE                ),
+    .m_IE_i                  (m_irq_enable        ),
+    .u_IE_i                  (u_irq_enable        ),
     .current_priv_lvl_i      (current_priv_lvl    )
 
   );

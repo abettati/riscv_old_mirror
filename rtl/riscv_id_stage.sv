@@ -212,8 +212,6 @@ module riscv_id_stage
     input  logic        irq_i,
     input  logic        irq_sec_i,
     input  logic [4:0]  irq_id_i,
-    input  logic        m_irq_enable_i,
-    input  logic        u_irq_enable_i,
     output logic        irq_ack_o,
     output logic [4:0]  irq_id_o,
     output logic [5:0]  exc_cause_o,
@@ -222,6 +220,8 @@ module riscv_id_stage
     input  logic        irq_req_ctrl_i,
     input  logic        irq_sec_ctrl_i,
     input  logic [4:0]  irq_id_ctrl_i,
+    input  logic        m_irq_enable_i,
+    input  logic        u_irq_enable_i,
     // handshake signals to int_controller
     output logic        ctrl_ack_o,
     output logic        ctrl_kill_o,
