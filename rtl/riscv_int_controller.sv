@@ -73,7 +73,7 @@ module riscv_int_controller
   logic [4:0] irq_id_q;
   logic irq_sec_q;
 
-  Interrupts_t irq_lines_q
+  Interrupts_t irq_lines_q;
 
 if(PULP_SECURE)
   assign irq_enable_ext =  ((u_IE_i | irq_sec_i) & current_priv_lvl_i == PRIV_LVL_U) | (m_IE_i & current_priv_lvl_i == PRIV_LVL_M);
@@ -97,10 +97,7 @@ else
 
       irq_id_q       <= '0;
       irq_sec_q      <= 1'b0;
-      irq_software_q <= '0;
-      irq_timer_q    <= '0;
-      irq_external_q <= '0;
-      irq_fast_q     <= 15'b0;
+      irq_lines_q    <= 18'h0;
       exc_ctrl_cs    <= IDLE;
 
     end else begin

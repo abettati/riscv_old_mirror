@@ -289,10 +289,10 @@ module riscv_core
   logic        m_irq_enable, u_irq_enable;
   logic        csr_irq_sec;
   logic [31:0] mepc, uepc, depc;
-  logic        irq_software,
-  logic        irq_timer,
-  logic        irq_external,
-  logic [14:0] irq_fast,
+  logic        irq_software;
+  logic        irq_timer;
+  logic        irq_external;
+  logic [14:0] irq_fast;
 
   logic        csr_save_cause;
   logic        csr_save_if;
