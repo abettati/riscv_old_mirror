@@ -72,8 +72,16 @@ module riscv_cs_registers
   input  logic               fflags_we_i,
 
   // Interrupts
+  // IRQ lines from int_controller
+  input  logic            irq_software_i,
+  input  logic            irq_timer_i,
+  input  logic            irq_external_i,
+  input  logic [14:0]     irq_fast_i,
+
   output logic            m_irq_enable_o,
   output logic            u_irq_enable_o,
+  // IRQ req to ID/controller
+  output logic            irq_pending_o,
 
   //csr_irq_sec_i is always 0 if PULP_SECURE is zero
   input  logic            csr_irq_sec_i,
@@ -274,6 +282,11 @@ module riscv_cs_registers
   // abet
   Interrupts_t mip;
   Interrupts_t mie_q, mie_n;
+  // abet TODO move these to I/F as outputs
+  logic        csr_msip_o; // software interrupt pending
+  logic        csr_mtip_o; // timer interrupt pending
+  logic        csr_meip_o; // external interrupt pending
+  logic [14:0] csr_mfip_o; // fast interrupt pending
 
   logic is_irq;
   PrivLvl_t priv_lvl_n, priv_lvl_q, priv_lvl_reg_q;
@@ -300,6 +313,13 @@ module riscv_cs_registers
 
 
   assign is_irq = csr_cause_i[5];
+
+  // abet mip CSR is purely combintational
+  // must be able to re-enable the clock upon WFI
+  assign mip.irq_software = irq_software_i & mie_q.irq_software;
+  assign mip.irq_timer    = irq_timer_i    & mie_q.irq_timer;
+  assign mip.irq_external = irq_external_i & mie_q.irq_external;
+  assign mip.irq_fast     = irq_fast_i     & mie_q.irq_fast;
 
   ////////////////////////////////////////////
   //   ____ ____  ____    ____              //
@@ -1046,6 +1066,13 @@ end //PULP_SECURE
   end
   endgenerate
 
+  // abet directly output some registers
+  assign csr_msip_o  = mip.irq_software;
+  assign csr_mtip_o  = mip.irq_timer;
+  assign csr_meip_o  = mip.irq_external;
+  assign csr_mfip_o  = mip.irq_fast;
+
+  assign irq_pending_o = csr_msip_o | csr_mtip_o | csr_meip_o | (|csr_mfip_o);
 
   // actual registers
   always_ff @(posedge clk, negedge rst_n)

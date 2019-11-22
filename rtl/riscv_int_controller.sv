@@ -32,7 +32,8 @@ module riscv_int_controller
   input  logic        rst_n,
 
   // irq_req for controller
-  output logic        irq_req_ctrl_o,
+  // abet removed irq request to ID/ctrl
+  // output logic        irq_req_ctrl_o,
   output logic        irq_sec_ctrl_o,
   output logic  [4:0] irq_id_ctrl_o,
 
@@ -47,32 +48,60 @@ module riscv_int_controller
 
   input  logic        m_IE_i,         // interrupt enable bit from CSR (M mode)
   input  logic        u_IE_i,         // interrupt enable bit from CSR (U mode)
-  input  PrivLvl_t    current_priv_lvl_i
+  input  PrivLvl_t    current_priv_lvl_i,
+
+  output  logic        irq_software_o,
+  output  logic        irq_timer_o,
+  output  logic        irq_external_o,
+  output  logic [14:0] irq_fast_o
 
 );
 
   enum logic [1:0] { IDLE, IRQ_PENDING, IRQ_DONE} exc_ctrl_cs;
 
+  // abet
+  // struct 18bit irq_lines
+  typedef struct packed {
+    logic        irq_software;
+    logic        irq_timer;
+    logic        irq_external;
+    logic [14:0] irq_fast; // 15 fast interrupts,
+                           // one interrupt is reserved for NMI (not visible through mip/mie)
+  } Interrupts_t;
+
   logic irq_enable_ext;
   logic [4:0] irq_id_q;
   logic irq_sec_q;
+
+  Interrupts_t irq_lines_q
 
 if(PULP_SECURE)
   assign irq_enable_ext =  ((u_IE_i | irq_sec_i) & current_priv_lvl_i == PRIV_LVL_U) | (m_IE_i & current_priv_lvl_i == PRIV_LVL_M);
 else
   assign irq_enable_ext =  m_IE_i;
 
-  assign irq_req_ctrl_o = exc_ctrl_cs == IRQ_PENDING;
+  //assign irq_req_ctrl_o = exc_ctrl_cs == IRQ_PENDING;
   assign irq_sec_ctrl_o = irq_sec_q;
   assign irq_id_ctrl_o  = irq_id_q;
+
+  // abet Output irq lines
+  assign irq_software_o = irq_lines_q.irq_software;
+  assign irq_timer_o    = irq_lines_q.irq_timer;
+  assign irq_external_o = irq_lines_q.irq_external;
+  assign irq_fast_o     = irq_lines_q.irq_fast;
+
 
   always_ff @(posedge clk, negedge rst_n)
   begin
     if (rst_n == 1'b0) begin
 
-      irq_id_q    <= '0;
-      irq_sec_q   <= 1'b0;
-      exc_ctrl_cs <= IDLE;
+      irq_id_q       <= '0;
+      irq_sec_q      <= 1'b0;
+      irq_software_q <= '0;
+      irq_timer_q    <= '0;
+      irq_external_q <= '0;
+      irq_fast_q     <= 15'b0;
+      exc_ctrl_cs    <= IDLE;
 
     end else begin
 
@@ -81,9 +110,33 @@ else
         IDLE:
         begin
           if(irq_enable_ext & irq_i) begin
-            exc_ctrl_cs <= IRQ_PENDING;
-            irq_id_q    <= irq_id_i;
-            irq_sec_q   <= irq_sec_i;
+            exc_ctrl_cs    <= IRQ_PENDING;
+            irq_id_q       <= irq_id_i;
+            irq_sec_q      <= irq_sec_i;
+            // abet need to update output lines
+            // decoding irq_id to one-hot
+            unique case ({1'b1, irq_id_i})            // Decoded as
+              {1'b1,5'd03}: irq_lines_q = 18'h1     ; // software
+              {1'b1,5'd07}: irq_lines_q = 18'h2     ; // timer
+              {1'b1,5'd11}: irq_lines_q = 18'h4     ; // external
+              {1'b1,5'd16}: irq_lines_q = 18'h8     ; // fast 0
+              {1'b1,5'd17}: irq_lines_q = 18'h10    ; // fast 1
+              {1'b1,5'd18}: irq_lines_q = 18'h20    ; // fast 2
+              {1'b1,5'd19}: irq_lines_q = 18'h40    ; // fast 3
+              {1'b1,5'd20}: irq_lines_q = 18'h80    ; // fast 4
+              {1'b1,5'd21}: irq_lines_q = 18'h100   ; // fast 5
+              {1'b1,5'd22}: irq_lines_q = 18'h200   ; // fast 6
+              {1'b1,5'd23}: irq_lines_q = 18'h400   ; // fast 7
+              {1'b1,5'd24}: irq_lines_q = 18'h800   ; // fast 8
+              {1'b1,5'd25}: irq_lines_q = 18'h1000  ; // fast 9
+              {1'b1,5'd26}: irq_lines_q = 18'h2000  ; // fast 10
+              {1'b1,5'd27}: irq_lines_q = 18'h4000  ; // fast 11
+              {1'b1,5'd28}: irq_lines_q = 18'h8000  ; // fast 12
+              {1'b1,5'd29}: irq_lines_q = 18'h10000 ; // fast 13
+              {1'b1,5'd30}: irq_lines_q = 18'h20000 ; // fast 14
+              {1'b1,5'd31}: irq_lines_q = 18'h40000 ; // non-masked
+              default: ;
+            endcase
           end
         end
 

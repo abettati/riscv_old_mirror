@@ -289,6 +289,10 @@ module riscv_core
   logic        m_irq_enable, u_irq_enable;
   logic        csr_irq_sec;
   logic [31:0] mepc, uepc, depc;
+  logic        irq_software,
+  logic        irq_timer,
+  logic        irq_external,
+  logic [14:0] irq_fast,
 
   logic        csr_save_cause;
   logic        csr_save_if;
@@ -349,7 +353,7 @@ module riscv_core
   // handshake signals to/from controller
   logic        irq_ctrl_ack;
   logic        irq_ctrl_kill;
-  logic        irq_req_ctrl;
+  logic        irq_pending;
   logic        irq_sec_ctrl;
   logic  [4:0] irq_id_ctrl;
 
@@ -726,7 +730,7 @@ module riscv_core
     .irq_id_o                     ( irq_id_o             ),
 
     // irq_req for controller
-    .irq_req_ctrl_i               (irq_req_ctrl        ),
+    .irq_req_ctrl_i               (irq_pending         ),
     .irq_sec_ctrl_i               (irq_sec_ctrl        ),
     .irq_id_ctrl_i                (irq_id_ctrl         ),
     // handshake signals to controller
@@ -1001,6 +1005,10 @@ module riscv_core
     .sec_lvl_o               ( sec_lvl_o          ),
     .mepc_o                  ( mepc               ),
     .uepc_o                  ( uepc               ),
+    .irq_software_i          (irq_software        ),
+    .irq_timer_i             (irq_timer           ),
+    .irq_external_i          (irq_external        ),
+    .irq_fast_i              (irq_fast            ),
 
     // debug
     .debug_mode_i            ( debug_mode         ),
@@ -1155,7 +1163,7 @@ module riscv_core
     .rst_n                   ( rst_ni             ),
 
     // irq_req to controller
-    .irq_req_ctrl_o           (irq_req_ctrl        ),
+    //.irq_req_ctrl_o           (irq_req_ctrl        ),
     .irq_sec_ctrl_o           (irq_sec_ctrl        ),
     .irq_id_ctrl_o            (irq_id_ctrl         ),
 
@@ -1170,7 +1178,11 @@ module riscv_core
 
     .m_IE_i                  (m_irq_enable        ),
     .u_IE_i                  (u_irq_enable        ),
-    .current_priv_lvl_i      (current_priv_lvl    )
+    .current_priv_lvl_i      (current_priv_lvl    ),
+    .irq_software_o          (irq_software        ),
+    .irq_timer_o             (irq_timer           ),
+    .irq_external_o          (irq_external        ),
+    .irq_fast_o              (irq_fast            )
 
   );
 

@@ -400,6 +400,13 @@ parameter EXC_PC_IRQ       = 3'b001;
 parameter EXC_PC_DBD       = 3'b010;
 
 // Exception Cause
+// TODO abet change this to enum logic [5:0] {...} exc_cause_e;
+parameter EXC_CAUSE_IRQ_SOFTWARE_M     = {1'b1, 5'd03},
+parameter EXC_CAUSE_IRQ_TIMER_M        = {1'b1, 5'd07},
+parameter EXC_CAUSE_IRQ_EXTERNAL_M     = {1'b1, 5'd11},
+// parameter EXC_CAUSE_IRQ_FAST_0      = {1'b1, 5'd16},
+// parameter EXC_CAUSE_IRQ_FAST_14     = {1'b1, 5'd30},
+parameter EXC_CAUSE_IRQ_NM             = {1'b1, 5'd31},
 parameter EXC_CAUSE_INSTR_FAULT  = 6'h01;
 parameter EXC_CAUSE_ILLEGAL_INSN = 6'h02;
 parameter EXC_CAUSE_BREAKPOINT   = 6'h03;
