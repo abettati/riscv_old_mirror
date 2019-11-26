@@ -360,6 +360,7 @@ module mm_ram
             end else if(timer_val_valid) begin
                 timer_cnt_q <= timer_wdata;
 
+            // abet Q: why is the r/w logic for stall_regs here?
             end else if(rnd_stall_req) begin
                 if(rnd_stall_we)
                     rnd_stall_regs[rnd_stall_addr[5:2]] <= rnd_stall_wdata;
@@ -525,7 +526,7 @@ module mm_ram
     assign instr_rvalid_o = ram_instr_valid;
     assign instr_rdata_o  = core_instr_rdata;
 
-
+  // abet RANDOM STALL MUX
   always_comb
   begin
     ram_instr_req    = instr_req_i;
