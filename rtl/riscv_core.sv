@@ -729,7 +729,7 @@ module riscv_core
     .irq_ack_o                    ( irq_ack_o            ),
     .irq_id_o                     ( irq_id_o             ),
 
-    // irq_req for controller
+    // irq_req from controller
     .irq_req_ctrl_i               (irq_pending         ),
     .irq_sec_ctrl_i               (irq_sec_ctrl        ),
     .irq_id_ctrl_i                (irq_id_ctrl         ),
@@ -1009,6 +1009,7 @@ module riscv_core
     .irq_timer_i             (irq_timer           ),
     .irq_external_i          (irq_external        ),
     .irq_fast_i              (irq_fast            ),
+    .irq_pending_o           (irq_pending         ), // IRQ to ID/Controller
 
     // debug
     .debug_mode_i            ( debug_mode         ),

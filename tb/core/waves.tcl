@@ -65,6 +65,34 @@ if {$rvcores ne ""} {
   add wave -group "EX Stage"                                 $rvcores/ex_stage_i/*
   add wave -group "LSU"                                      $rvcores/load_store_unit_i/*
   add wave -group "CSR"                                      $rvcores/cs_registers_i/*
+  add wave -group "MM RAM"                                   $mm_ram/*
+  add wave -group "INT CTRL"                                 $rvcores/int_controller_i/*
+  
+  # abet TODO find a better way to do multiline
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/clk
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/csr_addr_i
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/csr_wdata_i
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_software_i
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_timer_i
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_external_i
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_fast_i
+
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mstatus_q
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mie_q 
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mip 
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_pending_o
+
+  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/ctrl_ack_i
+  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/irq_id_i
+  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/irq_id_q
+  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/irq_lines_q
+  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/exc_ctrl_cs
+                  
+
+  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_ack_i
+  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_o
+  
+                                                            
 }
 
 configure wave -namecolwidth  250
