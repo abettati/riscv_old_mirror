@@ -230,11 +230,11 @@ custom-vsim-run: vsim-run
 
 .PHONY: custom-vsim-run-gui
 # abet: added this to generate disassembly for hello_world.c
-custom-vsim-run-gui:
-	$(RISCV)/riscv32-unknown-elf/bin/objdump -S custom/hello_world.elf > custom/hello_worldDump.txt
+
 custom-vsim-run-gui: vsim-all custom/hello_world.hex
 custom-vsim-run-gui: ALL_VSIM_FLAGS += "+firmware=custom/hello_world.hex"
 custom-vsim-run-gui: vsim-run-gui
+custom-vsim-run-gui: $(RISCV)/riscv32-unknown-elf/bin/objdump -S custom/hello_world.elf > custom/hello_worldDump.txt
 
 
 .PHONY: custom-veri-run

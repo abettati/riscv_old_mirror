@@ -16,11 +16,14 @@
 
 .section .vectors, "ax"
 .option norvc
+
+.global timer_irq_handler
+
 vector_table:
 	j sw_irq_handler
 	j __no_irq_handler
 	j __no_irq_handler
-	j __no_irq_handler
+	j timer_irq_handler
 	j __no_irq_handler
 	j __no_irq_handler
 	j __no_irq_handler
@@ -78,6 +81,13 @@ sw_irq_handler:
 	beq t0, t1, handle_ebreak
 	j handle_unknown
 
+/* when we get a timeout*/
+/* timer_irq_handler:
+	la a0, timeout_msg
+	jal ra, print_str*/
+
+
+
 handle_ecall:
 	la a0, ecall_msg
 	jal ra, puts
@@ -118,3 +128,5 @@ unknown_msg:
 	.string "unknown exception handler entered\n"
 no_exception_handler_msg:
 	.string "no exception handler installed\n"
+timeout_msg:
+	.string "\n\nTEST TIMEOUT...\n\n"

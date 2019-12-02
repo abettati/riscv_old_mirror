@@ -69,6 +69,10 @@ if {$rvcores ne ""} {
   add wave -group "INT CTRL"                                 $rvcores/int_controller_i/*
   
   # abet TODO find a better way to do multiline
+  add wave -group "ABET DEBUG" -group "IF"                   $rvcores/if_stage_i/exc_pc
+  add wave -group "ABET DEBUG" -group "IF"                   $rvcores/if_stage_i/exc_vec_pc_mux_i
+  add wave -group "ABET DEBUG" -group "IF"                   $rvcores/if_stage_i/trap_base_addr
+
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/clk
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/csr_addr_i
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/csr_wdata_i
@@ -82,6 +86,7 @@ if {$rvcores ne ""} {
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mip 
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_pending_o
 
+  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/clk
   add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/ctrl_ack_i
   add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/irq_id_i
   add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/irq_id_q
