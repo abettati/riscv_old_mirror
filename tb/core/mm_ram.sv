@@ -38,7 +38,12 @@ module mm_ram
 
      input logic [4:0]                    irq_id_i,
      input logic                          irq_ack_i,
+
      output logic [4:0]                   irq_id_o,
+     output logic                         irq_software_o,
+     output logic                         irq_timer_o,
+     output logic                         irq_external_o,
+     output logic [14:0]                  irq_fast_o,
      output logic                         irq_o,
 
      input logic [31:0]                   pc_core_id_i,
@@ -48,7 +53,7 @@ module mm_ram
      output logic                         exit_valid_o,
      output logic [31:0]                  exit_value_o);
 
-    localparam int                        TIMER_IRQ_ID   = 3;
+    localparam int                        TIMER_IRQ_ID   = 7;
     localparam int                        RND_STALL_REGS = 16;
     localparam int                        RND_IRQ_ID     = 31;
 
@@ -102,7 +107,7 @@ module mm_ram
     // signals to timer
     logic [31:0]                   timer_irq_mask_q;
     logic [31:0]                   timer_cnt_q;
-    logic                          irq_q;
+    logic                          irq_timer_q;
     logic                          timer_reg_valid;
     logic                          timer_val_valid;
     logic [31:0]                   timer_wdata;
@@ -245,6 +250,7 @@ module mm_ram
                     timer_wdata = data_wdata_i;
                     timer_val_valid = '1;
 
+                // write to rnd stall regs
                 end else if (data_addr_i[31:16] == 16'h1600) begin
                     rnd_stall_req   = data_req_i;
                     rnd_stall_wdata = data_wdata_i;
@@ -334,8 +340,6 @@ module mm_ram
     end
 
 
-    assign irq_id_o = irq_q ? TIMER_IRQ_ID : RND_IRQ_ID;
-    assign irq_o    = irq_q | rnd_irq;
 
     // Control timer. We need one to have some kind of timeout for tests that
     // get stuck in some loop. The riscv-tests also mandate that. Enable timer
@@ -346,7 +350,7 @@ module mm_ram
         if(~rst_ni) begin
             timer_irq_mask_q <= '0;
             timer_cnt_q      <= '0;
-            irq_q            <= '0;
+            irq_timer_q      <= '0;
             for(int i=0; i<RND_STALL_REGS; i++) begin
                 rnd_stall_regs[i] <= '0;
             end
@@ -371,10 +375,10 @@ module mm_ram
                     timer_cnt_q <= timer_cnt_q - 1;
 
                 if(timer_cnt_q == 1)
-                    irq_q <= 1'b1 && timer_irq_mask_q[TIMER_IRQ_ID];
+                    irq_timer_q <= 1'b1 && timer_irq_mask_q[TIMER_IRQ_ID];
 
                 if(irq_ack_i == 1'b1 && irq_id_i == TIMER_IRQ_ID)
-                    irq_q <= '0;
+                    irq_timer_q <= '0;
 
             end
         end
@@ -566,6 +570,27 @@ module mm_ram
   end
 
 `ifndef VERILATOR
+  riscv_interrupt_demux
+  interrupt_demux_i
+  (
+    .clk_i              ( clk_i                   ),
+    .rst_ni             ( rst_ni                  ),
+
+    .irq_timer_i        ( irq_timer_q             ),   
+    .irq_rnd_i          ( rnd_irq                 ),     
+    .irq_id_i           ( rnd_stall_regs[14][4:0] ),      
+    .irq_id_timer_i     ( 5'b111                  ),
+    .irq_id_rnd_i       ( 5'b11111                ),  //TODO fix with a signal coming from the peripheral
+    .irq_ack_i          ( irq_ack_i               ),
+    // directly output irq lines to core
+    .irq_o              ( irq_o                   ),
+    .irq_id_o           ( irq_id_o                ), 
+    .irq_software_o     ( irq_software_o          ),
+    .irq_timer_o        ( irq_timer_o             ),
+    .irq_external_o     ( irq_external_o          ),
+    .irq_fast_o         ( irq_fast_o              )
+    ); 
+
   riscv_random_stall
   #(.DATA_WIDTH(INSTR_RDATA_WIDTH))
   instr_random_stalls

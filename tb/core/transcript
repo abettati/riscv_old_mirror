@@ -14,8 +14,8 @@
 # //  18 U.S.C. Section 1905.
 # //
 # vsim "+firmware=custom/hello_world.hex" -gui -debugdb tb_top_vopt -do "vsim.tcl" 
-# Start time: 14:55:52 on Dec 02,2019
-# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_39839/linux_x86_64_gcc-5.3.0/export_tramp.so
+# Start time: 16:11:40 on Dec 05,2019
+# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_64212/linux_x86_64_gcc-5.3.0/export_tramp.so
 # Loading sv_std.std
 # Loading work.tb_top(fast)
 # Loading work.riscv_wrapper(fast)
@@ -63,22 +63,24 @@
 # Loading work.mm_ram(fast)
 # Loading work.dp_ram(fast)
 # Loading work.perturbation_defines(fast)
+# Loading work.riscv_interrupt_demux_sv_unit(fast)
+# Loading work.riscv_interrupt_demux(fast)
 # Loading work.riscv_random_stall_sv_unit(fast)
 # Loading work.riscv_random_stall(fast)
 # Loading work.riscv_random_stall(fast__1)
 # Loading work.riscv_random_interrupt_generator_sv_unit(fast)
 # Loading work.riscv_random_interrupt_generator(fast)
 # ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_core_i'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(51).
-#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/instr_random_stalls File: mm_ram.sv Line: 571
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/instr_random_stalls File: mm_ram.sv Line: 596
 # ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_mem_o'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(52).
-#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/instr_random_stalls File: mm_ram.sv Line: 571
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/instr_random_stalls File: mm_ram.sv Line: 596
 # ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_core_i'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(51).
-#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 607
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 632
 # ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_mem_o'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(52).
-#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 607
-# Compiling /tmp/bettatia@larain1.ee.ethz.ch_dpi_39839/linux_x86_64_gcc-5.3.0/exportwrapper.c
-# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_39839/linux_x86_64_gcc-5.3.0/vsim_auto_compile.so
-# ** Note: (vsim-8900) Creating design debug database vsim.dbg.
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 632
+# Compiling /tmp/bettatia@larain1.ee.ethz.ch_dpi_64212/linux_x86_64_gcc-5.3.0/exportwrapper.c
+# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_64212/linux_x86_64_gcc-5.3.0/vsim_auto_compile.so
+# ** Note: (vsim-8716) Reusing existing debug database vsim.dbg.
 # do vsim.tcl
 # 1
 # [CORE] Core settings: PULP_SECURE =           1, N_PMP_ENTRIES =          16, N_PMP_CFG           4
@@ -90,22 +92,34 @@
 # 
 # 
 # 
-# TEST TIMEOUT...
+#  SOFTWARE IRQ SERVED...
 # 
-# 53417
+# 0
 # 1
 # 2
 # 3
 # 4
-# 5
 # 1
-# 7
+# 6
 # 1
-# 9
+# 8
+# 1
+# 
+# 
+#  TIMER IRQ SERVED...
+# 
+# 0
+# 1
+# 2
+# 3
+# 4
+# 1
+# 6
+# 1
+# 8
+# 1
 # EXIT SUCCESS
 # ** Note: $finish    : tb_top.sv(137)
-#    Time: 140190 ns  Iteration: 1  Instance: /tb_top
+#    Time: 219530 ns  Iteration: 1  Instance: /tb_top
 # 1
 # Break in Module tb_top at tb_top.sv line 137
-# End time: 15:07:08 on Dec 02,2019, Elapsed time: 0:11:16
-# Errors: 0, Warnings: 6

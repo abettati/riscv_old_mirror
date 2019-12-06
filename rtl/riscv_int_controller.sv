@@ -45,6 +45,10 @@ module riscv_int_controller
   input  logic        irq_i,          // level-triggered interrupt inputs
   input  logic        irq_sec_i,      // interrupt secure bit from EU
   input  logic  [4:0] irq_id_i,       // interrupt id [0,1,....31]
+  input  logic        irq_software_i,
+  input  logic        irq_timer_i,
+  input  logic        irq_external_i,
+  input  logic [14:0] irq_fast_i,
 
   input  logic        m_IE_i,         // interrupt enable bit from CSR (M mode)
   input  logic        u_IE_i,         // interrupt enable bit from CSR (U mode)
@@ -112,30 +116,12 @@ else
             exc_ctrl_cs    <= IRQ_PENDING;
             irq_id_q       <= irq_id_i;
             irq_sec_q      <= irq_sec_i;
-            // abet need to update output lines
-            // decoding irq_id to one-hot
-            case (irq_id_i)            // Decoded as
-              5'd03: irq_lines_q.irq_software = 1'b1  ; // software
-              5'd07: irq_lines_q.irq_timer    = 1'b1  ; // timer
-              5'd11: irq_lines_q.irq_external = 1'b1  ; // external
-              5'd16: irq_lines_q.irq_fast[ 0] = 1'b1  ; // fast 0
-              5'd17: irq_lines_q.irq_fast[ 1] = 1'b1  ; // fast 1
-              5'd18: irq_lines_q.irq_fast[ 2] = 1'b1  ; // fast 2
-              5'd19: irq_lines_q.irq_fast[ 3] = 1'b1  ; // fast 3
-              5'd20: irq_lines_q.irq_fast[ 4] = 1'b1  ; // fast 4
-              5'd21: irq_lines_q.irq_fast[ 5] = 1'b1  ; // fast 5
-              5'd22: irq_lines_q.irq_fast[ 6] = 1'b1  ; // fast 6
-              5'd23: irq_lines_q.irq_fast[ 7] = 1'b1  ; // fast 7
-              5'd24: irq_lines_q.irq_fast[ 8] = 1'b1  ; // fast 8
-              5'd25: irq_lines_q.irq_fast[ 9] = 1'b1  ; // fast 9
-              5'd26: irq_lines_q.irq_fast[10] = 1'b1  ; // fast 10
-              5'd27: irq_lines_q.irq_fast[11] = 1'b1  ; // fast 11
-              5'd28: irq_lines_q.irq_fast[12] = 1'b1  ; // fast 12
-              5'd29: irq_lines_q.irq_fast[13] = 1'b1  ; // fast 13
-              5'd30: irq_lines_q.irq_fast[14] = 1'b1  ; // fast 14
-              // TODO {1'b1,5'd31}: irq_lines_q = 18'h40000 ; // non-masked
-              default: ;
-            endcase
+
+            // abet update clocked lines
+            irq_lines_q.irq_software = irq_software_i;
+            irq_lines_q.irq_timer    = irq_timer_i; 
+            irq_lines_q.irq_external = irq_external_i;
+            irq_lines_q.irq_fast     = irq_fast_i;
           end
         end
 
@@ -153,7 +139,8 @@ else
 
         IRQ_DONE:
         begin
-          irq_sec_q   <= 1'b0;
+          irq_sec_q   <=  1'b0;
+          irq_lines_q <= 18'b0;
           exc_ctrl_cs <= IDLE;
         end
 

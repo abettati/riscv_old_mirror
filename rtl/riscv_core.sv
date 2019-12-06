@@ -112,6 +112,11 @@ module riscv_core
   output logic [4:0]  irq_id_o,
   input  logic        irq_sec_i,
 
+  input  logic        irq_software_i,       // exploded irq lines
+  input  logic        irq_timer_i,          // exploded irq lines
+  input  logic        irq_external_i,       // exploded irq lines 
+  input  logic [14:0] irq_fast_i,           // exploded irq lines
+
   output logic        sec_lvl_o,
 
   // Debug Interface
@@ -1173,9 +1178,14 @@ module riscv_core
     .ctrl_kill_i             (irq_ctrl_kill       ),
 
     // external interrupt lines
-    .irq_i                   (irq_i               ),          // level-triggered interrupt inputs
-    .irq_sec_i               (irq_sec_i           ),      // interrupt secure bit from EU
-    .irq_id_i                (irq_id_i            ),       // interrupt id [0,1,....31]
+    .irq_i                   (irq_i               ),  // level-triggered interrupt inputs
+    .irq_sec_i               (irq_sec_i           ),  // interrupt secure bit from EU
+    .irq_id_i                (irq_id_i            ),  // interrupt id [0,1,....31]
+    
+    .irq_software_i          (irq_software_i      ),  // exploded irq lines
+    .irq_timer_i             (irq_timer_i         ),  // exploded irq lines 
+    .irq_external_i          (irq_external        ),  // exploded irq lines
+    .irq_fast_i              (irq_fast_i          ),  // exploded irq lines
 
     .m_IE_i                  (m_irq_enable        ),
     .u_IE_i                  (u_irq_enable        ),

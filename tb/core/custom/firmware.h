@@ -33,4 +33,8 @@ void multest(void);
 // stats.c
 void stats(void);
 
+//R/W
+static inline  void writew(uint32_t val, volatile uint32_t *addr);	
+
+
 #endif

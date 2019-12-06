@@ -50,6 +50,10 @@ module riscv_wrapper
     logic                         irq_ack;
     logic [0:4]                   irq_id_out;
     logic                         irq_sec;
+    logic                         irq_software;
+    logic                         irq_timer;    
+    logic                         irq_external;
+    logic [14:0]                  irq_fast; 
 
 
     // interrupts (only timer for now)
@@ -101,7 +105,12 @@ module riscv_wrapper
          .apu_master_flags_i     (                       ),
 
          .irq_i                  ( irq                   ),
-         .irq_id_i               ( irq_id_in             ),
+         .irq_id_i               ( irq_id_in             ),  // irq id to core
+         .irq_software_i         ( irq_software          ),  // exploded irq lines
+         .irq_timer_i            ( irq_timer             ),  // exploded irq lines 
+         .irq_external_i         ( irq_external          ),  // exploded irq lines
+         .irq_fast_i             ( irq_fast              ),  // exploded irq lines
+
          .irq_ack_o              ( irq_ack               ),
          .irq_id_o               ( irq_id_out            ),
          .irq_sec_i              ( irq_sec               ),
@@ -142,6 +151,12 @@ module riscv_wrapper
          .irq_id_i       ( irq_id_out                     ),
          .irq_ack_i      ( irq_ack                        ),
          .irq_id_o       ( irq_id_in                      ),
+         
+         // output irq lines
+         .irq_software_o ( irq_software                   ),
+         .irq_timer_o    ( irq_timer                      ),
+         .irq_external_o ( irq_external                   ),
+         .irq_fast_o     ( irq_fast                       ),
          .irq_o          ( irq                            ),
 
          .pc_core_id_i   ( riscv_core_i.pc_id             ),
