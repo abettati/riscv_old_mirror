@@ -45,7 +45,9 @@ module riscv_random_interrupt_generator
     output logic [31:0]   irq_act_id_o,
     output logic          irq_id_we_o,
     input logic  [31:0]   irq_pc_id_i,
-    input logic  [31:0]   irq_pc_trig_i
+    input logic  [31:0]   irq_pc_trig_i,
+    // software defined mode i/o
+    input logic  [31:0]   irq_sd_id_i 
 );
 
 `ifndef VERILATOR
@@ -65,6 +67,11 @@ logic        irq_monitor;
 logic  [4:0] irq_id_monitor;
 logic        irq_ack_monitor;
 
+logic        irq_sd;
+logic  [4:0] irq_sd_id;
+logic        ack_flag;
+
+
 assign irq_ack_o = irq_ack_i;
 
 always_ff @(posedge clk_i or negedge rst_ni)
@@ -81,14 +88,20 @@ begin
     unique case (irq_mode_q)
         RANDOM:
         begin
-         irq_o     = irq_random;
-         irq_id_o  = irq_id_random;
+          irq_o     = irq_random;
+          irq_id_o  = irq_id_random;
         end
 
         PC_TRIG:
         begin
-         irq_o     = irq_monitor;
-         irq_id_o  = irq_id_monitor;
+          irq_o     = irq_monitor;
+          irq_id_o  = irq_id_monitor;
+        end
+
+        SOFTWARE_DEFINED:
+        begin
+          irq_o    = irq_sd;
+          irq_id_o = irq_sd_id; 
         end
 
         default:
@@ -144,6 +157,40 @@ begin
     end
 end
 
+// Software Defined Interrupts process
+initial 
+begin
+  while(1) begin
+    irq_sd    = 1'b0;
+    irq_sd_id = 5'b0;
+    ack_flag  = 1'b0;
+
+    wait (irq_mode_q == SOFTWARE_DEFINED);
+
+    // blocking wait for a valid sd_id
+    while(irq_sd_id_i != 0 & ack_flag == 0) begin
+      @(posedge clk_i);
+        irq_sd_id = irq_sd_id_i; 
+        irq_sd    = 1'b1;
+        if (irq_ack_i) begin
+          ack_flag = 1'b1;
+        end  
+    end
+    
+    // keep request lines low: wait for the core to clear the id
+    while(irq_sd_id_i != 0) begin
+      @(posedge clk_i);
+        irq_sd    = 1'b0;
+        irq_sd_id = 5'b0;
+    end
+
+    // is this block useful?
+    @(posedge clk_i);
+    irq_sd    = 1'b0;
+    irq_sd_id = 5'b0;
+
+  end
+end
 
 //Monitor Process
 initial

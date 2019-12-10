@@ -107,7 +107,6 @@ module riscv_core
 
   // Interrupt inputs
   input  logic        irq_i,                 // level sensitive IR lines
-  input  logic [4:0]  irq_id_i,
   output logic        irq_ack_o,
   output logic [4:0]  irq_id_o,
   input  logic        irq_sec_i,
@@ -298,7 +297,11 @@ module riscv_core
   logic        irq_timer;
   logic        irq_external;
   logic [14:0] irq_fast;
-
+  logic        csr_msip; 
+  logic        csr_mtip; 
+  logic        csr_meip;  
+  logic [14:0] csr_mfip;    
+  
   logic        csr_save_cause;
   logic        csr_save_if;
   logic        csr_save_id;
@@ -360,7 +363,7 @@ module riscv_core
   logic        irq_ctrl_kill;
   logic        irq_pending;
   logic        irq_sec_ctrl;
-  logic  [4:0] irq_id_ctrl;
+ 
 
   //Simchecker signal
   logic is_interrupt;
@@ -728,16 +731,19 @@ module riscv_core
     // Interrupt Signals
     .irq_i                        ( irq_i                ), // incoming interrupts
     .irq_sec_i                    ( (PULP_SECURE) ? irq_sec_i : 1'b0 ),
-    .irq_id_i                     ( irq_id_i             ),
     .m_irq_enable_i               ( m_irq_enable         ),
     .u_irq_enable_i               ( u_irq_enable         ),
     .irq_ack_o                    ( irq_ack_o            ),
     .irq_id_o                     ( irq_id_o             ),
+    .csr_msip_i                   ( csr_msip             ),
+    .csr_mtip_i                   ( csr_mtip             ),
+    .csr_meip_i                   ( csr_meip             ),
+    .csr_mfip_i                   ( csr_mfip             ),
 
     // irq_req from controller
     .irq_req_ctrl_i               (irq_pending         ),
     .irq_sec_ctrl_i               (irq_sec_ctrl        ),
-    .irq_id_ctrl_i                (irq_id_ctrl         ),
+
     // handshake signals to controller
     .ctrl_ack_o                   (irq_ctrl_ack        ),
     .ctrl_kill_o                  (irq_ctrl_kill       ),
@@ -1015,7 +1021,10 @@ module riscv_core
     .irq_external_i          (irq_external        ),
     .irq_fast_i              (irq_fast            ),
     .irq_pending_o           (irq_pending         ), // IRQ to ID/Controller
-
+    .csr_msip_o              ( csr_msip           ), 
+    .csr_mtip_o              ( csr_mtip           ), 
+    .csr_meip_o              ( csr_meip           ), 
+    .csr_mfip_o              ( csr_mfip           ), 
     // debug
     .debug_mode_i            ( debug_mode         ),
     .debug_cause_i           ( debug_cause        ),
@@ -1171,7 +1180,7 @@ module riscv_core
     // irq_req to controller
     //.irq_req_ctrl_o           (irq_req_ctrl        ),
     .irq_sec_ctrl_o           (irq_sec_ctrl        ),
-    .irq_id_ctrl_o            (irq_id_ctrl         ),
+
 
     // handshake signals from controller
     .ctrl_ack_i              (irq_ctrl_ack        ),
@@ -1180,7 +1189,6 @@ module riscv_core
     // external interrupt lines
     .irq_i                   (irq_i               ),  // level-triggered interrupt inputs
     .irq_sec_i               (irq_sec_i           ),  // interrupt secure bit from EU
-    .irq_id_i                (irq_id_i            ),  // interrupt id [0,1,....31]
     
     .irq_software_i          (irq_software_i      ),  // exploded irq lines
     .irq_timer_i             (irq_timer_i         ),  // exploded irq lines 

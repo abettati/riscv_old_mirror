@@ -36,5 +36,22 @@ void stats(void);
 //R/W
 static inline  void writew(uint32_t val, volatile uint32_t *addr);	
 
+// IRQ HANDLERS
+// adding the attribute interrupt is telling GCC to execute the mret instruction
+void fast0_irq_handler(void)  __attribute__ ((interrupt ("machine")));
+void fast1_irq_handler(void)  __attribute__ ((interrupt ("machine")));
+void fast2_irq_handler(void)  __attribute__ ((interrupt ("machine")));
+void fast3_irq_handler(void)  __attribute__ ((interrupt ("machine")));
+void fast4_irq_handler(void)  __attribute__ ((interrupt ("machine")));
+void fast5_irq_handler(void)  __attribute__ ((interrupt ("machine")));
+void fast6_irq_handler(void)  __attribute__ ((interrupt ("machine")));
+void fast7_irq_handler(void)  __attribute__ ((interrupt ("machine")));
+void fast8_irq_handler(void)  __attribute__ ((interrupt ("machine")));
+void fast9_irq_handler(void)  __attribute__ ((interrupt ("machine")));
+void fast10_irq_handler(void) __attribute__ ((interrupt ("machine")));
+void fast11_irq_handler(void) __attribute__ ((interrupt ("machine")));
+void fast12_irq_handler(void) __attribute__ ((interrupt ("machine")));
+void fast13_irq_handler(void) __attribute__ ((interrupt ("machine")));
+void fast14_irq_handler(void) __attribute__ ((interrupt ("machine")));
 
 #endif

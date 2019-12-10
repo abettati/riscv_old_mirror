@@ -71,6 +71,7 @@ if {$rvcores ne ""} {
   # abet TODO find a better way to do multiline
 
   add wave -group "ABET DEBUG"                               $rvcores/clk_i
+  add wave -group "ABET DEBUG" -group "IF"                   $rvcores/if_stage_i/pc_if_o
   add wave -group "ABET DEBUG" -group "IF"                   $rvcores/if_stage_i/exc_pc
   add wave -group "ABET DEBUG" -group "IF"                   $rvcores/if_stage_i/exc_vec_pc_mux_i
   add wave -group "ABET DEBUG" -group "IF"                   $rvcores/if_stage_i/trap_base_addr
@@ -82,6 +83,11 @@ if {$rvcores ne ""} {
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_external_i
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_fast_i
 
+  add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/mfip_id
+  add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/irq_id_o
+  add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/csr_mfip_i
+  add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/ctrl_fsm_cs  
+  
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mstatus_q
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mie_q 
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mip 
@@ -89,8 +95,6 @@ if {$rvcores ne ""} {
 
   add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/clk
   add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/ctrl_ack_i
-  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/irq_id_i
-  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/irq_id_q
   add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/irq_lines_q
   add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/exc_ctrl_cs
                   
@@ -106,16 +110,20 @@ if {$rvcores ne ""} {
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_external_o
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_fast_o    
   
-  add wave -group "ABET DEBUG" -group "INT DEMUX"            $mm_ram/interrupt_demux_i/*
+  #add wave -group "ABET DEBUG" -group "INT DEMUX"            $mm_ram/interrupt_demux_i/*
 
   add wave -group "ABET DEBUG" -group "HW TIMER"             $mm_ram/timer_wdata
   add wave -group "ABET DEBUG" -group "HW TIMER"             $mm_ram/timer_wdata
   add wave -group "ABET DEBUG" -group "HW TIMER"             $mm_ram/irq_timer_q
-  # add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_mode_i
-  # add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_min_cycles_i
-  # add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_max_cycles_i
-  # add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_id_o
-  # add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_o
+  
+  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_ack_i
+  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_mode_i
+  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_min_cycles_i
+  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_max_cycles_i
+  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_sd_id_i
+  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_id_o
+  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_o
+
                                                             
 }
 

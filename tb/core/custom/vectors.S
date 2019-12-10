@@ -20,40 +20,56 @@
 /* abet added this to declar IRQ routine */
 .global timer_irq_handler
 .global software_irq_handler
+.global fast0_irq_handler
+.global fast1_irq_handler
+.global fast2_irq_handler
+.global fast3_irq_handler
+.global fast4_irq_handler
+.global fast5_irq_handler
+.global fast6_irq_handler
+.global fast7_irq_handler
+.global fast8_irq_handler
+.global fast9_irq_handler
+.global fast10_irq_handler
+.global fast11_irq_handler
+.global fast12_irq_handler
+.global fast13_irq_handler
+.global fast14_irq_handler
 
-vector_table:
-	j sw_irq_handler            /*  0                          */
-	j __no_irq_handler          /*  1                          */
-	j __no_irq_handler          /*  2                          */
-	j software_irq_handler      /*  3 EXC_CAUSE_IRQ_SOFTWARE_M */
-	j __no_irq_handler          /*  4                          */
-	j __no_irq_handler          /*  5                          */
-	j __no_irq_handler          /*  6                          */
-	j timer_irq_handler         /*  7 EXC_CAUSE_IRQ_TIMER_M    */
-	j __no_irq_handler          /*  8                          */
-	j __no_irq_handler          /*  9                          */
-	j __no_irq_handler          /* 10                          */
-	j __no_irq_handler          /* 11 EXC_CAUSE_IRQ_EXTERNAL_M */
-	j __no_irq_handler          /* 12                          */
-	j __no_irq_handler          /* 13                          */
-	j __no_irq_handler          /* 14                          */
-	j __no_irq_handler          /* 15                          */
-	j __no_irq_handler          /* 16 EXC_CAUSE_IRQ_FAST_0     */
-	j __no_irq_handler          /* 17 EXC_CAUSE_IRQ_FAST_1     */
-	j __no_irq_handler          /* 18 EXC_CAUSE_IRQ_FAST_2     */
-	j __no_irq_handler          /* 19 EXC_CAUSE_IRQ_FAST_3     */
-	j __no_irq_handler          /* 20 EXC_CAUSE_IRQ_FAST_4     */
-	j __no_irq_handler          /* 21 EXC_CAUSE_IRQ_FAST_5     */
-	j __no_irq_handler          /* 22 EXC_CAUSE_IRQ_FAST_6     */
-	j __no_irq_handler          /* 23 EXC_CAUSE_IRQ_FAST_7     */
-	j __no_irq_handler          /* 24 EXC_CAUSE_IRQ_FAST_8     */
-	j __no_irq_handler          /* 25 EXC_CAUSE_IRQ_FAST_9     */
-	j __no_irq_handler          /* 26 EXC_CAUSE_IRQ_FAST_10    */
-	j __no_irq_handler          /* 27 EXC_CAUSE_IRQ_FAST_11    */
-	j __no_irq_handler          /* 28 EXC_CAUSE_IRQ_FAST_12    */
-	j __no_irq_handler          /* 29 EXC_CAUSE_IRQ_FAST_13    */
-	j __no_irq_handler          /* 30 EXC_CAUSE_IRQ_FAST_14    */
-	j verification_irq_handler  /* 31 EXC_CAUSE_IRQ_NM         */
+
+vector_table: 
+	j sw_irq_handler               /*  0                          */
+	j __no_irq_handler             /*  1                          */
+	j __no_irq_handler             /*  2                          */
+	j software_irq_handler         /*  3 EXC_CAUSE_IRQ_SOFTWARE_M */
+	j __no_irq_handler             /*  4                          */
+	j __no_irq_handler             /*  5                          */
+	j __no_irq_handler             /*  6                          */
+	j timer_irq_handler            /*  7 EXC_CAUSE_IRQ_TIMER_M    */
+	j __no_irq_handler             /*  8                          */
+	j __no_irq_handler             /*  9                          */
+	j __no_irq_handler             /* 10                          */
+	j __no_irq_handler             /* 11 EXC_CAUSE_IRQ_EXTERNAL_M */
+	j __no_irq_handler             /* 12                          */
+	j __no_irq_handler             /* 13                          */
+	j __no_irq_handler             /* 14                          */
+	j __no_irq_handler             /* 15                          */
+	j fast0_irq_handler            /* 16 EXC_CAUSE_IRQ_FAST_0     */
+	j fast1_irq_handler            /* 17 EXC_CAUSE_IRQ_FAST_1     */
+	j fast2_irq_handler            /* 18 EXC_CAUSE_IRQ_FAST_2     */
+	j fast3_irq_handler            /* 19 EXC_CAUSE_IRQ_FAST_3     */
+	j fast4_irq_handler            /* 20 EXC_CAUSE_IRQ_FAST_4     */
+	j fast5_irq_handler            /* 21 EXC_CAUSE_IRQ_FAST_5     */
+	j fast6_irq_handler            /* 22 EXC_CAUSE_IRQ_FAST_6     */
+	j fast7_irq_handler            /* 23 EXC_CAUSE_IRQ_FAST_7     */
+	j fast8_irq_handler            /* 24 EXC_CAUSE_IRQ_FAST_8     */
+	j fast9_irq_handler            /* 25 EXC_CAUSE_IRQ_FAST_9     */
+	j fast10_irq_handler           /* 26 EXC_CAUSE_IRQ_FAST_10    */
+	j fast11_irq_handler           /* 27 EXC_CAUSE_IRQ_FAST_11    */
+	j fast12_irq_handler           /* 28 EXC_CAUSE_IRQ_FAST_12    */
+	j fast13_irq_handler           /* 29 EXC_CAUSE_IRQ_FAST_13    */
+	j fast14_irq_handler           /* 30 EXC_CAUSE_IRQ_FAST_14    */
+	j verification_irq_handler     /* 31 EXC_CAUSE_IRQ_NM         */
 
 /* this is fixed to 0x8000, used for PULP_SECURE=0. We redirect this entry to the
 new vector table (which is at mtvec) */

@@ -74,7 +74,6 @@ module riscv_int_controller
   } Interrupts_t;
 
   logic irq_enable_ext;
-  logic [4:0] irq_id_q;
   logic irq_sec_q;
 
   Interrupts_t irq_lines_q;
@@ -86,7 +85,6 @@ else
 
   //assign irq_req_ctrl_o = exc_ctrl_cs == IRQ_PENDING;
   assign irq_sec_ctrl_o = irq_sec_q;
-  assign irq_id_ctrl_o  = irq_id_q;
 
   // abet Output irq lines
   assign irq_software_o = irq_lines_q.irq_software;
@@ -99,7 +97,6 @@ else
   begin
     if (rst_n == 1'b0) begin
 
-      irq_id_q       <= '0;
       irq_sec_q      <= 1'b0;
       irq_lines_q    <= 18'h0;
       exc_ctrl_cs    <= IDLE;
@@ -114,7 +111,6 @@ else
           irq_lines_q = '0;
           if(irq_enable_ext & irq_i) begin
             exc_ctrl_cs    <= IRQ_PENDING;
-            irq_id_q       <= irq_id_i;
             irq_sec_q      <= irq_sec_i;
 
             // abet update clocked lines

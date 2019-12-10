@@ -137,9 +137,22 @@ module mm_ram
     logic                          rnd_stall_data_we;
     logic [3:0]                    rnd_stall_data_be;
 
-    //random or monitor interrupt request
-    logic rnd_irq;
+    // IRQ related internal signals
 
+    //random or monitor interrupt request
+    logic        irq_rnd;
+    logic [4:0]  irq_rnd_id;
+    // struct 18bit irq_lines
+    typedef struct packed {
+      logic        irq_software;
+      logic        irq_timer;
+      logic        irq_external;
+      logic [14:0] irq_fast; // 15 fast interrupts,
+                               // one interrupt is reserved for NMI (not visible through mip/mie)
+    } Interrupts_t;
+
+    Interrupts_t irq_lines;
+    
     // uhh, align?
     always_comb data_addr_aligned = {data_addr_i[31:2], 2'b0};
 
@@ -569,28 +582,64 @@ module mm_ram
 `endif
   end
 
+// IRQ SIGNALS ROUTING and DEMUX
+// irq_o OR
+// irq_id_int -> irq_lines_demux
+
+assign irq_o = irq_rnd | irq_timer_q;
+assign irq_software_o = irq_lines.irq_software;
+assign irq_timer_o    = irq_lines.irq_timer;
+assign irq_external_o = irq_lines.irq_external;
+assign irq_fast_o     = irq_lines.irq_fast; 
+
+always_comb
+begin
+   
+   irq_id_o <= 5'b0;
+
+  // choose irq to route out
+  if (irq_timer_q) begin
+    irq_id_o <= 5'b00111;
+  end else if (irq_rnd) begin
+    irq_id_o <= irq_rnd_id;
+  end
+end
+
+always_comb
+begin
+  // decoding irq_id to one-hot
+  case (irq_id_o)
+  
+    5'd00: irq_lines              = 18'b0 ; // cleared
+    //---------------------------------------------------                        
+    5'd03: irq_lines.irq_software = 1'b1  ; // software
+    5'd07: irq_lines.irq_timer    = 1'b1  ; // timer
+    5'd11: irq_lines.irq_external = 1'b1  ; // external
+    5'd16: irq_lines.irq_fast[ 0] = 1'b1  ; // fast 0
+    5'd17: irq_lines.irq_fast[ 1] = 1'b1  ; // fast 1
+    5'd18: irq_lines.irq_fast[ 2] = 1'b1  ; // fast 2
+    5'd19: irq_lines.irq_fast[ 3] = 1'b1  ; // fast 3
+    5'd20: irq_lines.irq_fast[ 4] = 1'b1  ; // fast 4
+    5'd21: irq_lines.irq_fast[ 5] = 1'b1  ; // fast 5
+    5'd22: irq_lines.irq_fast[ 6] = 1'b1  ; // fast 6
+    5'd23: irq_lines.irq_fast[ 7] = 1'b1  ; // fast 7
+    5'd24: irq_lines.irq_fast[ 8] = 1'b1  ; // fast 8
+    5'd25: irq_lines.irq_fast[ 9] = 1'b1  ; // fast 9
+    5'd26: irq_lines.irq_fast[10] = 1'b1  ; // fast 10
+    5'd27: irq_lines.irq_fast[11] = 1'b1  ; // fast 11
+    5'd28: irq_lines.irq_fast[12] = 1'b1  ; // fast 12
+    5'd29: irq_lines.irq_fast[13] = 1'b1  ; // fast 13
+    5'd30: irq_lines.irq_fast[14] = 1'b1  ; // fast 14
+    // TODO {1'b1,5'd31}: irq_lines_q = 18'h40000 ; // non-masked
+    default:;
+  endcase
+end 
+
+
+
+
 `ifndef VERILATOR
-  riscv_interrupt_demux
-  interrupt_demux_i
-  (
-    .clk_i              ( clk_i                   ),
-    .rst_ni             ( rst_ni                  ),
-
-    .irq_timer_i        ( irq_timer_q             ),   
-    .irq_rnd_i          ( rnd_irq                 ),     
-    .irq_id_i           ( rnd_stall_regs[14][4:0] ),      
-    .irq_id_timer_i     ( 5'b111                  ),
-    .irq_id_rnd_i       ( 5'b11111                ),  //TODO fix with a signal coming from the peripheral
-    .irq_ack_i          ( irq_ack_i               ),
-    // directly output irq lines to core
-    .irq_o              ( irq_o                   ),
-    .irq_id_o           ( irq_id_o                ), 
-    .irq_software_o     ( irq_software_o          ),
-    .irq_timer_o        ( irq_timer_o             ),
-    .irq_external_o     ( irq_external_o          ),
-    .irq_fast_o         ( irq_fast_o              )
-    ); 
-
+ 
   riscv_random_stall
   #(.DATA_WIDTH(INSTR_RDATA_WIDTH))
   instr_random_stalls
@@ -670,10 +719,10 @@ module mm_ram
       .clk_i             ( clk_i                                        ),
       .irq_i             ( 1'b0                                         ),
       .irq_id_i          ( '0                                           ),
-      .irq_ack_i         ( irq_ack_i == 1'b1 && irq_id_i == RND_IRQ_ID  ),
+      .irq_ack_i         ( irq_ack_i                                    ),
       .irq_ack_o         (                                              ),
-      .irq_o             ( rnd_irq                                      ),
-      .irq_id_o          ( /*disconnected, always generate RND_IRQ_ID*/ ),
+      .irq_o             ( irq_rnd                                      ),
+      .irq_id_o          ( irq_rnd_id                                   ),
       .irq_mode_i        ( rnd_stall_regs[10]                           ),
       .irq_min_cycles_i  ( rnd_stall_regs[11]                           ),
       .irq_max_cycles_i  ( rnd_stall_regs[12]                           ),
@@ -682,7 +731,8 @@ module mm_ram
       .irq_act_id_o      (                                              ),
       .irq_id_we_o       (                                              ),
       .irq_pc_id_i       ( pc_core_id_i                                 ),
-      .irq_pc_trig_i     ( rnd_stall_regs[13]                           )
+      .irq_pc_trig_i     ( rnd_stall_regs[13]                           ),
+      .irq_sd_id_i       ( rnd_stall_regs[14]                           )
     );
 
 `endif

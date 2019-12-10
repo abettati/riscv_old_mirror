@@ -82,7 +82,10 @@ module riscv_cs_registers
   output logic            u_irq_enable_o,
   // IRQ req to ID/controller
   output logic            irq_pending_o,
-
+  output logic            csr_msip_o,
+  output logic            csr_mtip_o,
+  output logic            csr_meip_o,
+  output logic [14:0]     csr_mfip_o,
   //csr_irq_sec_i is always 0 if PULP_SECURE is zero
   input  logic            csr_irq_sec_i,
   output logic            sec_lvl_o,
@@ -282,11 +285,7 @@ module riscv_cs_registers
   // abet
   Interrupts_t mip;
   Interrupts_t mie_q, mie_n;
-  // abet TODO move these to I/F as outputs
-  logic        csr_msip_o; // software interrupt pending
-  logic        csr_mtip_o; // timer interrupt pending
-  logic        csr_meip_o; // external interrupt pending
-  logic [14:0] csr_mfip_o; // fast interrupt pending
+
 
   logic is_irq;
   PrivLvl_t priv_lvl_n, priv_lvl_q, priv_lvl_reg_q;
@@ -1002,7 +1001,12 @@ end //PULP_SECURE
   assign debug_ebreakm_o      = dcsr_q.ebreakm;
   assign debug_ebreaku_o      = dcsr_q.ebreaku;
 
-
+  // Output interrupt pending to ID/Controller
+  assign csr_msip_o    = mip.irq_software;
+  assign csr_mtip_o    = mip.irq_timer;
+  assign csr_meip_o    = mip.irq_external;
+  assign csr_mfip_o    = mip.irq_fast;
+  assign irq_pending_o = csr_msip_o | csr_mtip_o | csr_meip_o | (|csr_mfip_o);
 
   generate
   if (PULP_SECURE == 1)
@@ -1066,13 +1070,9 @@ end //PULP_SECURE
   end
   endgenerate
 
-  // abet directly output some registers
-  assign csr_msip_o  = mip.irq_software;
-  assign csr_mtip_o  = mip.irq_timer;
-  assign csr_meip_o  = mip.irq_external;
-  assign csr_mfip_o  = mip.irq_fast;
 
-  assign irq_pending_o = csr_msip_o | csr_mtip_o | csr_meip_o | (|csr_mfip_o);
+
+
 
   // actual registers
   always_ff @(posedge clk, negedge rst_n)

@@ -211,7 +211,6 @@ module riscv_id_stage
     // Interrupt signals
     input  logic        irq_i,
     input  logic        irq_sec_i,
-    input  logic [4:0]  irq_id_i,
     output logic        irq_ack_o,
     output logic [4:0]  irq_id_o,
     output logic [5:0]  exc_cause_o,
@@ -219,9 +218,12 @@ module riscv_id_stage
     // irq_req from int_controller
     input  logic        irq_req_ctrl_i,
     input  logic        irq_sec_ctrl_i,
-    input  logic [4:0]  irq_id_ctrl_i,
     input  logic        m_irq_enable_i,
     input  logic        u_irq_enable_i,
+    input  logic        csr_msip_i,
+    input  logic        csr_mtip_i,
+    input  logic        csr_meip_i,
+    input  logic [14:0] csr_mfip_i,
     // handshake signals to int_controller
     output logic        ctrl_ack_o,
     output logic        ctrl_kill_o,
@@ -313,9 +315,8 @@ module riscv_id_stage
 
 
 
-  // Signals running between controller and exception controller
+  // Interrupts: Signals running between controller and exception controller
   logic       irq_req_ctrl, irq_sec_ctrl;
-  logic [4:0] irq_id_ctrl;
 
 
   // Register file interface
@@ -1240,16 +1241,22 @@ module riscv_id_stage
     .irq_i                          ( irq_i                  ),
     .irq_req_ctrl_i                 ( irq_req_ctrl_i         ),
     .irq_sec_ctrl_i                 ( irq_sec_ctrl_i         ),
-    .irq_id_ctrl_i                  ( irq_id_ctrl_i          ),
     .m_IE_i                         ( m_irq_enable_i         ),
     .u_IE_i                         ( u_irq_enable_i         ),
     .current_priv_lvl_i             ( current_priv_lvl_i     ),
 
     .irq_ack_o                      ( irq_ack_o              ),
     .irq_id_o                       ( irq_id_o               ),
+
+  // Irq lines from CSR (exploded pending interrupts)
+     .csr_msip_i                    ( csr_msip_i              ),  // software interrupt pending
+     .csr_mtip_i                    ( csr_mtip_i              ),  // timer interrupt pending
+     .csr_meip_i                    ( csr_meip_i              ),  // external interrupt pending
+     .csr_mfip_i                    ( csr_mfip_i              ),  // fast interrupt pending
+
     // handshake
     .exc_ack_o                      ( ctrl_ack_o             ),
-    .exc_kill_o                     ( ctrl_kill_o             ),
+    .exc_kill_o                     ( ctrl_kill_o            ),
 
     // Debug Signal
     .debug_mode_o                   ( debug_mode_o           ),

@@ -105,7 +105,6 @@ module riscv_wrapper
          .apu_master_flags_i     (                       ),
 
          .irq_i                  ( irq                   ),
-         .irq_id_i               ( irq_id_in             ),  // irq id to core
          .irq_software_i         ( irq_software          ),  // exploded irq lines
          .irq_timer_i            ( irq_timer             ),  // exploded irq lines 
          .irq_external_i         ( irq_external          ),  // exploded irq lines
@@ -150,9 +149,9 @@ module riscv_wrapper
 
          .irq_id_i       ( irq_id_out                     ),
          .irq_ack_i      ( irq_ack                        ),
-         .irq_id_o       ( irq_id_in                      ),
+         .irq_id_o       (                                ),
          
-         // output irq lines
+         // output irq lines to Core
          .irq_software_o ( irq_software                   ),
          .irq_timer_o    ( irq_timer                      ),
          .irq_external_o ( irq_external                   ),

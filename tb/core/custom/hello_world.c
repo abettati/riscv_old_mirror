@@ -9,6 +9,22 @@
 
 uint32_t IRQ_SOFTWARE_CODE = 3;
 uint32_t IRQ_TIMER_CODE    = 7;
+uint32_t IRQ_EXTERNAL_CODE = 11;
+uint32_t IRQ_FAST0_CODE    = 16;
+uint32_t IRQ_FAST1_CODE    = 17;
+uint32_t IRQ_FAST2_CODE    = 18;
+uint32_t IRQ_FAST3_CODE    = 19;
+uint32_t IRQ_FAST4_CODE    = 20;
+uint32_t IRQ_FAST5_CODE    = 21;
+uint32_t IRQ_FAST6_CODE    = 22;
+uint32_t IRQ_FAST7_CODE    = 23;
+uint32_t IRQ_FAST8_CODE    = 24;
+uint32_t IRQ_FAST9_CODE    = 25;
+uint32_t IRQ_FAST10_CODE   = 26;
+uint32_t IRQ_FAST11_CODE   = 27;
+uint32_t IRQ_FAST12_CODE   = 28;
+uint32_t IRQ_FAST13_CODE   = 29;
+uint32_t IRQ_FAST14_CODE   = 30;
 
 void print_chr(char ch)
 {
@@ -61,6 +77,96 @@ void software_irq_handler(void)
     print_str("\n\n SOFTWARE IRQ SERVED...\n\n");
 }
 
+void fast0_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST0 IRQ SERVED...\n\n");
+}
+
+void fast1_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST1 IRQ SERVED...\n\n");
+}
+
+void fast2_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST2 IRQ SERVED...\n\n");
+}
+
+void fast3_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST3 IRQ SERVED...\n\n");
+}
+
+void fast4_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST4 IRQ SERVED...\n\n");
+}
+
+void fast5_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST5 IRQ SERVED...\n\n");
+}
+
+void fast6_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST6 IRQ SERVED...\n\n");
+}
+
+void fast7_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST7 IRQ SERVED...\n\n");
+}
+
+void fast8_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST8 IRQ SERVED...\n\n");
+}
+
+void fast9_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST9 IRQ SERVED...\n\n");
+}
+
+void fast10_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST10 IRQ SERVED...\n\n");
+}
+
+void fast11_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST11 IRQ SERVED...\n\n");
+}
+
+void fast12_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST12 IRQ SERVED...\n\n");
+}
+
+void fast13_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST13 IRQ SERVED...\n\n");
+}
+
+void fast14_irq_handler(void)
+{
+    writew(0,0x16000038);
+    print_str("\n\n FAST14 IRQ SERVED...\n\n");
+}
+
 int main(int argc, char *argv[])
 {
     /* inline assembly */
@@ -84,11 +190,15 @@ int main(int argc, char *argv[])
      writew(128,0x15000000);
 
 
+    // software defined irq gen mode
+    writew(4,0x16000028);
+
+
     /* TEST WRITE IRQ*/
-    writew(IRQ_SOFTWARE_CODE,0x16000038);
+    //writew(IRQ_SOFTWARE_CODE,0x16000038);
 
-
-
+    /* TEST t IRQ*/
+    writew(IRQ_EXTERNAL_CODE,0x16000038);
 
 
     /* WRITE TO RND IRQ GEN */
@@ -97,12 +207,6 @@ int main(int argc, char *argv[])
     //writew(2,0x1600002C);
     
     //writew(20,0x16000030);     
-
-    // rnd irq gen mode
-    //writew(2,0x16000028);
-
-    // set timer_cnt_q = 3
-    //writew(3,0x15000004);
 
 
     int a = 5;
@@ -125,8 +229,10 @@ int main(int argc, char *argv[])
     }
     
     // set hw timer = 3
-    writew(3,0x15000004);
-    printf("\n\n timer set \n\n");
+    //writew(3,0x15000004);
+    //printf("\n\n timer set \n\n");
+    
+    writew(IRQ_FAST10_CODE,0x16000038);
 
     a = 5;
     count = 10;
