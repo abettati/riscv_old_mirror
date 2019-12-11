@@ -44,7 +44,6 @@ module mm_ram
      output logic                         irq_timer_o,
      output logic                         irq_external_o,
      output logic [14:0]                  irq_fast_o,
-     output logic                         irq_o,
 
      input logic [31:0]                   pc_core_id_i,
 
@@ -586,7 +585,6 @@ module mm_ram
 // irq_o OR
 // irq_id_int -> irq_lines_demux
 
-assign irq_o = irq_rnd | irq_timer_q;
 assign irq_software_o = irq_lines.irq_software;
 assign irq_timer_o    = irq_lines.irq_timer;
 assign irq_external_o = irq_lines.irq_external;

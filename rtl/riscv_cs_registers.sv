@@ -82,10 +82,8 @@ module riscv_cs_registers
   output logic            u_irq_enable_o,
   // IRQ req to ID/controller
   output logic            irq_pending_o,
-  output logic            csr_msip_o,
-  output logic            csr_mtip_o,
-  output logic            csr_meip_o,
-  output logic [14:0]     csr_mfip_o,
+  output logic [4:0]      irq_id_o,
+
   //csr_irq_sec_i is always 0 if PULP_SECURE is zero
   input  logic            csr_irq_sec_i,
   output logic            sec_lvl_o,
@@ -309,16 +307,21 @@ module riscv_cs_registers
   logic                          is_pccr;
   logic                          is_pcer;
   logic                          is_pcmr;
-
+  Interrupts_t                   irq_req_n, irq_req_q;
 
   assign is_irq = csr_cause_i[5];
 
+  assign irq_req_n.irq_software = irq_software_i;
+  assign irq_req_n.irq_timer    = irq_timer_i; 
+  assign irq_req_n.irq_external = irq_external_i;
+  assign irq_req_n.irq_fast     = irq_fast_i;
+
   // abet mip CSR is purely combintational
   // must be able to re-enable the clock upon WFI
-  assign mip.irq_software = irq_software_i & mie_q.irq_software;
-  assign mip.irq_timer    = irq_timer_i    & mie_q.irq_timer;
-  assign mip.irq_external = irq_external_i & mie_q.irq_external;
-  assign mip.irq_fast     = irq_fast_i     & mie_q.irq_fast;
+  assign mip.irq_software = irq_req_q.irq_software & mie_q.irq_software;
+  assign mip.irq_timer    = irq_req_q.irq_timer    & mie_q.irq_timer;
+  assign mip.irq_external = irq_req_q.irq_external & mie_q.irq_external;
+  assign mip.irq_fast     = irq_req_q.irq_fast     & mie_q.irq_fast;
 
   ////////////////////////////////////////////
   //   ____ ____  ____    ____              //
@@ -478,7 +481,7 @@ end else begin //PULP_SECURE == 0
       CSR_MEPC: csr_rdata_int = mepc_q;
       // mcause: exception cause
       CSR_MCAUSE: csr_rdata_int = {mcause_q[5], 26'b0, mcause_q[4:0]};
-      // abet mip: interrupt pending - put zero just for testing
+      // TODO abet mip: interrupt pending - put zero just for testing
       CSR_MIP: begin
         csr_rdata_int                                     = '0;
         csr_rdata_int[CSR_MSIX_BIT]                       = '0;
@@ -976,8 +979,48 @@ end //PULP_SECURE
     if (is_pccr || is_pcer || is_pcmr)
       csr_rdata_o = perf_rdata;
   end
+  
+  // abet Interrupt Encoder
+  always_comb
+  begin
 
+    // TODO support nm interrupt 
+    // if (irq_nm_i && !nmi_mode_q) begin
+    //   exc_cause_o = EXC_CAUSE_IRQ_NM;
+    //   nmi_mode_d  = 1'b1; // enter NMI mode
+    // end else if (csr_mfip_i != 15'b0) begin
 
+    if(mip.irq_fast != '0)
+    begin
+      if      (mip.irq_fast[14]) irq_id_o = 5'd30;
+      else if (mip.irq_fast[13]) irq_id_o = 5'd29;
+      else if (mip.irq_fast[12]) irq_id_o = 5'd28;
+      else if (mip.irq_fast[11]) irq_id_o = 5'd27;
+      else if (mip.irq_fast[10]) irq_id_o = 5'd26;
+      else if (mip.irq_fast[ 9]) irq_id_o = 5'd25; 
+      else if (mip.irq_fast[ 8]) irq_id_o = 5'd24; 
+      else if (mip.irq_fast[ 7]) irq_id_o = 5'd23; 
+      else if (mip.irq_fast[ 6]) irq_id_o = 5'd22; 
+      else if (mip.irq_fast[ 5]) irq_id_o = 5'd21;
+      else if (mip.irq_fast[ 4]) irq_id_o = 5'd20;
+      else if (mip.irq_fast[ 3]) irq_id_o = 5'd19;
+      else if (mip.irq_fast[ 2]) irq_id_o = 5'd18;
+      else if (mip.irq_fast[ 1]) irq_id_o = 5'd17;
+      else                         irq_id_o = 5'd16;
+    end else if (mip.irq_external) begin
+      // EXC_CAUSE_IRQ_EXTERNAL_M
+      irq_id_o    = {5'd11};
+        
+    end else if (mip.irq_software) begin
+      // EXC_CAUSE_IRQ_SOFTWARE_M;
+      irq_id_o    = {5'd03};
+    
+    end else begin // mip.irq_timer
+      // EXC_CAUSE_IRQ_TIMER_M;
+      irq_id_o    = {5'd07};
+    end    
+  end
+  
   // directly output some registers
   assign m_irq_enable_o  = mstatus_q.mie & priv_lvl_q == PRIV_LVL_M;
   assign u_irq_enable_o  = mstatus_q.uie & priv_lvl_q == PRIV_LVL_U;
@@ -1002,11 +1045,7 @@ end //PULP_SECURE
   assign debug_ebreaku_o      = dcsr_q.ebreaku;
 
   // Output interrupt pending to ID/Controller
-  assign csr_msip_o    = mip.irq_software;
-  assign csr_mtip_o    = mip.irq_timer;
-  assign csr_meip_o    = mip.irq_external;
-  assign csr_mfip_o    = mip.irq_fast;
-  assign irq_pending_o = csr_msip_o | csr_mtip_o | csr_meip_o | (|csr_mfip_o);
+  assign irq_pending_o = mip.irq_software | mip.irq_timer | mip.irq_external | (|mip.irq_fast);
 
   generate
   if (PULP_SECURE == 1)
@@ -1046,7 +1085,7 @@ end //PULP_SECURE
             mtvec_q        <= '0;
             utvec_q        <= '0;
             priv_lvl_q     <= PRIV_LVL_M;
-
+            irq_req_q      <= '0;  
           end
           else
           begin
@@ -1055,6 +1094,7 @@ end //PULP_SECURE
             mtvec_q        <= mtvec_n;
             utvec_q        <= utvec_n;
             priv_lvl_q     <= priv_lvl_n;
+            irq_req_q      <= irq_req_n;
           end
         end
 

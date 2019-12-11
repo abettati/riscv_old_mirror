@@ -53,7 +53,6 @@ if {$rvcores ne ""} {
   add wave -group "RF_FP"                                    $rvcores/id_stage_i/registers_i/riscv_register_file_i/mem_fp
   add wave -group "Decoder"                                  $rvcores/id_stage_i/decoder_i/*
   add wave -group "Controller"                               $rvcores/id_stage_i/controller_i/*
-  add wave -group "Int Ctrl"                                 $rvcores/int_controller_i/*
   add wave -group "Hwloop Regs"                              $rvcores/id_stage_i/hwloop_regs_i/*
   add wave -group "EX Stage" -group "ALU"                    $rvcores/ex_stage_i/alu_i/*
   add wave -group "EX Stage" -group "ALU_DIV"                $rvcores/ex_stage_i/alu_i/int_div/div_i/*
@@ -66,7 +65,6 @@ if {$rvcores ne ""} {
   add wave -group "LSU"                                      $rvcores/load_store_unit_i/*
   add wave -group "CSR"                                      $rvcores/cs_registers_i/*
   add wave -group "MM RAM"                                   $mm_ram/*
-  add wave -group "INT CTRL"                                 $rvcores/int_controller_i/*
   
   # abet TODO find a better way to do multiline
 
@@ -83,20 +81,13 @@ if {$rvcores ne ""} {
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_external_i
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_fast_i
 
-  add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/mfip_id
   add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/irq_id_o
-  add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/csr_mfip_i
   add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/ctrl_fsm_cs  
   
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mstatus_q
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mie_q 
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mip 
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_pending_o
-
-  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/clk
-  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/ctrl_ack_i
-  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/irq_lines_q
-  add wave -group "ABET DEBUG" -group "INT CTRL"             $rvcores/int_controller_i/exc_ctrl_cs
                   
 
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/data_addr_i
@@ -104,7 +95,6 @@ if {$rvcores ne ""} {
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_ack_i
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_id_i
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_id_o
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_o
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_software_o
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_timer_o   
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_external_o

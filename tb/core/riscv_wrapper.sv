@@ -44,8 +44,7 @@ module riscv_wrapper
     // signals to debug unit
     logic                         debug_req_i;
 
-    // irq signals (not used)
-    logic                         irq;
+    // irq signals
     logic [0:4]                   irq_id_in;
     logic                         irq_ack;
     logic [0:4]                   irq_id_out;
@@ -104,7 +103,6 @@ module riscv_wrapper
          .apu_master_result_i    (                       ),
          .apu_master_flags_i     (                       ),
 
-         .irq_i                  ( irq                   ),
          .irq_software_i         ( irq_software          ),  // exploded irq lines
          .irq_timer_i            ( irq_timer             ),  // exploded irq lines 
          .irq_external_i         ( irq_external          ),  // exploded irq lines
@@ -156,7 +154,6 @@ module riscv_wrapper
          .irq_timer_o    ( irq_timer                      ),
          .irq_external_o ( irq_external                   ),
          .irq_fast_o     ( irq_fast                       ),
-         .irq_o          ( irq                            ),
 
          .pc_core_id_i   ( riscv_core_i.pc_id             ),
 

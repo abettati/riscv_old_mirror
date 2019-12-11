@@ -20,6 +20,7 @@
 /* abet added this to declar IRQ routine */
 .global timer_irq_handler
 .global software_irq_handler
+.global external_irq_handler
 .global fast0_irq_handler
 .global fast1_irq_handler
 .global fast2_irq_handler
@@ -49,7 +50,7 @@ vector_table:
 	j __no_irq_handler             /*  8                          */
 	j __no_irq_handler             /*  9                          */
 	j __no_irq_handler             /* 10                          */
-	j __no_irq_handler             /* 11 EXC_CAUSE_IRQ_EXTERNAL_M */
+	j external_irq_handler         /* 11 EXC_CAUSE_IRQ_EXTERNAL_M */
 	j __no_irq_handler             /* 12                          */
 	j __no_irq_handler             /* 13                          */
 	j __no_irq_handler             /* 14                          */

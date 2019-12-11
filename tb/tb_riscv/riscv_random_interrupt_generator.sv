@@ -173,6 +173,7 @@ begin
         irq_sd_id = irq_sd_id_i; 
         irq_sd    = 1'b1;
         if (irq_ack_i) begin
+          // TODO check if the received irq is as expected
           ack_flag = 1'b1;
         end  
     end

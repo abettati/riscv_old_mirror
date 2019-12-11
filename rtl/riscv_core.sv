@@ -106,9 +106,9 @@ module riscv_core
   input logic [APU_NUSFLAGS_CPU-1:0]     apu_master_flags_i,
 
   // Interrupt inputs
-  input  logic        irq_i,                 // level sensitive IR lines
   output logic        irq_ack_o,
   output logic [4:0]  irq_id_o,
+
   input  logic        irq_sec_i,
 
   input  logic        irq_software_i,       // exploded irq lines
@@ -362,6 +362,7 @@ module riscv_core
   logic        irq_ctrl_ack;
   logic        irq_ctrl_kill;
   logic        irq_pending;
+  logic [4:0]  irq_id;
   logic        irq_sec_ctrl;
  
 
@@ -442,7 +443,7 @@ module riscv_core
   // interface to finish loading instructions
   assign core_busy_int = (PULP_CLUSTER & data_load_event_ex & data_req_o) ? (if_busy | apu_busy) : (if_busy | ctrl_busy | lsu_busy | apu_busy);
 
-  assign clock_en      = PULP_CLUSTER ? clock_en_i | core_busy_o : irq_i | debug_req_i | core_busy_o;
+  assign clock_en      = PULP_CLUSTER ? clock_en_i | core_busy_o : irq_pending | debug_req_i | core_busy_o;
 
   assign sleeping      = ~core_busy_o;
 
@@ -729,24 +730,13 @@ module riscv_core
     .data_err_i                   ( data_err_pmp         ),
     .data_err_ack_o               ( data_err_ack         ),
     // Interrupt Signals
-    .irq_i                        ( irq_i                ), // incoming interrupts
+    .irq_pending_i                ( irq_pending          ), // incoming interrupts
+    .irq_id_i                     ( irq_id               ),
     .irq_sec_i                    ( (PULP_SECURE) ? irq_sec_i : 1'b0 ),
     .m_irq_enable_i               ( m_irq_enable         ),
     .u_irq_enable_i               ( u_irq_enable         ),
     .irq_ack_o                    ( irq_ack_o            ),
     .irq_id_o                     ( irq_id_o             ),
-    .csr_msip_i                   ( csr_msip             ),
-    .csr_mtip_i                   ( csr_mtip             ),
-    .csr_meip_i                   ( csr_meip             ),
-    .csr_mfip_i                   ( csr_mfip             ),
-
-    // irq_req from controller
-    .irq_req_ctrl_i               (irq_pending         ),
-    .irq_sec_ctrl_i               (irq_sec_ctrl        ),
-
-    // handshake signals to controller
-    .ctrl_ack_o                   (irq_ctrl_ack        ),
-    .ctrl_kill_o                  (irq_ctrl_kill       ),
 
     // Debug Signal
     .debug_mode_o                 ( debug_mode           ),
@@ -1016,15 +1006,12 @@ module riscv_core
     .sec_lvl_o               ( sec_lvl_o          ),
     .mepc_o                  ( mepc               ),
     .uepc_o                  ( uepc               ),
-    .irq_software_i          (irq_software        ),
-    .irq_timer_i             (irq_timer           ),
-    .irq_external_i          (irq_external        ),
-    .irq_fast_i              (irq_fast            ),
-    .irq_pending_o           (irq_pending         ), // IRQ to ID/Controller
-    .csr_msip_o              ( csr_msip           ), 
-    .csr_mtip_o              ( csr_mtip           ), 
-    .csr_meip_o              ( csr_meip           ), 
-    .csr_mfip_o              ( csr_mfip           ), 
+    .irq_software_i          ( irq_software_i     ),
+    .irq_timer_i             ( irq_timer_i        ),
+    .irq_external_i          ( irq_external_i     ),
+    .irq_fast_i              ( irq_fast_i         ),
+    .irq_pending_o           ( irq_pending        ), // IRQ to ID/Controller
+    .irq_id_o                ( irq_id             ),
     // debug
     .debug_mode_i            ( debug_mode         ),
     .debug_cause_i           ( debug_cause        ),
@@ -1157,53 +1144,6 @@ module riscv_core
   end
   endgenerate
 
-// abet moved from ID to core
-////////////////////////////////////////////////////////////////////////
-//  _____      _       _____             _             _ _            //
-// |_   _|    | |     /  __ \           | |           | | |           //
-//   | | _ __ | |_    | /  \/ ___  _ __ | |_ _ __ ___ | | | ___ _ __  //
-//   | || '_ \| __|   | |    / _ \| '_ \| __| '__/ _ \| | |/ _ \ '__| //
-//  _| || | | | |_ _  | \__/\ (_) | | | | |_| | | (_) | | |  __/ |    //
-//  \___/_| |_|\__(_)  \____/\___/|_| |_|\__|_|  \___/|_|_|\___|_|    //
-//                                                                    //
-////////////////////////////////////////////////////////////////////////
-
-  riscv_int_controller
-  #(
-    .PULP_SECURE(PULP_SECURE)
-  )
-  int_controller_i
-  (
-    .clk                     ( clk                ),
-    .rst_n                   ( rst_ni             ),
-
-    // irq_req to controller
-    //.irq_req_ctrl_o           (irq_req_ctrl        ),
-    .irq_sec_ctrl_o           (irq_sec_ctrl        ),
-
-
-    // handshake signals from controller
-    .ctrl_ack_i              (irq_ctrl_ack        ),
-    .ctrl_kill_i             (irq_ctrl_kill       ),
-
-    // external interrupt lines
-    .irq_i                   (irq_i               ),  // level-triggered interrupt inputs
-    .irq_sec_i               (irq_sec_i           ),  // interrupt secure bit from EU
-    
-    .irq_software_i          (irq_software_i      ),  // exploded irq lines
-    .irq_timer_i             (irq_timer_i         ),  // exploded irq lines 
-    .irq_external_i          (irq_external        ),  // exploded irq lines
-    .irq_fast_i              (irq_fast_i          ),  // exploded irq lines
-
-    .m_IE_i                  (m_irq_enable        ),
-    .u_IE_i                  (u_irq_enable        ),
-    .current_priv_lvl_i      (current_priv_lvl    ),
-    .irq_software_o          (irq_software        ),
-    .irq_timer_o             (irq_timer           ),
-    .irq_external_o          (irq_external        ),
-    .irq_fast_o              (irq_fast            )
-
-  );
 
 `ifndef VERILATOR
 `ifdef TRACE_EXECUTION

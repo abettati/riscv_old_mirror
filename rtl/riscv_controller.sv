@@ -101,17 +101,13 @@ module riscv_controller
   input  logic [1:0]  jump_in_dec_i,              // jump is being calculated in ALU
 
   // Interrupt Controller Signals
-  input  logic        irq_i,
+  input  logic        irq_pending_i,
   input  logic        irq_req_ctrl_i,
   input  logic        irq_sec_ctrl_i,
+  input  logic [4:0]  irq_id_ctrl_i,
   input  logic        m_IE_i,                     // interrupt enable bit from CSR (M mode)
   input  logic        u_IE_i,                     // interrupt enable bit from CSR (U mode)
   input  PrivLvl_t    current_priv_lvl_i,
-  // Irq lines from CSR (exploded pending interrupts)
-  input  logic        csr_msip_i,                 // software interrupt pending
-  input  logic        csr_mtip_i,                 // timer interrupt pending   
-  input  logic        csr_meip_i,                 // external interrupt pending
-  input  logic [14:0] csr_mfip_i,                 // fast interrupt pending    
 
   output logic        irq_ack_o,
   output logic [4:0]  irq_id_o,
@@ -209,10 +205,6 @@ module riscv_controller
 
   logic instr_valid_irq_flush_n, instr_valid_irq_flush_q;
 
-  // IRQ related internal signals
-  logic [3:0] mfip_id;  // holds the encoded fast interrupt id
-
-
 `ifndef SYNTHESIS
   // synopsys translate_off
   // make sure we are called later so that we do not generate messages for
@@ -228,29 +220,6 @@ module riscv_controller
   // synopsys translate_on
 `endif
 
-  //////////////////////////
-  // INTERRUPT COMB LOGIC //
-  //////////////////////////
-
-  
-  // generate ID of fast interrupts, highest priority to highest ID
-  always_comb begin : gen_mfip_id
-    if      (csr_mfip_i[14]) mfip_id = 4'd14;
-    else if (csr_mfip_i[13]) mfip_id = 4'd13;
-    else if (csr_mfip_i[12]) mfip_id = 4'd12;
-    else if (csr_mfip_i[11]) mfip_id = 4'd11;
-    else if (csr_mfip_i[10]) mfip_id = 4'd10;
-    else if (csr_mfip_i[ 9]) mfip_id = 4'd9; 
-    else if (csr_mfip_i[ 8]) mfip_id = 4'd8; 
-    else if (csr_mfip_i[ 7]) mfip_id = 4'd7; 
-    else if (csr_mfip_i[ 6]) mfip_id = 4'd6; 
-    else if (csr_mfip_i[ 5]) mfip_id = 4'd5;
-    else if (csr_mfip_i[ 4]) mfip_id = 4'd4;
-    else if (csr_mfip_i[ 3]) mfip_id = 4'd3;
-    else if (csr_mfip_i[ 2]) mfip_id = 4'd2;
-    else if (csr_mfip_i[ 1]) mfip_id = 4'd1;
-    else                     mfip_id = 4'd0;
-  end
 
   ////////////////////////////////////////////////////////////////////////////////////////////
   //   ____ ___  ____  _____    ____ ___  _   _ _____ ____   ___  _     _     _____ ____    //
@@ -299,7 +268,7 @@ module riscv_controller
     halt_if_o              = 1'b0;
     halt_id_o              = 1'b0;
     irq_ack_o              = 1'b0;
-    irq_id_o               = 5'b0;
+    irq_id_o               = irq_id_ctrl_i;
     boot_done              = 1'b0;
     jump_in_dec            = jump_in_dec_i == BRANCH_JALR || jump_in_dec_i == BRANCH_JAL;
     branch_in_id           = jump_in_id_i == BRANCH_COND;
@@ -376,7 +345,7 @@ module riscv_controller
 
         // normal execution flow
         // in debug mode or single step mode we leave immediately (wfi=nop)
-        if (irq_i || (debug_req_i || debug_mode_q || debug_single_step_i)) begin
+        if (irq_pending_i || (debug_req_i || debug_mode_q || debug_single_step_i)) begin
           ctrl_fsm_ns  = FIRST_FETCH;
         end
 
@@ -671,7 +640,7 @@ module riscv_controller
 
         end  //data error
         else begin
-          if(irq_i & irq_enable_int) begin
+          if(irq_pending_i & irq_enable_int) begin
             ctrl_fsm_ns = IRQ_TAKEN_ID;
           end else begin
             // we can go back to decode in case the IRQ is not taken (no ELW REPLAY)
@@ -691,7 +660,7 @@ module riscv_controller
 
         perf_pipeline_stall_o = data_load_event_i;
 
-        if(irq_i & irq_enable_int) begin
+        if(irq_pending_i & irq_enable_int) begin
             ctrl_fsm_ns = IRQ_TAKEN_ID;
         end else begin
           // we can go back to decode in case the IRQ is not taken (no ELW REPLAY)
@@ -730,45 +699,12 @@ module riscv_controller
         pc_set_o          = 1'b1;
         pc_mux_o          = PC_EXCEPTION;
         exc_pc_mux_o      = EXC_PC_IRQ;
-        
-        // abet Evaluate exception cause (interrupt priorities according to Privileged Spec v1.11 p.31)
-        
-        // TODO support nm interrupt 
-        // if (irq_nm_i && !nmi_mode_q) begin
-        //   exc_cause_o = EXC_CAUSE_IRQ_NM;
-        //   nmi_mode_d  = 1'b1; // enter NMI mode
-        // end else if (csr_mfip_i != 15'b0) begin
-        
-        if (csr_mfip_i != 15'b0) begin
-          // generate exception cause ID from fast interrupt ID:
-          // - first bit distinguishes interrupts from exceptions,
-          // - second bit adds 16 to fast interrupt ID
-          // for example EXC_CAUSE_IRQ_FAST_0 = {1'b1, 5'd16}
-          exc_cause_o = {2'b01, mfip_id};
-          csr_cause_o = {1'b1,5'd11};
-          irq_id_o    = {1'b1,mfip_id};
-
-        end else if (csr_meip_i) begin
-          // EXC_CAUSE_IRQ_EXTERNAL_M
-          exc_cause_o = {1'b0,5'd11};
-          csr_cause_o = {1'b1,5'd11};
-          irq_id_o    = {5'd11};
-          
-        end else if (csr_msip_i) begin
-          // EXC_CAUSE_IRQ_SOFTWARE_M;
-          exc_cause_o = {1'b0,5'd03};
-          csr_cause_o = {1'b1,5'd03};
-          irq_id_o    = {5'd03};
-
-        end else begin // csr_mtip_i
-          // EXC_CAUSE_IRQ_TIMER_M;
-          exc_cause_o = {1'b0,5'd07};
-          csr_cause_o = {1'b1,5'd07};
-          irq_id_o    = {5'd07};
-        end
+        exc_cause_o       = {1'b0,irq_id_ctrl_i};
 
         csr_irq_sec_o     = irq_sec_ctrl_i;
         csr_save_cause_o  = 1'b1;
+        csr_cause_o       = {1'b1,irq_id_ctrl_i};
+
         csr_save_id_o     = 1'b1;
 
         if(irq_sec_ctrl_i)
@@ -789,37 +725,12 @@ module riscv_controller
         pc_set_o          = 1'b1;
         pc_mux_o          = PC_EXCEPTION;
         exc_pc_mux_o      = EXC_PC_IRQ;
-        
-        if (csr_mfip_i != 15'b0) begin
-          // generate exception cause ID from fast interrupt ID:
-          // - first bit distinguishes interrupts from exceptions,
-          // - second bit adds 16 to fast interrupt ID
-          // for example EXC_CAUSE_IRQ_FAST_0 = {1'b1, 5'd16}
-          exc_cause_o = {2'b01, mfip_id};
-          csr_cause_o = {1'b1,5'd11};
-          irq_id_o    = {1'b1,mfip_id};
-
-        end else if (csr_meip_i) begin
-          // EXC_CAUSE_IRQ_EXTERNAL_M
-          exc_cause_o = {1'b0,5'd11};
-          csr_cause_o = {1'b1,5'd11};
-          irq_id_o    = {5'd11};
-          
-        end else if (csr_msip_i) begin
-          // EXC_CAUSE_IRQ_SOFTWARE_M;
-          exc_cause_o = {1'b0,5'd03};
-          csr_cause_o = {1'b1,5'd03};
-          irq_id_o    = {5'd03};
-
-        end else begin // csr_mtip_i
-          // EXC_CAUSE_IRQ_TIMER_M;
-          exc_cause_o = {1'b0,5'd07};
-          csr_cause_o = {1'b1,5'd07};
-          irq_id_o    = {5'd07};
-        end
+        exc_cause_o       = {1'b0,irq_id_ctrl_i};
 
         csr_irq_sec_o     = irq_sec_ctrl_i;
         csr_save_cause_o  = 1'b1;
+        csr_cause_o       = {1'b1,irq_id_ctrl_i};
+
         csr_save_if_o     = 1'b1;
 
         if(irq_sec_ctrl_i)
