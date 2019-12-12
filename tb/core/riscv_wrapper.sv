@@ -147,7 +147,6 @@ module riscv_wrapper
 
          .irq_id_i       ( irq_id_out                     ),
          .irq_ack_i      ( irq_ack                        ),
-         .irq_id_o       (                                ),
          
          // output irq lines to Core
          .irq_software_o ( irq_software                   ),

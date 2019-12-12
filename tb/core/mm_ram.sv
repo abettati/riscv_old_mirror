@@ -39,7 +39,6 @@ module mm_ram
      input logic [4:0]                    irq_id_i,
      input logic                          irq_ack_i,
 
-     output logic [4:0]                   irq_id_o,
      output logic                         irq_software_o,
      output logic                         irq_timer_o,
      output logic                         irq_external_o,
@@ -138,9 +137,6 @@ module mm_ram
 
     // IRQ related internal signals
 
-    //random or monitor interrupt request
-    logic        irq_rnd;
-    logic [4:0]  irq_rnd_id;
     // struct 18bit irq_lines
     typedef struct packed {
       logic        irq_software;
@@ -150,7 +146,7 @@ module mm_ram
                                // one interrupt is reserved for NMI (not visible through mip/mie)
     } Interrupts_t;
 
-    Interrupts_t irq_lines;
+    Interrupts_t irq_rnd_lines;
     
     // uhh, align?
     always_comb data_addr_aligned = {data_addr_i[31:2], 2'b0};
@@ -585,54 +581,10 @@ module mm_ram
 // irq_o OR
 // irq_id_int -> irq_lines_demux
 
-assign irq_software_o = irq_lines.irq_software;
-assign irq_timer_o    = irq_lines.irq_timer;
-assign irq_external_o = irq_lines.irq_external;
-assign irq_fast_o     = irq_lines.irq_fast; 
-
-always_comb
-begin
-   
-   irq_id_o <= 5'b0;
-
-  // choose irq to route out
-  if (irq_timer_q) begin
-    irq_id_o <= 5'b00111;
-  end else if (irq_rnd) begin
-    irq_id_o <= irq_rnd_id;
-  end
-end
-
-always_comb
-begin
-  // decoding irq_id to one-hot
-  case (irq_id_o)
-  
-    5'd00: irq_lines              = 18'b0 ; // cleared
-    //---------------------------------------------------                        
-    5'd03: irq_lines.irq_software = 1'b1  ; // software
-    5'd07: irq_lines.irq_timer    = 1'b1  ; // timer
-    5'd11: irq_lines.irq_external = 1'b1  ; // external
-    5'd16: irq_lines.irq_fast[ 0] = 1'b1  ; // fast 0
-    5'd17: irq_lines.irq_fast[ 1] = 1'b1  ; // fast 1
-    5'd18: irq_lines.irq_fast[ 2] = 1'b1  ; // fast 2
-    5'd19: irq_lines.irq_fast[ 3] = 1'b1  ; // fast 3
-    5'd20: irq_lines.irq_fast[ 4] = 1'b1  ; // fast 4
-    5'd21: irq_lines.irq_fast[ 5] = 1'b1  ; // fast 5
-    5'd22: irq_lines.irq_fast[ 6] = 1'b1  ; // fast 6
-    5'd23: irq_lines.irq_fast[ 7] = 1'b1  ; // fast 7
-    5'd24: irq_lines.irq_fast[ 8] = 1'b1  ; // fast 8
-    5'd25: irq_lines.irq_fast[ 9] = 1'b1  ; // fast 9
-    5'd26: irq_lines.irq_fast[10] = 1'b1  ; // fast 10
-    5'd27: irq_lines.irq_fast[11] = 1'b1  ; // fast 11
-    5'd28: irq_lines.irq_fast[12] = 1'b1  ; // fast 12
-    5'd29: irq_lines.irq_fast[13] = 1'b1  ; // fast 13
-    5'd30: irq_lines.irq_fast[14] = 1'b1  ; // fast 14
-    // TODO {1'b1,5'd31}: irq_lines_q = 18'h40000 ; // non-masked
-    default:;
-  endcase
-end 
-
+assign irq_software_o = irq_rnd_lines.irq_software;
+assign irq_timer_o    = irq_rnd_lines.irq_timer | irq_timer_q;
+assign irq_external_o = irq_rnd_lines.irq_external;
+assign irq_fast_o     = irq_rnd_lines.irq_fast; 
 
 
 
@@ -719,8 +671,7 @@ end
       .irq_id_i          ( '0                                           ),
       .irq_ack_i         ( irq_ack_i                                    ),
       .irq_ack_o         (                                              ),
-      .irq_o             ( irq_rnd                                      ),
-      .irq_id_o          ( irq_rnd_id                                   ),
+      .irq_rnd_lines_o   ( irq_rnd_lines                                ),
       .irq_mode_i        ( rnd_stall_regs[10]                           ),
       .irq_min_cycles_i  ( rnd_stall_regs[11]                           ),
       .irq_max_cycles_i  ( rnd_stall_regs[12]                           ),
@@ -730,7 +681,7 @@ end
       .irq_id_we_o       (                                              ),
       .irq_pc_id_i       ( pc_core_id_i                                 ),
       .irq_pc_trig_i     ( rnd_stall_regs[13]                           ),
-      .irq_sd_id_i       ( rnd_stall_regs[14]                           )
+      .irq_sd_lines_i    ( rnd_stall_regs[14]                           )
     );
 
 `endif

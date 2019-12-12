@@ -34,8 +34,7 @@ module riscv_random_interrupt_generator
     input logic           irq_i,
     input logic   [4:0]   irq_id_i,
     input logic           irq_ack_i,
-    output logic          irq_o,
-    output logic  [4:0]   irq_id_o,
+    output logic [17:0]   irq_rnd_lines_o,
     output logic          irq_ack_o,
     input logic  [31:0]   irq_mode_i,
     input logic  [31:0]   irq_min_cycles_i,
@@ -47,7 +46,7 @@ module riscv_random_interrupt_generator
     input logic  [31:0]   irq_pc_id_i,
     input logic  [31:0]   irq_pc_trig_i,
     // software defined mode i/o
-    input logic  [31:0]   irq_sd_id_i 
+    input logic  [31:0]   irq_sd_lines_i 
 );
 
 `ifndef VERILATOR
@@ -61,18 +60,30 @@ endclass : rand_irq_id
 
 logic [31:0] irq_mode_q;
 logic        irq_random;
-logic  [4:0] irq_id_random;
+logic [4:0]  irq_id_random;
 logic        irq_ack_random;
 logic        irq_monitor;
-logic  [4:0] irq_id_monitor;
+logic [4:0]  irq_id_monitor;
 logic        irq_ack_monitor;
 
 logic        irq_sd;
-logic  [4:0] irq_sd_id;
+logic [31:0] irq_sd_lines;
 logic        ack_flag;
 
+// struct 18bit irq_lines
+typedef struct packed {
+  logic        irq_software;
+  logic        irq_timer;
+  logic        irq_external;
+  logic [14:0] irq_fast; // 15 fast interrupts,
+                           // one interrupt is reserved for NMI (not visible through mip/mie)
+} Interrupts_t;
 
-assign irq_ack_o = irq_ack_i;
+Interrupts_t irq_rnd_lines;
+
+
+assign irq_ack_o       = irq_ack_i;
+assign irq_rnd_lines_o = irq_rnd_lines; 
 
 always_ff @(posedge clk_i or negedge rst_ni)
 begin
@@ -88,26 +99,30 @@ begin
     unique case (irq_mode_q)
         RANDOM:
         begin
-          irq_o     = irq_random;
-          irq_id_o  = irq_id_random;
+          // TODO generate individuals irq lines
+          //irq_id_o  = irq_id_random;
+          irq_rnd_lines = '0;
         end
 
         PC_TRIG:
         begin
-          irq_o     = irq_monitor;
-          irq_id_o  = irq_id_monitor;
+          // TODO generate individual irq lines
+          // irq_id_o  = irq_id_monitor;
+          irq_rnd_lines = '0;
         end
 
         SOFTWARE_DEFINED:
         begin
-          irq_o    = irq_sd;
-          irq_id_o = irq_sd_id; 
+          // generate individual irq lines
+          irq_rnd_lines.irq_software = irq_sd_lines[3];
+          irq_rnd_lines.irq_timer    = irq_sd_lines[7];
+          irq_rnd_lines.irq_external = irq_sd_lines[11];
+          irq_rnd_lines.irq_fast     = irq_sd_lines[30:16];
         end
 
         default:
         begin
-         irq_o     = irq_i;
-         irq_id_o  = irq_id_i;
+          irq_rnd_lines = '0;
         end
     endcase
 end
@@ -160,17 +175,17 @@ end
 // Software Defined Interrupts process
 initial 
 begin
+  irq_sd_lines = 32'b0;
   while(1) begin
-    irq_sd    = 1'b0;
-    irq_sd_id = 5'b0;
-    ack_flag  = 1'b0;
+    irq_sd       = 1'b0;  
+    ack_flag     = 1'b0;
 
     wait (irq_mode_q == SOFTWARE_DEFINED);
 
     // blocking wait for a valid sd_id
-    while(irq_sd_id_i != 0 & ack_flag == 0) begin
+    while(irq_sd_lines_i != 0 & ack_flag == 0) begin
       @(posedge clk_i);
-        irq_sd_id = irq_sd_id_i; 
+        irq_sd_lines = irq_sd_lines_i; 
         irq_sd    = 1'b1;
         if (irq_ack_i) begin
           // TODO check if the received irq is as expected
@@ -179,16 +194,14 @@ begin
     end
     
     // keep request lines low: wait for the core to clear the id
-    while(irq_sd_id_i != 0) begin
-      @(posedge clk_i);
-        irq_sd    = 1'b0;
-        irq_sd_id = 5'b0;
-    end
+    // while(irq_sd_lines_i != 0) begin
+    //   @(posedge clk_i);
+    //     irq_sd       = 1'b0;
+    //     irq_sd_lines = 32'b0;
+    // end
 
     // is this block useful?
     @(posedge clk_i);
-    irq_sd    = 1'b0;
-    irq_sd_id = 5'b0;
 
   end
 end

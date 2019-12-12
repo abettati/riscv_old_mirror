@@ -318,6 +318,7 @@ module riscv_cs_registers
 
   // abet mip CSR is purely combintational
   // must be able to re-enable the clock upon WFI
+  //assign mip.irq_nmi      = irq_req_q.irq_nmi;
   assign mip.irq_software = irq_req_q.irq_software & mie_q.irq_software;
   assign mip.irq_timer    = irq_req_q.irq_timer    & mie_q.irq_timer;
   assign mip.irq_external = irq_req_q.irq_external & mie_q.irq_external;

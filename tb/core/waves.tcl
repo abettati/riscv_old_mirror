@@ -94,7 +94,6 @@ if {$rvcores ne ""} {
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/rnd_stall_regs[14]
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_ack_i
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_id_i
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_id_o
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_software_o
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_timer_o   
   add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_external_o
@@ -110,9 +109,9 @@ if {$rvcores ne ""} {
   add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_mode_i
   add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_min_cycles_i
   add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_max_cycles_i
-  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_sd_id_i
-  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_id_o
-  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_o
+  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_sd_lines_i
+  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_rnd_lines_o
+
 
                                                             
 }
