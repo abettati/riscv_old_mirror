@@ -36,11 +36,12 @@
 .global fast12_irq_handler
 .global fast13_irq_handler
 .global fast14_irq_handler
+.global nmi_irq_handler
 
 
 vector_table: 
 	j sw_irq_handler               /*  0                          */
-	j __no_irq_handler             /*  1                          */
+	j verification_irq_handler     /*  1                          */
 	j __no_irq_handler             /*  2                          */
 	j software_irq_handler         /*  3 EXC_CAUSE_IRQ_SOFTWARE_M */
 	j __no_irq_handler             /*  4                          */
@@ -70,7 +71,7 @@ vector_table:
 	j fast12_irq_handler           /* 28 EXC_CAUSE_IRQ_FAST_12    */
 	j fast13_irq_handler           /* 29 EXC_CAUSE_IRQ_FAST_13    */
 	j fast14_irq_handler           /* 30 EXC_CAUSE_IRQ_FAST_14    */
-	j verification_irq_handler     /* 31 EXC_CAUSE_IRQ_NM         */
+	j nmi_irq_handler              /* 31 EXC_CAUSE_IRQ_NM         */
 
 /* this is fixed to 0x8000, used for PULP_SECURE=0. We redirect this entry to the
 new vector table (which is at mtvec) */

@@ -34,7 +34,7 @@ module riscv_random_interrupt_generator
     input logic           irq_i,
     input logic   [4:0]   irq_id_i,
     input logic           irq_ack_i,
-    output logic [17:0]   irq_rnd_lines_o,
+    output logic [18:0]   irq_rnd_lines_o,
     output logic          irq_ack_o,
     input logic  [31:0]   irq_mode_i,
     input logic  [31:0]   irq_min_cycles_i,
@@ -75,8 +75,8 @@ typedef struct packed {
   logic        irq_software;
   logic        irq_timer;
   logic        irq_external;
-  logic [14:0] irq_fast; // 15 fast interrupts,
-                           // one interrupt is reserved for NMI (not visible through mip/mie)
+  logic [14:0] irq_fast;
+  logic        irq_nmi;
 } Interrupts_t;
 
 Interrupts_t irq_rnd_lines;
@@ -114,10 +114,11 @@ begin
         SOFTWARE_DEFINED:
         begin
           // generate individual irq lines
-          irq_rnd_lines.irq_software = irq_sd_lines[3];
-          irq_rnd_lines.irq_timer    = irq_sd_lines[7];
-          irq_rnd_lines.irq_external = irq_sd_lines[11];
-          irq_rnd_lines.irq_fast     = irq_sd_lines[30:16];
+          irq_rnd_lines.irq_software = irq_sd_lines [3];
+          irq_rnd_lines.irq_timer    = irq_sd_lines [7];
+          irq_rnd_lines.irq_external = irq_sd_lines [11];
+          irq_rnd_lines.irq_fast     = irq_sd_lines [30:16];
+          irq_rnd_lines.irq_nmi      = irq_sd_lines [31];
         end
 
         default:

@@ -43,6 +43,7 @@ module mm_ram
      output logic                         irq_timer_o,
      output logic                         irq_external_o,
      output logic [14:0]                  irq_fast_o,
+     output logic                         irq_nmi_o,
 
      input logic [31:0]                   pc_core_id_i,
 
@@ -142,8 +143,8 @@ module mm_ram
       logic        irq_software;
       logic        irq_timer;
       logic        irq_external;
-      logic [14:0] irq_fast; // 15 fast interrupts,
-                               // one interrupt is reserved for NMI (not visible through mip/mie)
+      logic [14:0] irq_fast; 
+      logic        irq_nmi;
     } Interrupts_t;
 
     Interrupts_t irq_rnd_lines;
@@ -585,7 +586,7 @@ assign irq_software_o = irq_rnd_lines.irq_software;
 assign irq_timer_o    = irq_rnd_lines.irq_timer | irq_timer_q;
 assign irq_external_o = irq_rnd_lines.irq_external;
 assign irq_fast_o     = irq_rnd_lines.irq_fast; 
-
+assign irq_nmi_o      = irq_rnd_lines.irq_nmi;
 
 
 `ifndef VERILATOR

@@ -77,6 +77,7 @@ module riscv_cs_registers
   input  logic            irq_timer_i,
   input  logic            irq_external_i,
   input  logic [14:0]     irq_fast_i,
+  input  logic            irq_nmi_i,
 
   output logic            m_irq_enable_o,
   output logic            u_irq_enable_o,
@@ -214,14 +215,6 @@ module riscv_cs_registers
     logic mprv;
   } Status_t;
 
-  //abet struct for mip/mie CSRs
-  typedef struct packed {
-    logic        irq_software;
-    logic        irq_timer;
-    logic        irq_external;
-    logic [14:0] irq_fast; // 15 fast interrupts,
-                           // one interrupt is reserved for NMI (not visible through mip/mie)
-  } Interrupts_t;
 
   typedef struct packed{
       logic [31:28] xdebugver;
@@ -282,7 +275,7 @@ module riscv_cs_registers
 
   // abet
   Interrupts_t mip;
-  Interrupts_t mie_q, mie_n;
+  Masked_Interrupts_t mie_q, mie_n;
 
 
   logic is_irq;
@@ -315,10 +308,11 @@ module riscv_cs_registers
   assign irq_req_n.irq_timer    = irq_timer_i; 
   assign irq_req_n.irq_external = irq_external_i;
   assign irq_req_n.irq_fast     = irq_fast_i;
+  assign irq_req_n.irq_nmi      = irq_nmi_i;
 
   // abet mip CSR is purely combintational
   // must be able to re-enable the clock upon WFI
-  //assign mip.irq_nmi      = irq_req_q.irq_nmi;
+  assign mip.irq_nmi      = irq_req_q.irq_nmi;
   assign mip.irq_software = irq_req_q.irq_software & mie_q.irq_software;
   assign mip.irq_timer    = irq_req_q.irq_timer    & mie_q.irq_timer;
   assign mip.irq_external = irq_req_q.irq_external & mie_q.irq_external;
@@ -381,13 +375,14 @@ if(PULP_SECURE==1) begin
       CSR_MEPC: csr_rdata_int = mepc_q;
       // mcause: exception cause
       CSR_MCAUSE: csr_rdata_int = {mcause_q[5], 26'b0, mcause_q[4:0]};
-      // abet mip: interrupt pending - put zero just for testing
+      // abet mip: interrupt pending
       CSR_MIP: begin
         csr_rdata_int                                     = '0;
-        csr_rdata_int[CSR_MSIX_BIT]                       = '0;
-        csr_rdata_int[CSR_MTIX_BIT]                       = '0;
-        csr_rdata_int[CSR_MEIX_BIT]                       = '0;
-        csr_rdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW] = 15'b0;
+        csr_rdata_int[CSR_MSIX_BIT]                       = mip.irq_software;
+        csr_rdata_int[CSR_MTIX_BIT]                       = mip.irq_timer;
+        csr_rdata_int[CSR_MEIX_BIT]                       = mip.irq_external;
+        csr_rdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW] = mip.irq_fast;
+        csr_rdata_int[CSR_NMIX_BIT]                       = mip.irq_nmi;
       end
       // mhartid: unique hardware thread id
       CSR_MHARTID: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
@@ -482,13 +477,14 @@ end else begin //PULP_SECURE == 0
       CSR_MEPC: csr_rdata_int = mepc_q;
       // mcause: exception cause
       CSR_MCAUSE: csr_rdata_int = {mcause_q[5], 26'b0, mcause_q[4:0]};
-      // TODO abet mip: interrupt pending - put zero just for testing
+      // abet mip: interrupt pending
       CSR_MIP: begin
         csr_rdata_int                                     = '0;
-        csr_rdata_int[CSR_MSIX_BIT]                       = '0;
-        csr_rdata_int[CSR_MTIX_BIT]                       = '0;
-        csr_rdata_int[CSR_MEIX_BIT]                       = '0;
-        csr_rdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW] = 15'b0;
+        csr_rdata_int[CSR_MSIX_BIT]                       = mip.irq_software;
+        csr_rdata_int[CSR_MTIX_BIT]                       = mip.irq_timer;
+        csr_rdata_int[CSR_MEIX_BIT]                       = mip.irq_external;
+        csr_rdata_int[CSR_MFIX_BIT_HIGH:CSR_MFIX_BIT_LOW] = mip.irq_fast;
+        csr_rdata_int[CSR_NMIX_BIT]                       = mip.irq_nmi;
       end
       // mhartid: unique hardware thread id
       CSR_MHARTID: csr_rdata_int = {21'b0, cluster_id_i[5:0], 1'b0, core_id_i[3:0]};
@@ -985,13 +981,12 @@ end //PULP_SECURE
   always_comb
   begin
 
-    // TODO support nm interrupt 
-    // if (irq_nm_i && !nmi_mode_q) begin
-    //   exc_cause_o = EXC_CAUSE_IRQ_NM;
-    //   nmi_mode_d  = 1'b1; // enter NMI mode
-    // end else if (csr_mfip_i != 15'b0) begin
+    // TODO abet insert nmi_mode_q? 
+    if (mip.irq_nmi) begin
+      // EXC_CAUSE_IRQ_NM
+      irq_id_o    = {5'd31};
 
-    if(mip.irq_fast != '0)
+    end else if(mip.irq_fast != '0)
     begin
       if      (mip.irq_fast[14]) irq_id_o = 5'd30;
       else if (mip.irq_fast[13]) irq_id_o = 5'd29;
@@ -1046,7 +1041,7 @@ end //PULP_SECURE
   assign debug_ebreaku_o      = dcsr_q.ebreaku;
 
   // Output interrupt pending to ID/Controller
-  assign irq_pending_o = mip.irq_software | mip.irq_timer | mip.irq_external | (|mip.irq_fast);
+  assign irq_pending_o = mip.irq_software | mip.irq_timer | mip.irq_external | (|mip.irq_fast) | mip.irq_nmi;
 
   generate
   if (PULP_SECURE == 1)

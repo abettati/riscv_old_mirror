@@ -115,6 +115,7 @@ module riscv_core
   input  logic        irq_timer_i,          // exploded irq lines
   input  logic        irq_external_i,       // exploded irq lines 
   input  logic [14:0] irq_fast_i,           // exploded irq lines
+  input  logic        irq_nmi_i,
 
   output logic        sec_lvl_o,
 
@@ -297,6 +298,7 @@ module riscv_core
   logic        irq_timer;
   logic        irq_external;
   logic [14:0] irq_fast;
+  logic        irq_nmi;
   logic        csr_msip; 
   logic        csr_mtip; 
   logic        csr_meip;  
@@ -1010,6 +1012,7 @@ module riscv_core
     .irq_timer_i             ( irq_timer_i        ),
     .irq_external_i          ( irq_external_i     ),
     .irq_fast_i              ( irq_fast_i         ),
+    .irq_nmi_i               ( irq_nmi_i          ),
     .irq_pending_o           ( irq_pending        ), // IRQ to ID/Controller
     .irq_id_o                ( irq_id             ),
     // debug

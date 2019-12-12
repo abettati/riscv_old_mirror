@@ -273,6 +273,7 @@ parameter int unsigned CSR_MTIX_BIT      = 7;
 parameter int unsigned CSR_MEIX_BIT      = 11;
 parameter int unsigned CSR_MFIX_BIT_LOW  = 16;
 parameter int unsigned CSR_MFIX_BIT_HIGH = 30;
+parameter int unsigned CSR_NMIX_BIT      = 31; // nmi bit needed to read mip
 
 // SPR for debugger, not accessible by CPU
 parameter SP_DVR0       = 16'h3000;
@@ -414,6 +415,23 @@ parameter EXC_CAUSE_LOAD_FAULT   = 6'h05;
 parameter EXC_CAUSE_STORE_FAULT  = 6'h07;
 parameter EXC_CAUSE_ECALL_UMODE  = 6'h08;
 parameter EXC_CAUSE_ECALL_MMODE  = 6'h0B;
+
+// Interrupt lines struct
+typedef struct packed {
+  logic        irq_software;
+  logic        irq_timer;
+  logic        irq_external;
+  logic [14:0] irq_fast;
+  logic        irq_nmi;
+} Interrupts_t;
+
+// Interrupt lines struct
+typedef struct packed {
+  logic        irq_software;
+  logic        irq_timer;
+  logic        irq_external;
+  logic [14:0] irq_fast; // 15 fast interrupts,
+} Masked_Interrupts_t;
 
 // Trap mux selector
 parameter TRAP_MACHINE      = 1'b0;

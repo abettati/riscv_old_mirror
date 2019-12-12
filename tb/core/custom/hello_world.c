@@ -13,7 +13,7 @@ volatile uint32_t irq_processed = 1;
 volatile uint32_t irq_id = 0;
 volatile uint32_t irq_pending = 0;
 
-uint32_t IRQ_CODE [18] = { 
+uint32_t IRQ_CODE [19] = { 
   3,   // 0  - IRQ_SOFTWARE_CODE 
   7,   // 1  - IRQ_TIMER_CODE  
   11,  // 2  - IRQ_EXTERNAL_CODE  
@@ -31,8 +31,8 @@ uint32_t IRQ_CODE [18] = {
   27,  // 14 - IRQ_FAST11_CODE 
   28,  // 15 - IRQ_FAST12_CODE 
   29,  // 16 - IRQ_FAST13_CODE 
-  30   // 17 - IRQ_FAST14_CODE 
-  //0    // 18 - TODO IRQ_NM_CODE
+  30,  // 17 - IRQ_FAST14_CODE 
+  31   // 18 - TODO IRQ_NM_CODE
 };
 
 void print_chr(char ch)
@@ -221,6 +221,13 @@ void fast14_irq_handler(void)
     print_str("FAST14 IRQ SERVED...\n");
 }
 
+void nmi_irq_handler(void)
+{
+    irq_id = 31;
+    irq_pending &= (~(1 << irq_id));
+    writew(irq_pending,0x16000038);
+    print_str("NMI IRQ SERVED...\n");
+}
 
 uint32_t random_num(uint32_t upper_bound, uint32_t lower_bound) 
 { 
@@ -256,10 +263,10 @@ int main(int argc, char *argv[])
 
     // software defined irq gen mode
     writew(4,0x16000028);
-/*
+
     // Sequential test (no masking)
     uint32_t i = 0;
-    while(i < 18){
+    while(i < 19){
       irq_id = 0;
       // add new pending irq
       irq_pending |= (1 << IRQ_CODE[i]);
@@ -267,13 +274,13 @@ int main(int argc, char *argv[])
       
       i=i+1;
     };
-  */  
+  
     printf("TEST 2\n");
     // Multiple interrupts at a time
-    uint32_t irq_num = 18;
-    irq_pending |= 0xFFFFFFFF;
-    writew(irq_pending,0x16000038);
-    // we expect 18 irqs to be served
+    //uint32_t irq_num = 18;
+    //irq_pending |= 0xFFFFFFFF;
+    //writew(irq_pending,0x16000038);
+
 
 
     // Random test with masking

@@ -52,7 +52,8 @@ module riscv_wrapper
     logic                         irq_software;
     logic                         irq_timer;    
     logic                         irq_external;
-    logic [14:0]                  irq_fast; 
+    logic [14:0]                  irq_fast;
+    logic                         irq_nmi; 
 
 
     // interrupts (only timer for now)
@@ -107,6 +108,7 @@ module riscv_wrapper
          .irq_timer_i            ( irq_timer             ),  // exploded irq lines 
          .irq_external_i         ( irq_external          ),  // exploded irq lines
          .irq_fast_i             ( irq_fast              ),  // exploded irq lines
+         .irq_nmi_i              ( irq_nmi               ),
 
          .irq_ack_o              ( irq_ack               ),
          .irq_id_o               ( irq_id_out            ),
@@ -153,7 +155,8 @@ module riscv_wrapper
          .irq_timer_o    ( irq_timer                      ),
          .irq_external_o ( irq_external                   ),
          .irq_fast_o     ( irq_fast                       ),
-
+         .irq_nmi_o      ( irq_nmi                        ),
+         
          .pc_core_id_i   ( riscv_core_i.pc_id             ),
 
          .tests_passed_o ( tests_passed_o                 ),
