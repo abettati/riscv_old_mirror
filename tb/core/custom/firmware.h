@@ -36,7 +36,6 @@ void stats(void);
 //R/W
 static inline  void writew(uint32_t val, volatile uint32_t *addr);	
 
-
 void software_irq_handler(void) __attribute__ ((interrupt ("machine")));
 void timer_irq_handler(void)    __attribute__ ((interrupt ("machine")));
 void external_irq_handler(void) __attribute__ ((interrupt ("machine")));
@@ -56,5 +55,7 @@ void fast11_irq_handler(void) __attribute__ ((interrupt ("machine")));
 void fast12_irq_handler(void) __attribute__ ((interrupt ("machine")));
 void fast13_irq_handler(void) __attribute__ ((interrupt ("machine")));
 void fast14_irq_handler(void) __attribute__ ((interrupt ("machine")));
+void fast14_irq_handler(void) __attribute__ ((interrupt ("machine")));
+void nmi_irq_handler(void)    __attribute__ ((interrupt ("machine")));
 
 #endif

@@ -6,34 +6,90 @@
 #include "firmware.h"
 #include "irq_test_lib.h"
 
+#define ERR_CODE_WRONG_ORDER 2
+#define ERR_CODE_WRONG_NUM   3
+
 #define OUTPORT 0x10000000
-#define IRQ_NUM 18
+#define RND_STALL_IRQ_REG 0x16000038
 
-volatile uint32_t irq_processed = 1;
-volatile uint32_t irq_id = 0;
-volatile uint32_t irq_pending = 0;
+#define IRQ_NUM 19
+#define SOFTWARE_IRQ_ID  3
+#define TIMER_IRQ_ID     7
+#define EXTERNAL_IRQ_ID  11
+#define FAST0_IRQ_ID     16
+#define FAST1_IRQ_ID     17
+#define FAST2_IRQ_ID     18
+#define FAST3_IRQ_ID     19
+#define FAST4_IRQ_ID     20
+#define FAST5_IRQ_ID     21
+#define FAST6_IRQ_ID     22
+#define FAST7_IRQ_ID     23
+#define FAST8_IRQ_ID     24
+#define FAST9_IRQ_ID     25
+#define FAST10_IRQ_ID    26
+#define FAST11_IRQ_ID    27
+#define FAST12_IRQ_ID    28
+#define FAST13_IRQ_ID    29
+#define FAST14_IRQ_ID    30
+#define NMI_IRQ_ID       31
 
-uint32_t IRQ_CODE [19] = { 
-  3,   // 0  - IRQ_SOFTWARE_CODE 
-  7,   // 1  - IRQ_TIMER_CODE  
-  11,  // 2  - IRQ_EXTERNAL_CODE  
-  16,  // 3  - IRQ_FAST0_CODE 
-  17,  // 4  - IRQ_FAST1_CODE 
-  18,  // 5  - IRQ_FAST2_CODE 
-  19,  // 6  - IRQ_FAST3_CODE 
-  20,  // 7  - IRQ_FAST4_CODE 
-  21,  // 8  - IRQ_FAST5_CODE 
-  22,  // 9  - IRQ_FAST6_CODE 
-  23,  // 10 - IRQ_FAST7_CODE 
-  24,  // 11 - IRQ_FAST8_CODE 
-  25,  // 12 - IRQ_FAST9_CODE 
-  26,  // 13 - IRQ_FAST10_CODE 
-  27,  // 14 - IRQ_FAST11_CODE 
-  28,  // 15 - IRQ_FAST12_CODE 
-  29,  // 16 - IRQ_FAST13_CODE 
-  30,  // 17 - IRQ_FAST14_CODE 
-  31   // 18 - TODO IRQ_NM_CODE
+#define RND_IRQ_NUM      20
+#define RND_IE_NUM       5
+
+volatile uint32_t irq_processed     = 1;
+volatile uint32_t irq_id            = 0;
+volatile uint32_t irq_pending       = 0;
+volatile uint32_t prev_irq_pending  = 0;
+volatile uint32_t first_irq_pending = 0;
+volatile uint32_t rnd_ie_mask       = 0;
+
+
+uint32_t IRQ_ID [IRQ_NUM] = 
+{ 
+  SOFTWARE_IRQ_ID ,  // 0
+  TIMER_IRQ_ID    ,  // 1
+  EXTERNAL_IRQ_ID ,  // 2
+  FAST0_IRQ_ID    ,  // 3
+  FAST1_IRQ_ID    ,  // 4
+  FAST2_IRQ_ID    ,  // 5
+  FAST3_IRQ_ID    ,  // 6
+  FAST4_IRQ_ID    ,  // 7
+  FAST5_IRQ_ID    ,  // 8
+  FAST6_IRQ_ID    ,  // 9
+  FAST7_IRQ_ID    ,  // 10
+  FAST8_IRQ_ID    ,  // 11
+  FAST9_IRQ_ID    ,  // 12
+  FAST10_IRQ_ID   ,  // 13 
+  FAST11_IRQ_ID   ,  // 14 
+  FAST12_IRQ_ID   ,  // 15
+  FAST13_IRQ_ID   ,  // 16 
+  FAST14_IRQ_ID   ,  // 17 
+  NMI_IRQ_ID         // 18
 };
+
+uint32_t IRQ_ID_PRIORITY [IRQ_NUM] = 
+{ 
+  NMI_IRQ_ID      ,  // 0
+  FAST14_IRQ_ID   ,  // 1
+  FAST13_IRQ_ID   ,  // 2
+  FAST12_IRQ_ID   ,  // 3
+  FAST11_IRQ_ID   ,  // 4
+  FAST10_IRQ_ID   ,  // 5
+  FAST9_IRQ_ID    ,  // 6
+  FAST8_IRQ_ID    ,  // 7
+  FAST7_IRQ_ID    ,  // 8
+  FAST6_IRQ_ID    ,  // 9
+  FAST5_IRQ_ID    ,  // 10
+  FAST4_IRQ_ID    ,  // 11 
+  FAST3_IRQ_ID    ,  // 12 
+  FAST2_IRQ_ID    ,  // 13
+  FAST1_IRQ_ID    ,  // 14 
+  FAST0_IRQ_ID    ,  // 15 
+  EXTERNAL_IRQ_ID ,  // 16
+  SOFTWARE_IRQ_ID ,  // 17
+  TIMER_IRQ_ID       // 18
+};
+
 
 void print_chr(char ch)
 {
@@ -73,160 +129,111 @@ void writew(uint32_t val, volatile uint32_t *addr)
     asm volatile("sw %0, 0(%1)" : : "r"(val), "r"(addr));
 }
 
+#define FAST_IRQ_GENERIC(id)                                                 \
+do {                                                                         \
+    irq_id = id;                                                             \
+    irq_pending &= (~(1 << irq_id));                                         \
+    writew(irq_pending, RND_STALL_IRQ_REG);                                  \
+    uint32_t mmstatus = 0;                                                   \
+    asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       \
+    mmstatus &= (~(1 << 7));                                                 \
+    asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus)); \
+    printf("IRQ SERVED: irq_ id = %d \n", irq_id);                           \
+} while(0)
 
 void software_irq_handler(void)
 {
-    irq_id = 3;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    printf("SOFTWARE IRQ SERVED: irq_ id = %d \n", irq_id);
-
+    FAST_IRQ_GENERIC(SOFTWARE_IRQ_ID);
 }
 
-void timer_irq_handler(void)
+void timer_irq_handler(void) //TODO: do this here
 {
-    irq_id = 7;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("TIMER IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(TIMER_IRQ_ID);
 }
 
 void external_irq_handler(void)
 {
-    irq_id = 11;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("EXTERNAL IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(EXTERNAL_IRQ_ID);
 }
-
-
 
 void fast0_irq_handler(void)
 {
-    irq_id = 16;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST0 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST0_IRQ_ID);
 }
 
 void fast1_irq_handler(void)
 {
-    irq_id = 17;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST1 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST1_IRQ_ID);
 }
 
 void fast2_irq_handler(void)
 {
-    irq_id = 18;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST2 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST2_IRQ_ID);
 }
 
 void fast3_irq_handler(void)
 {
-    irq_id = 19;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST3 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST3_IRQ_ID);
 }
 
 void fast4_irq_handler(void)
 {
-    irq_id = 20;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST4 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST4_IRQ_ID);
 }
 
 void fast5_irq_handler(void)
 {
-    irq_id = 21;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST5 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST5_IRQ_ID);
 }
 
 void fast6_irq_handler(void)
 {
-    irq_id = 22;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST6 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST6_IRQ_ID);
 }
 
 void fast7_irq_handler(void)
 {
-    irq_id = 23;    
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST7 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST7_IRQ_ID);
 }
 
 void fast8_irq_handler(void)
 {
-    irq_id = 24;    
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST8 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST8_IRQ_ID);
 }
 
 void fast9_irq_handler(void)
 {
-    irq_id = 25;    
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST9 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST9_IRQ_ID);
 }
 
 void fast10_irq_handler(void)
 {
-    irq_id = 26;    
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST10 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST10_IRQ_ID);
 }
 
 void fast11_irq_handler(void)
 {
-    irq_id = 27;    
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST11 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST11_IRQ_ID);
 }
 
 void fast12_irq_handler(void)
 {
-    irq_id = 28;    
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST12 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST12_IRQ_ID);
 }
 
 void fast13_irq_handler(void)
 {
-    irq_id = 29;    
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST13 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST13_IRQ_ID);
 }
 
 void fast14_irq_handler(void)
 {
-    irq_id = 30;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("FAST14 IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(FAST14_IRQ_ID);
 }
 
 void nmi_irq_handler(void)
 {
-    irq_id = 31;
-    irq_pending &= (~(1 << irq_id));
-    writew(irq_pending,0x16000038);
-    print_str("NMI IRQ SERVED...\n");
+    FAST_IRQ_GENERIC(NMI_IRQ_ID);
 }
 
 uint32_t random_num(uint32_t upper_bound, uint32_t lower_bound) 
@@ -237,8 +244,6 @@ uint32_t random_num(uint32_t upper_bound, uint32_t lower_bound)
 
 int main(int argc, char *argv[])
 {
-    /* inline assembly */
-    //asm volatile("ecall");
 
     // Use current time as  
     // seed for random generator 
@@ -250,7 +255,7 @@ int main(int argc, char *argv[])
     volatile uint32_t* baseAddr;
 
     // Enable mstatus.mie
-    asm volatile("csrwi 0x300, 0x8");
+    asm volatile("csrwi mstatus, 0x8");
 
     // Enable all mie (need to store) 
     regVal = 0xFFFFFFFF;
@@ -266,88 +271,154 @@ int main(int argc, char *argv[])
 
     // Sequential test (no masking)
     uint32_t i = 0;
-    while(i < 19){
-      irq_id = 0;
-      // add new pending irq
-      irq_pending |= (1 << IRQ_CODE[i]);
-      writew(irq_pending,0x16000038);
+    while(i < IRQ_NUM)
+    {
+        irq_id = 0;
       
-      i=i+1;
+        // add new pending irq
+        irq_pending |= (1 << IRQ_ID[i]);
+        prev_irq_pending = irq_pending;
+
+        writew(irq_pending, RND_STALL_IRQ_REG);
+      
+        // wait for the irq to be served
+        while(prev_irq_pending == irq_pending);
+
+        // irq_id sampling and testing
+        if(IRQ_ID[i] != irq_id)
+        {
+            printf("TEST1: IRQ served in wrong order %d %d\n", IRQ_ID[i], irq_id);
+            return -1;
+        }
+        asm volatile("csrwi mstatus, 0x8");
+         ++i;      
     };
-  
-    printf("TEST 2\n");
+    // TODO: needs to make sure preivous test finished
+
+    printf("TEST 2: TRIGGER ALL IRQS AT ONCE\n");
     // Multiple interrupts at a time
-    //uint32_t irq_num = 18;
-    //irq_pending |= 0xFFFFFFFF;
-    //writew(irq_pending,0x16000038);
+    uint32_t irq_num = 18;
+    irq_pending |= 0xFFFFFFFF;
+    prev_irq_pending = irq_pending;
+    writew(irq_pending, RND_STALL_IRQ_REG);
+
+    // wait first irq to be served - do this outside the loop to avoid race
+    while(prev_irq_pending==irq_pending); 
+
+    for (int i = 0; i < IRQ_NUM-1; i++) 
+    {
+        // sample irq_pending
+        prev_irq_pending=irq_pending;
+        
+        // irq_id sampling and testing
+        if(IRQ_ID_PRIORITY[i] != irq_id)
+        {
+            printf("TEST2: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
+            return ERR_CODE_WRONG_ORDER;
+        }
+
+        // enable mstatus.mie
+        asm volatile("csrwi mstatus, 0x8");
+        // wait for nex irq to be served
+        while(prev_irq_pending==irq_pending);
+    }
 
 
-
-    // Random test with masking
+    printf("STARTING TEST 3: RANDOMIZE \n"); //TODO: improve messages
     
-    //uint32_t random_ie_word;
-    //uint32_t random_irq_code;
-    //uint32_t random_ie_num;
+    ///////////////////////////////
+    // Random test with masking  //
+    ///////////////////////////////
+    
+    // Test 3 is a random test where two 32 bit-wide 
+    // words are generated:
+    // - a mask (rnd_ie_mask)
+    // - and a value for the irq_pending
     //
-    //i = 0;
-    ////TODO finish this
-    //while(i < 10)
-    //{
     //
-    //  irq_processed = 1;
-    //  irq_id = 0;
-    //  random_ie_word = 0;
-    //  random_irq_code = 0;
-    //  
-    //  // build ie word randomly
-    //  random_ie_num = random_num(IRQ_NUM, 0);
-    //  
-    //  if(random_ie_num != 0)
-    //  {
-    //     while(random_ie_num > 0)
+    
+    
+    // irq_processed = 1;
+    // irq_id        = 0;
+    // rnd_ie_mask   = 0;
+    // irq_pending   = 0;
+        
+    // // build ie word randomly
+    // for (int i = 0; i < RND_IE_NUM; ++i)
+    // {
+    //     rnd_ie_mask |= (1 << IRQ_ID[random_num(IRQ_NUM, 0)]) ;
+    // }
+
+      
+    // // write the mask to mie
+    // asm volatile("csrw 0x304, %[regVal]" : : [regVal] "r" (rnd_ie_mask));
+      
+    // // build irq word randomly
+    // for (int i = 0; i < RND_IRQ_NUM; ++i)
+    // {
+    //     irq_pending |= (1 << IRQ_ID[random_num(IRQ_NUM, 0)]) ;
+    // }
+
+
+    // first_irq_pending = irq_pending;
+
+    // writew(irq_pending, RND_STALL_IRQ_REG);
+
+    // // wait for firs irq to be served - do this outside the loop to avoid race
+    // while(first_irq_pending==irq_pending);
+
+    // for (int i = 0; i < IRQ_NUM-1; ++i)
+    // {
+    //     // test if the nmi irq should be served
+    //     if(i==0 & (1 << IRQ_ID_PRIORITY[0]) & irq_pending)
     //     {
-    //        // generate one random irq code and add (OR) it with current ie value
-    //        random_ie_word |= (1 << IRQ_CODE[random_num(IRQ_NUM, 0)]) ;
-    //        --random_ie_num;
+    //         // sample irq_pending
+    //         prev_irq_pending=irq_pending;
+    //         printf("received irq %d\n", irq_id);
+
+    //         // irq_id sampling and testing
+    //         if(IRQ_ID_PRIORITY[i] != irq_id)
+    //         {
+    //             printf("TEST2: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
+    //             return ERR_CODE_WRONG_NUM;
+    //         }
+
+    //         // enable mstatus.mie
+    //         asm volatile("csrwi mstatus, 0x8");
+
+    //         // wait for nex irq to be served
+    //         while(prev_irq_pending==irq_pending);
     //     }
-    //  }
-    //  
-    //  // write the mask to mie
-    //  asm volatile("csrw 0x304, %[regVal]"
-    //              : : [regVal] "r" (random_ie_word));
-    //  
-    //  // evaluate random irq id
-    //  random_irq_code = IRQ_CODE[random_num(IRQ_NUM, 0)];
-    //  printf("irq id: %d\n", random_irq_code);
-    //  
-    //  writew(random_irq_code,0x16000038);
-    //  
-    //  // if the interrupt is enabled, we expect it to be served
-    //  if((1 << random_irq_code) & random_ie_word)
-    //  {
-    //    while(irq_processed)
-    //    {
-    //      printf("waiting \n");
-    //    };
-    //    
-    //    if(irq_id == random_irq_code)
-    //    {
-    //        printf("OK: correct id");
-    //    }
-    //    else 
-    //    {
-    //        printf("ERR: wrong id\n Expected %d Got %d", random_irq_code, irq_id);
-    //    }
-    //    printf("\n\n");
-    //  }
-    //  //TODO add masking detection 
-    //  else 
-    //  {
-    //    
-    //  }
-    //
-    //  ++i;
-    //}
+
+    //     // test if the irq should be served
+    //     else if ( i !=0 & (1 << IRQ_ID_PRIORITY[i]) & rnd_ie_mask & irq_pending)
+    //     {
+    //         // sample irq_pending
+    //         prev_irq_pending=irq_pending;
+    //         printf("received irq %d\n", irq_id);
+
+    //         // irq_id sampling and testing
+    //         if(IRQ_ID_PRIORITY[i] != irq_id)
+    //         {
+    //             printf("TEST3: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
+    //             return ERR_CODE_WRONG_NUM;
+    //         }
+
+    //         // enable mstatus.mie
+    //         asm volatile("csrwi mstatus, 0x8");
+
+    //         // wait for nex irq to be served
+    //         while(prev_irq_pending==irq_pending);
+    //     }
+
+
+    // }
+
+    // if(irq_pending != ((~rnd_ie_mask) & first_irq_pending))
+    // {
+    //     printf("TEST3: wrong number of irq served\n");
+    //     return ERR_CODE_WRONG_NUM;
+    // }
 
 
     //writew(2,0x1600002C);
