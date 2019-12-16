@@ -80,9 +80,12 @@ if {$rvcores ne ""} {
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_timer_i
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_external_i
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_fast_i
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_nmi_i
 
   add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/irq_id_o
   add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/ctrl_fsm_cs  
+
+  add wave -group "ABET DEBUG" -group "ID/INT_CTRL"          $rvcores/id_stage_i/int_controller_i/*
   
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mstatus_q
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mie_q 

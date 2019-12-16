@@ -33,8 +33,8 @@
 #define FAST14_IRQ_ID    30
 #define NMI_IRQ_ID       31
 
-#define RND_IRQ_NUM      20
-#define RND_IE_NUM       5
+#define RND_IRQ_NUM      100
+#define RND_IE_NUM       100
 
 volatile uint32_t irq_processed     = 1;
 volatile uint32_t irq_id            = 0;
@@ -42,6 +42,7 @@ volatile uint32_t irq_pending       = 0;
 volatile uint32_t prev_irq_pending  = 0;
 volatile uint32_t first_irq_pending = 0;
 volatile uint32_t rnd_ie_mask       = 0;
+volatile uint32_t mmstatus          = 0;
 
 
 uint32_t IRQ_ID [IRQ_NUM] = 
@@ -134,7 +135,6 @@ do {                                                                         \
     irq_id = id;                                                             \
     irq_pending &= (~(1 << irq_id));                                         \
     writew(irq_pending, RND_STALL_IRQ_REG);                                  \
-    uint32_t mmstatus = 0;                                                   \
     asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       \
     mmstatus &= (~(1 << 7));                                                 \
     asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus)); \
@@ -254,8 +254,11 @@ int main(int argc, char *argv[])
     uint32_t regVal;
     volatile uint32_t* baseAddr;
 
-    // Enable mstatus.mie
-    asm volatile("csrwi mstatus, 0x8");
+    // enable mstatus.mie
+    asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
+    mmstatus |= (1 << 3);                                                 
+    asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));  
+
 
     // Enable all mie (need to store) 
     regVal = 0xFFFFFFFF;
@@ -270,17 +273,24 @@ int main(int argc, char *argv[])
     writew(4,0x16000028);
 
     // Sequential test (no masking)
-    uint32_t i = 0;
-    while(i < IRQ_NUM)
-    {
-        irq_id = 0;
-      
+    
+    // disable mstatues.mie
+    asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
+    mmstatus &= (~(1 << 3));                                                 
+    asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus)); 
+
+
+    for (int i = 0; i < IRQ_NUM; i++)
+    {      
         // add new pending irq
         irq_pending |= (1 << IRQ_ID[i]);
         prev_irq_pending = irq_pending;
 
         writew(irq_pending, RND_STALL_IRQ_REG);
-      
+
+        // enable mstatus.mie
+        asm volatile("csrwi mstatus, 0x8");
+        
         // wait for the irq to be served
         while(prev_irq_pending == irq_pending);
 
@@ -290,37 +300,39 @@ int main(int argc, char *argv[])
             printf("TEST1: IRQ served in wrong order %d %d\n", IRQ_ID[i], irq_id);
             return -1;
         }
-        asm volatile("csrwi mstatus, 0x8");
-         ++i;      
     };
     // TODO: needs to make sure preivous test finished
 
     printf("TEST 2: TRIGGER ALL IRQS AT ONCE\n");
     // Multiple interrupts at a time
-    uint32_t irq_num = 18;
     irq_pending |= 0xFFFFFFFF;
-    prev_irq_pending = irq_pending;
+
+    // disable mstatues.mie
+    asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
+    mmstatus &= (~(1 << 3));                                                 
+    asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));
+
     writew(irq_pending, RND_STALL_IRQ_REG);
 
-    // wait first irq to be served - do this outside the loop to avoid race
-    while(prev_irq_pending==irq_pending); 
-
-    for (int i = 0; i < IRQ_NUM-1; i++) 
+    for (int i = 0; i < IRQ_NUM; i++) 
     {
         // sample irq_pending
         prev_irq_pending=irq_pending;
         
+        // enable mstatus.mie
+        asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
+        mmstatus |= (1 << 3);                                                 
+        asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));  
+
+        // wait for nex irq to be served
+        while(prev_irq_pending==irq_pending);
+
         // irq_id sampling and testing
         if(IRQ_ID_PRIORITY[i] != irq_id)
         {
             printf("TEST2: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
             return ERR_CODE_WRONG_ORDER;
         }
-
-        // enable mstatus.mie
-        asm volatile("csrwi mstatus, 0x8");
-        // wait for nex irq to be served
-        while(prev_irq_pending==irq_pending);
     }
 
 
@@ -338,90 +350,93 @@ int main(int argc, char *argv[])
     //
     
     
-    // irq_processed = 1;
-    // irq_id        = 0;
-    // rnd_ie_mask   = 0;
-    // irq_pending   = 0;
-        
-    // // build ie word randomly
-    // for (int i = 0; i < RND_IE_NUM; ++i)
-    // {
-    //     rnd_ie_mask |= (1 << IRQ_ID[random_num(IRQ_NUM, 0)]) ;
-    // }
+    irq_processed = 1;
+    irq_id        = 0;
+    rnd_ie_mask   = 0;
+    irq_pending   = 0;
+
+    // build ie word randomly
+    for (int i = 0; i < RND_IE_NUM; ++i)
+    {
+        rnd_ie_mask |= (1 << IRQ_ID[random_num(IRQ_NUM, 0)]) ;
+    }
 
       
-    // // write the mask to mie
-    // asm volatile("csrw 0x304, %[regVal]" : : [regVal] "r" (rnd_ie_mask));
+    // write the mask to mie
+    asm volatile("csrw 0x304, %[regVal]" : : [regVal] "r" (rnd_ie_mask));
       
-    // // build irq word randomly
-    // for (int i = 0; i < RND_IRQ_NUM; ++i)
-    // {
-    //     irq_pending |= (1 << IRQ_ID[random_num(IRQ_NUM, 0)]) ;
-    // }
+    // build irq word randomly
+    for (int i = 0; i < RND_IRQ_NUM; ++i)
+    {
+        irq_pending |= (1 << IRQ_ID[random_num(IRQ_NUM, 0)]) ;
+    }
+    
+    first_irq_pending = irq_pending;
+    
+    // disable mstatues.mie
+    asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
+    mmstatus &= (~(1 << 3));                                                 
+    asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));
+
+    writew(irq_pending, RND_STALL_IRQ_REG);
+
+    for (int i = 0; i < IRQ_NUM; ++i)
+    {
+        // test if the nmi irq should be served
+        if(i==0 && ((1 << IRQ_ID_PRIORITY[0]) & irq_pending))
+        {
+            // sample irq_pending
+            prev_irq_pending=irq_pending;
+            printf("received irq %d\n", irq_id);
+
+            // enable mstatus.mie
+            asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
+            mmstatus |= (1 << 3);                                                 
+            asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));
+
+            // wait for next irq to be served
+            while(prev_irq_pending==irq_pending);
+
+            // irq_id sampling and testing
+            if(IRQ_ID_PRIORITY[i] != irq_id)
+            {
+                printf("TEST3: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
+                return ERR_CODE_WRONG_NUM;
+            }
+        }
+
+        // test if the i-th irq should be served
+        else if ( i !=0 && ((1 << IRQ_ID_PRIORITY[i]) & rnd_ie_mask & irq_pending))
+        {
+            // sample irq_pending
+            prev_irq_pending=irq_pending;
+            printf("received irq %d\n", irq_id);
+
+            // enable mstatus.mie
+            asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
+            mmstatus |= (1 << 3);                                                 
+            asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));
+
+            // wait for next irq to be served
+            while(prev_irq_pending==irq_pending);
+
+            // irq_id sampling and testing
+            if(IRQ_ID_PRIORITY[i] != irq_id)
+            {
+                printf("TEST3: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
+                return ERR_CODE_WRONG_NUM;
+            }
+        }
+    }
+
+    if(irq_pending != ((~rnd_ie_mask) & first_irq_pending))
+    {
+        printf("TEST3: wrong number of irq served\n first_irq_pending: %d irq_pending: %d rnd_ie_mask: %d\n", first_irq_pending, irq_pending, rnd_ie_mask);
+        return ERR_CODE_WRONG_NUM;
+    }
 
 
-    // first_irq_pending = irq_pending;
-
-    // writew(irq_pending, RND_STALL_IRQ_REG);
-
-    // // wait for firs irq to be served - do this outside the loop to avoid race
-    // while(first_irq_pending==irq_pending);
-
-    // for (int i = 0; i < IRQ_NUM-1; ++i)
-    // {
-    //     // test if the nmi irq should be served
-    //     if(i==0 & (1 << IRQ_ID_PRIORITY[0]) & irq_pending)
-    //     {
-    //         // sample irq_pending
-    //         prev_irq_pending=irq_pending;
-    //         printf("received irq %d\n", irq_id);
-
-    //         // irq_id sampling and testing
-    //         if(IRQ_ID_PRIORITY[i] != irq_id)
-    //         {
-    //             printf("TEST2: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
-    //             return ERR_CODE_WRONG_NUM;
-    //         }
-
-    //         // enable mstatus.mie
-    //         asm volatile("csrwi mstatus, 0x8");
-
-    //         // wait for nex irq to be served
-    //         while(prev_irq_pending==irq_pending);
-    //     }
-
-    //     // test if the irq should be served
-    //     else if ( i !=0 & (1 << IRQ_ID_PRIORITY[i]) & rnd_ie_mask & irq_pending)
-    //     {
-    //         // sample irq_pending
-    //         prev_irq_pending=irq_pending;
-    //         printf("received irq %d\n", irq_id);
-
-    //         // irq_id sampling and testing
-    //         if(IRQ_ID_PRIORITY[i] != irq_id)
-    //         {
-    //             printf("TEST3: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
-    //             return ERR_CODE_WRONG_NUM;
-    //         }
-
-    //         // enable mstatus.mie
-    //         asm volatile("csrwi mstatus, 0x8");
-
-    //         // wait for nex irq to be served
-    //         while(prev_irq_pending==irq_pending);
-    //     }
-
-
-    // }
-
-    // if(irq_pending != ((~rnd_ie_mask) & first_irq_pending))
-    // {
-    //     printf("TEST3: wrong number of irq served\n");
-    //     return ERR_CODE_WRONG_NUM;
-    // }
-
-
-    //writew(2,0x1600002C);
+    // writew(2,0x1600002C);
     
     //writew(20,0x16000030);     
     
