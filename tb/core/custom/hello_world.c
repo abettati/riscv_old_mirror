@@ -9,8 +9,20 @@
 #define ERR_CODE_WRONG_ORDER 2
 #define ERR_CODE_WRONG_NUM   3
 
-#define OUTPORT 0x10000000
-#define RND_STALL_IRQ_REG 0x16000038
+#define OUTPORT                0x10000000
+
+#define RND_STALL_REG_10       0x16000028
+#define RND_STALL_REG_11       0x1600002C
+#define RND_STALL_REG_12       0x16000030
+#define RND_STALL_REG_13       0x16000034
+#define RND_STALL_IRQ_REG      0x16000038
+
+#define RND_STALL_IRQ_MODE_REG 0x16000028
+
+#define IRQ_MODE_RND 2
+#define IRQ_MODE_SD  4
+
+#define MSTATUS_MIE_BIT 3
 
 #define IRQ_NUM 19
 #define SOFTWARE_IRQ_ID  3
@@ -133,6 +145,7 @@ void writew(uint32_t val, volatile uint32_t *addr)
 #define FAST_IRQ_GENERIC(id)                                                 \
 do {                                                                         \
     irq_id = id;                                                             \
+    asm volatile("csrr %0, mip": "=r" (irq_pending));                        \
     irq_pending &= (~(1 << irq_id));                                         \
     writew(irq_pending, RND_STALL_IRQ_REG);                                  \
     asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       \
@@ -242,6 +255,13 @@ uint32_t random_num(uint32_t upper_bound, uint32_t lower_bound)
     return num;
 } 
 
+void mstatus_enable(uint32_t bit_enabled)
+{
+    asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
+    mmstatus |= (1 << bit_enabled);                                                 
+    asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));    
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -266,11 +286,11 @@ int main(int argc, char *argv[])
                   : : [regVal] "r" (regVal));
     
     // set timer_irq_mask_q[TIMER_IRQ_ID] = 1
-     writew(128,0x15000000);
+    // writew(128,0x15000000);
 
 
     // software defined irq gen mode
-    writew(4,0x16000028);
+    writew(IRQ_MODE_SD,RND_STALL_REG_10);
 
     // Sequential test (no masking)
     
@@ -373,7 +393,7 @@ int main(int argc, char *argv[])
     
     first_irq_pending = irq_pending;
     
-    // disable mstatues.mie
+    // disable mstatus.mie
     asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
     mmstatus &= (~(1 << 3));                                                 
     asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));
@@ -413,9 +433,8 @@ int main(int argc, char *argv[])
             printf("received irq %d\n", irq_id);
 
             // enable mstatus.mie
-            asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
-            mmstatus |= (1 << 3);                                                 
-            asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));
+            mstatus_enable(MSTATUS_MIE_BIT);
+
 
             // wait for next irq to be served
             while(prev_irq_pending==irq_pending);
@@ -443,7 +462,24 @@ int main(int argc, char *argv[])
     // set hw timer = 3
     //writew(3,0x15000004);
     
+    mstatus_enable(MSTATUS_MIE_BIT);
 
+    // Enable all mie (need to store) 
+    regVal = 0xFFFFFFFF;
+    asm volatile("csrw 0x304, %[regVal]"
+                  : : [regVal] "r" (regVal));
+
+    writew(4096,RND_STALL_REG_11);
+
+    writew(4096,RND_STALL_REG_12);
+
+    // software defined irq gen mode
+    writew(IRQ_MODE_RND, RND_STALL_REG_10);
+
+    while(1)
+    {
+        mstatus_enable(MSTATUS_MIE_BIT);
+    };
 
     return EXIT_SUCCESS;
 }

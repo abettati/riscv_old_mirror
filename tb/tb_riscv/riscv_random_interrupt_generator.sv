@@ -39,8 +39,8 @@ module riscv_random_interrupt_generator
     input logic  [31:0]   irq_mode_i,
     input logic  [31:0]   irq_min_cycles_i,
     input logic  [31:0]   irq_max_cycles_i,
-    input logic  [31:0]   irq_min_id_i,
-    input logic  [31:0]   irq_max_id_i,
+    input logic  [31:0]   irq_min_lines_i,
+    input logic  [31:0]   irq_max_lines_i,
     output logic [31:0]   irq_act_id_o,
     output logic          irq_id_we_o,
     input logic  [31:0]   irq_pc_id_i,
@@ -70,6 +70,7 @@ logic        irq_sd;
 logic [31:0] irq_sd_lines;
 logic        ack_flag;
 
+
 // struct 18bit irq_lines
 typedef struct packed {
   logic        irq_software;
@@ -79,53 +80,92 @@ typedef struct packed {
   logic        irq_nmi;
 } Interrupts_t;
 
+Interrupts_t irq_lines_q, irq_lines_n, irq_lines_mask;
 Interrupts_t irq_rnd_lines;
 
 
 assign irq_ack_o       = irq_ack_i;
-assign irq_rnd_lines_o = irq_rnd_lines; 
+assign irq_rnd_lines_o = irq_lines_q; 
 
 always_ff @(posedge clk_i or negedge rst_ni)
 begin
     if(~rst_ni) begin
-        irq_mode_q <= 0;
+        irq_mode_q  <= 0;
+        irq_lines_q <= '0;
     end else begin
-        irq_mode_q <= irq_mode_i;
+        irq_mode_q  <= irq_mode_i;
+        irq_lines_q <= irq_lines_n;
     end
 end
 
 always_comb
 begin
-    unique case (irq_mode_q)
-        RANDOM:
-        begin
-          // TODO generate individuals irq lines
-          //irq_id_o  = irq_id_random;
-          irq_rnd_lines = '0;
-        end
+  unique case (irq_mode_q)
+    RANDOM:
+    begin
+      // TODO generate individuals irq lines
+      //irq_id_o  = irq_id_random;
+      
 
-        PC_TRIG:
-        begin
-          // TODO generate individual irq lines
-          // irq_id_o  = irq_id_monitor;
-          irq_rnd_lines = '0;
-        end
+      //
 
-        SOFTWARE_DEFINED:
-        begin
-          // generate individual irq lines
-          irq_rnd_lines.irq_software = irq_sd_lines [3];
-          irq_rnd_lines.irq_timer    = irq_sd_lines [7];
-          irq_rnd_lines.irq_external = irq_sd_lines [11];
-          irq_rnd_lines.irq_fast     = irq_sd_lines [30:16];
-          irq_rnd_lines.irq_nmi      = irq_sd_lines [31];
-        end
+      if (irq_ack_i) begin
+        case (irq_id_i)
+          5'd31: irq_lines_mask.irq_nmi      = 1'b1;
+          5'd30: irq_lines_mask.irq_fast[14] = 1'b1;
+          5'd29: irq_lines_mask.irq_fast[13] = 1'b1;
+          5'd28: irq_lines_mask.irq_fast[12] = 1'b1;
+          5'd27: irq_lines_mask.irq_fast[11] = 1'b1;
+          5'd26: irq_lines_mask.irq_fast[10] = 1'b1;
+          5'd25: irq_lines_mask.irq_fast[9]  = 1'b1;
+          5'd24: irq_lines_mask.irq_fast[8]  = 1'b1;
+          5'd23: irq_lines_mask.irq_fast[7]  = 1'b1;
+          5'd22: irq_lines_mask.irq_fast[6]  = 1'b1;
+          5'd21: irq_lines_mask.irq_fast[5]  = 1'b1;
+          5'd20: irq_lines_mask.irq_fast[4]  = 1'b1;
+          5'd19: irq_lines_mask.irq_fast[3]  = 1'b1;
+          5'd18: irq_lines_mask.irq_fast[2]  = 1'b1;
+          5'd17: irq_lines_mask.irq_fast[1]  = 1'b1;
+          5'd16: irq_lines_mask.irq_fast[0]  = 1'b1;
+          5'd11: irq_lines_mask.irq_external = 1'b1;
+          5'd07: irq_lines_mask.irq_timer    = 1'b1;
+          5'd03: irq_lines_mask.irq_software = 1'b1;
+          default : /* default */;
+        endcase
+      end else begin
+        irq_lines_mask = '0;
+      end
 
-        default:
-        begin
-          irq_rnd_lines = '0;
-        end
-    endcase
+      if (irq_random) begin
+        irq_lines_n = irq_rnd_lines;
+      end else begin
+        irq_lines_n = irq_lines_q & (~irq_lines_mask); 
+      end
+      
+    end
+
+    PC_TRIG:
+    begin
+      // TODO generate individual irq lines
+      // irq_id_o  = irq_id_monitor;
+      irq_lines_n = '0;
+    end
+
+    SOFTWARE_DEFINED:
+    begin
+      // generate individual irq lines
+      irq_lines_n.irq_software = irq_sd_lines [3];
+      irq_lines_n.irq_timer    = irq_sd_lines [7];
+      irq_lines_n.irq_external = irq_sd_lines [11];
+      irq_lines_n.irq_fast     = irq_sd_lines [30:16];
+      irq_lines_n.irq_nmi      = irq_sd_lines [31];
+    end
+
+    default:
+    begin
+      irq_lines_n = '0;
+    end
+  endcase
 end
 
 //Random Process
@@ -133,25 +173,21 @@ initial
 begin
     automatic rand_irq_cycles wait_cycles = new();
     automatic rand_irq_id value = new();
-    int temp,i, min_irq_cycles, max_irq_cycles, min_irq_id, max_irq_id;
-    irq_random = 1'b0;
-    irq_id_random  = '0;
+    int temp,i, min_irq_cycles, max_irq_cycles, min_irq_lines, max_irq_lines;
+    irq_random     = 1'b0;
+    irq_rnd_lines  = '0;
     while(1) begin
-
-        irq_random    = 1'b0;
-        irq_id_random = '0;
-
         @(posedge clk_i);
 
         wait(irq_mode_q == RANDOM);
-        min_irq_id     = irq_min_id_i;
-        max_irq_id     = irq_max_id_i;
+        min_irq_lines  = irq_min_lines_i;
+        max_irq_lines  = irq_max_lines_i;
         min_irq_cycles = irq_min_cycles_i;
         max_irq_cycles = irq_max_cycles_i;
 
         temp = value.randomize() with{
-            n >= min_irq_id;
-            n <= max_irq_id;
+            n >= min_irq_lines;
+            n <= max_irq_lines;
         };
         temp = wait_cycles.randomize() with{
             n >= min_irq_cycles;
@@ -162,10 +198,12 @@ begin
             wait_cycles.n--;
         end
 
-        irq_id_random = value.n;
+        irq_rnd_lines = value.n;
         irq_random    = 1'b1;
         irq_act_id_o  = value.n;
         @(posedge clk_i);
+        irq_random    = 1'b0;
+        
         //we don't care about the ack in this mode
         for(i=0; i<max_irq_cycles; i++) begin
             @(posedge clk_i);
@@ -217,7 +255,7 @@ begin
     wait(irq_mode_q == PC_TRIG);
     wait(irq_pc_id_i == irq_pc_trig_i);
     irq_monitor    = 1'b1;
-    irq_id_monitor = irq_min_id_i;
+    irq_id_monitor = irq_min_lines_i;
     while(irq_ack_i != 1'b1) begin
         @(posedge clk_i);   //Keep the request high until the acknowledge is received
     end

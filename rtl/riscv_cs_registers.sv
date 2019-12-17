@@ -1002,7 +1002,7 @@ end //PULP_SECURE
       else if (mip.irq_fast[ 3]) irq_id_o = 5'd19;
       else if (mip.irq_fast[ 2]) irq_id_o = 5'd18;
       else if (mip.irq_fast[ 1]) irq_id_o = 5'd17;
-      else                         irq_id_o = 5'd16;
+      else                       irq_id_o = 5'd16;
     end else if (mip.irq_external) begin
       // EXC_CAUSE_IRQ_EXTERNAL_M
       irq_id_o    = {5'd11};
