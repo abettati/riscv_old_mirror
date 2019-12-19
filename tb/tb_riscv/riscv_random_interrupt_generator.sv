@@ -13,6 +13,7 @@
 // Author:                              Francesco Minervini - minervif@student.ethz.ch                      //
 //                                                                                                          //
 // Additional contributions by:         Davide Schiavone - pschiavo@iis.ee.ethz.ch                          //
+//                                      Andrea Bettati - andrea.bettati@studenti.unipr.it                   //
 // Design Name:                         Interrupt generator                                                 //
 // Project Name:                        RI5CY, Zeroriscy                                                    //
 // Language:                            SystemVerilog                                                       //
@@ -103,33 +104,31 @@ begin
   unique case (irq_mode_q)
     RANDOM:
     begin
-      // TODO generate individuals irq lines
-      //irq_id_o  = irq_id_random;
-      
-
-      //
+      // UPDATE LOGIC:
+      // random irq word id stored and updated every time 
+      // an interrupt is taken by the core
 
       if (irq_ack_i) begin
         case (irq_id_i)
-          5'd31: irq_lines_mask.irq_nmi      = 1'b1;
-          5'd30: irq_lines_mask.irq_fast[14] = 1'b1;
-          5'd29: irq_lines_mask.irq_fast[13] = 1'b1;
-          5'd28: irq_lines_mask.irq_fast[12] = 1'b1;
-          5'd27: irq_lines_mask.irq_fast[11] = 1'b1;
-          5'd26: irq_lines_mask.irq_fast[10] = 1'b1;
-          5'd25: irq_lines_mask.irq_fast[9]  = 1'b1;
-          5'd24: irq_lines_mask.irq_fast[8]  = 1'b1;
-          5'd23: irq_lines_mask.irq_fast[7]  = 1'b1;
-          5'd22: irq_lines_mask.irq_fast[6]  = 1'b1;
-          5'd21: irq_lines_mask.irq_fast[5]  = 1'b1;
-          5'd20: irq_lines_mask.irq_fast[4]  = 1'b1;
-          5'd19: irq_lines_mask.irq_fast[3]  = 1'b1;
-          5'd18: irq_lines_mask.irq_fast[2]  = 1'b1;
-          5'd17: irq_lines_mask.irq_fast[1]  = 1'b1;
-          5'd16: irq_lines_mask.irq_fast[0]  = 1'b1;
-          5'd11: irq_lines_mask.irq_external = 1'b1;
-          5'd07: irq_lines_mask.irq_timer    = 1'b1;
-          5'd03: irq_lines_mask.irq_software = 1'b1;
+          NMI_IRQ_ID:      irq_lines_mask.irq_nmi      = 1'b1;
+          FAST14_IRQ_ID:   irq_lines_mask.irq_fast[14] = 1'b1;
+          FAST13_IRQ_ID:   irq_lines_mask.irq_fast[13] = 1'b1;
+          FAST12_IRQ_ID:   irq_lines_mask.irq_fast[12] = 1'b1;
+          FAST11_IRQ_ID:   irq_lines_mask.irq_fast[11] = 1'b1;
+          FAST10_IRQ_ID:   irq_lines_mask.irq_fast[10] = 1'b1;
+          FAST9_IRQ_ID:    irq_lines_mask.irq_fast[9]  = 1'b1;
+          FAST8_IRQ_ID:    irq_lines_mask.irq_fast[8]  = 1'b1;
+          FAST7_IRQ_ID:    irq_lines_mask.irq_fast[7]  = 1'b1;
+          FAST6_IRQ_ID:    irq_lines_mask.irq_fast[6]  = 1'b1;
+          FAST5_IRQ_ID:    irq_lines_mask.irq_fast[5]  = 1'b1;
+          FAST4_IRQ_ID:    irq_lines_mask.irq_fast[4]  = 1'b1;
+          FAST3_IRQ_ID:    irq_lines_mask.irq_fast[3]  = 1'b1;
+          FAST2_IRQ_ID:    irq_lines_mask.irq_fast[2]  = 1'b1;
+          FAST1_IRQ_ID:    irq_lines_mask.irq_fast[1]  = 1'b1;
+          FAST0_IRQ_ID:    irq_lines_mask.irq_fast[0]  = 1'b1;
+          EXTERNAL_IRQ_ID: irq_lines_mask.irq_external = 1'b1;
+          SOFTWARE_IRQ_ID: irq_lines_mask.irq_timer    = 1'b1;
+          TIMER_IRQ_ID:    irq_lines_mask.irq_software = 1'b1;
           default : /* default */;
         endcase
       end else begin
@@ -141,19 +140,19 @@ begin
       end else begin
         irq_lines_n = irq_lines_q & (~irq_lines_mask); 
       end
-      
+
     end
 
     PC_TRIG:
     begin
       // TODO generate individual irq lines
-      // irq_id_o  = irq_id_monitor;
       irq_lines_n = '0;
     end
 
     SOFTWARE_DEFINED:
     begin
-      // generate individual irq lines
+      // UPDATE LOGIC:
+      // generate individual irq lines for the sampled word
       irq_lines_n.irq_software = irq_sd_lines [3];
       irq_lines_n.irq_timer    = irq_sd_lines [7];
       irq_lines_n.irq_external = irq_sd_lines [11];
@@ -168,7 +167,10 @@ begin
   endcase
 end
 
-//Random Process
+// RANDOM INTERRUPTS PROCESS
+// Generates a random word irq_rnd_lines [18:0] at a random time. 
+// The generated word is stored in irq_lines_q. 
+
 initial
 begin
     automatic rand_irq_cycles wait_cycles = new();
@@ -211,7 +213,9 @@ begin
     end
 end
 
-// Software Defined Interrupts process
+// SOFTWARE DEFINED INTERRUPTS PROCESS
+// Samples irq lines (word) as defined by software
+
 initial 
 begin
   irq_sd_lines = 32'b0;
@@ -222,24 +226,12 @@ begin
     wait (irq_mode_q == SOFTWARE_DEFINED);
 
     // blocking wait for a valid sd_id
-    while(irq_sd_lines_i != 0 & ack_flag == 0) begin
+    while(irq_sd_lines_i != 0) begin
       @(posedge clk_i);
         irq_sd_lines = irq_sd_lines_i; 
         irq_sd    = 1'b1;
-        if (irq_ack_i) begin
-          // TODO check if the received irq is as expected
-          ack_flag = 1'b1;
-        end  
     end
     
-    // keep request lines low: wait for the core to clear the id
-    // while(irq_sd_lines_i != 0) begin
-    //   @(posedge clk_i);
-    //     irq_sd       = 1'b0;
-    //     irq_sd_lines = 32'b0;
-    // end
-
-    // is this block useful?
     @(posedge clk_i);
 
   end

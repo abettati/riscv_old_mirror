@@ -277,7 +277,6 @@ module riscv_cs_registers
   Interrupts_t mip;
   Masked_Interrupts_t mie_q, mie_n;
 
-
   logic is_irq;
   PrivLvl_t priv_lvl_n, priv_lvl_q, priv_lvl_reg_q;
   Pmp_t pmp_reg_q, pmp_reg_n;
@@ -984,36 +983,36 @@ end //PULP_SECURE
     // TODO abet insert nmi_mode_q? 
     if (mip.irq_nmi) begin
       // EXC_CAUSE_IRQ_NM
-      irq_id_o    = {5'd31};
+      irq_id_o    = NMI_IRQ_ID;
 
     end else if(mip.irq_fast != '0)
     begin
-      if      (mip.irq_fast[14]) irq_id_o = 5'd30;
-      else if (mip.irq_fast[13]) irq_id_o = 5'd29;
-      else if (mip.irq_fast[12]) irq_id_o = 5'd28;
-      else if (mip.irq_fast[11]) irq_id_o = 5'd27;
-      else if (mip.irq_fast[10]) irq_id_o = 5'd26;
-      else if (mip.irq_fast[ 9]) irq_id_o = 5'd25; 
-      else if (mip.irq_fast[ 8]) irq_id_o = 5'd24; 
-      else if (mip.irq_fast[ 7]) irq_id_o = 5'd23; 
-      else if (mip.irq_fast[ 6]) irq_id_o = 5'd22; 
-      else if (mip.irq_fast[ 5]) irq_id_o = 5'd21;
-      else if (mip.irq_fast[ 4]) irq_id_o = 5'd20;
-      else if (mip.irq_fast[ 3]) irq_id_o = 5'd19;
-      else if (mip.irq_fast[ 2]) irq_id_o = 5'd18;
-      else if (mip.irq_fast[ 1]) irq_id_o = 5'd17;
-      else                       irq_id_o = 5'd16;
+      if      (mip.irq_fast[14]) irq_id_o = FAST14_IRQ_ID;
+      else if (mip.irq_fast[13]) irq_id_o = FAST13_IRQ_ID;
+      else if (mip.irq_fast[12]) irq_id_o = FAST12_IRQ_ID;
+      else if (mip.irq_fast[11]) irq_id_o = FAST11_IRQ_ID;
+      else if (mip.irq_fast[10]) irq_id_o = FAST10_IRQ_ID;
+      else if (mip.irq_fast[ 9]) irq_id_o = FAST9_IRQ_ID; 
+      else if (mip.irq_fast[ 8]) irq_id_o = FAST8_IRQ_ID; 
+      else if (mip.irq_fast[ 7]) irq_id_o = FAST7_IRQ_ID; 
+      else if (mip.irq_fast[ 6]) irq_id_o = FAST6_IRQ_ID; 
+      else if (mip.irq_fast[ 5]) irq_id_o = FAST5_IRQ_ID;
+      else if (mip.irq_fast[ 4]) irq_id_o = FAST4_IRQ_ID;
+      else if (mip.irq_fast[ 3]) irq_id_o = FAST3_IRQ_ID;
+      else if (mip.irq_fast[ 2]) irq_id_o = FAST2_IRQ_ID;
+      else if (mip.irq_fast[ 1]) irq_id_o = FAST1_IRQ_ID;
+      else                       irq_id_o = FAST0_IRQ_ID;
     end else if (mip.irq_external) begin
       // EXC_CAUSE_IRQ_EXTERNAL_M
-      irq_id_o    = {5'd11};
+      irq_id_o    = EXTERNAL_IRQ_ID;
         
     end else if (mip.irq_software) begin
       // EXC_CAUSE_IRQ_SOFTWARE_M;
-      irq_id_o    = {5'd03};
+      irq_id_o    = SOFTWARE_IRQ_ID;
     
     end else begin // mip.irq_timer
       // EXC_CAUSE_IRQ_TIMER_M;
-      irq_id_o    = {5'd07};
+      irq_id_o    = TIMER_IRQ_ID;
     end    
   end
   

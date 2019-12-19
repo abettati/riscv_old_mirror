@@ -262,6 +262,13 @@ void mstatus_enable(uint32_t bit_enabled)
     asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));    
 }
 
+void mstatus_disable(uint32_t bit_enabled)
+{
+    asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
+    mmstatus &= (~(1 << bit_enabled));                                                 
+    asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));    
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -294,11 +301,8 @@ int main(int argc, char *argv[])
 
     // Sequential test (no masking)
     
-    // disable mstatues.mie
-    asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
-    mmstatus &= (~(1 << 3));                                                 
-    asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus)); 
-
+    // disable mstatus.mie
+    mstatus_disable(MSTATUS_MIE_BIT);
 
     for (int i = 0; i < IRQ_NUM; i++)
     {      
@@ -327,10 +331,8 @@ int main(int argc, char *argv[])
     // Multiple interrupts at a time
     irq_pending |= 0xFFFFFFFF;
 
-    // disable mstatues.mie
-    asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
-    mmstatus &= (~(1 << 3));                                                 
-    asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));
+    // disable mstatus.mie
+    mstatus_disable(MSTATUS_MIE_BIT);
 
     writew(irq_pending, RND_STALL_IRQ_REG);
 
@@ -340,9 +342,7 @@ int main(int argc, char *argv[])
         prev_irq_pending=irq_pending;
         
         // enable mstatus.mie
-        asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
-        mmstatus |= (1 << 3);                                                 
-        asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));  
+        mstatus_enable(MSTATUS_MIE_BIT);
 
         // wait for nex irq to be served
         while(prev_irq_pending==irq_pending);
@@ -394,12 +394,11 @@ int main(int argc, char *argv[])
     first_irq_pending = irq_pending;
     
     // disable mstatus.mie
-    asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
-    mmstatus &= (~(1 << 3));                                                 
-    asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));
+    mstatus_disable(MSTATUS_MIE_BIT);
 
     writew(irq_pending, RND_STALL_IRQ_REG);
 
+    // Scan all interrupt bits following priority order
     for (int i = 0; i < IRQ_NUM; ++i)
     {
         // test if the nmi irq should be served
@@ -407,12 +406,10 @@ int main(int argc, char *argv[])
         {
             // sample irq_pending
             prev_irq_pending=irq_pending;
-            printf("received irq %d\n", irq_id);
 
             // enable mstatus.mie
-            asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
-            mmstatus |= (1 << 3);                                                 
-            asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));
+            mstatus_enable(MSTATUS_MIE_BIT);
+
 
             // wait for next irq to be served
             while(prev_irq_pending==irq_pending);
@@ -430,7 +427,6 @@ int main(int argc, char *argv[])
         {
             // sample irq_pending
             prev_irq_pending=irq_pending;
-            printf("received irq %d\n", irq_id);
 
             // enable mstatus.mie
             mstatus_enable(MSTATUS_MIE_BIT);
