@@ -416,30 +416,6 @@ parameter EXC_CAUSE_STORE_FAULT  = 6'h07;
 parameter EXC_CAUSE_ECALL_UMODE  = 6'h08;
 parameter EXC_CAUSE_ECALL_MMODE  = 6'h0B;
 
-
-// Possible irq ids
-typedef enum logic [4:0] {
-  NMI_IRQ_ID      = 5'd31, 
-  FAST14_IRQ_ID   = 5'd30,  
-  FAST13_IRQ_ID   = 5'd29,  
-  FAST12_IRQ_ID   = 5'd28,  
-  FAST11_IRQ_ID   = 5'd27,  
-  FAST10_IRQ_ID   = 5'd26,
-  FAST9_IRQ_ID    = 5'd25,
-  FAST8_IRQ_ID    = 5'd24,
-  FAST7_IRQ_ID    = 5'd23,
-  FAST6_IRQ_ID    = 5'd22,
-  FAST5_IRQ_ID    = 5'd21,
-  FAST4_IRQ_ID    = 5'd20,
-  FAST3_IRQ_ID    = 5'd19,
-  FAST2_IRQ_ID    = 5'd18,
-  FAST1_IRQ_ID    = 5'd17,
-  FAST0_IRQ_ID    = 5'd16,
-  EXTERNAL_IRQ_ID = 5'd11,
-  TIMER_IRQ_ID    = 5'd07,
-  SOFTWARE_IRQ_ID = 5'd03
-} irq_id_e;
-
 // Interrupt lines struct
 typedef struct packed {
   logic        irq_software;

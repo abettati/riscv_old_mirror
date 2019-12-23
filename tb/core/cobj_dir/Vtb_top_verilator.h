@@ -121,6 +121,7 @@ VL_MODULE(Vtb_top_verilator) {
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__instr_req_pmp;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__instr_gnt_pmp;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__irq_pending;
+        CData/*4:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__irq_id;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__mult_is_clpx_ex;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__core_clock_gate_i__DOT__clk_en;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__if_stage_i__DOT__offset_fsm_cs;
@@ -160,9 +161,9 @@ VL_MODULE(Vtb_top_verilator) {
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__illegal_insn_dec;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__ebrk_insn;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__mret_insn_dec;
-        CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__uret_insn_dec;
     };
     struct {
+        CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__uret_insn_dec;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__dret_insn_dec;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__ecall_insn_dec;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__pipe_flush_dec;
@@ -226,9 +227,9 @@ VL_MODULE(Vtb_top_verilator) {
         CData/*1:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__alu_vec_mode;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__scalar_replication;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__reg_d_ex_is_reg_a_id;
-        CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__reg_d_ex_is_reg_b_id;
     };
     struct {
+        CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__reg_d_ex_is_reg_b_id;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__reg_d_ex_is_reg_c_id;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__reg_d_wb_is_reg_a_id;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__reg_d_alu_is_reg_a_id;
@@ -292,9 +293,9 @@ VL_MODULE(Vtb_top_verilator) {
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__div_ready;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__int_div__DOT__div_op_a_signed;
         IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__alu_popcnt_i__DOT__cnt_l1;
-        IData/*23:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__alu_popcnt_i__DOT__cnt_l2;
     };
     struct {
+        IData/*23:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__alu_popcnt_i__DOT__cnt_l2;
         SData/*15:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__alu_popcnt_i__DOT__cnt_l3;
         SData/*9:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__alu_popcnt_i__DOT__cnt_l4;
         WData/*159:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__alu_ff_i__DOT__index_lut[5];
@@ -358,9 +359,9 @@ VL_MODULE(Vtb_top_verilator) {
         CData/*1:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__ram_i__DOT__select_rdata_d;
         CData/*1:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__ram_i__DOT__select_rdata_q;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__ram_i__DOT__transaction;
-        CData/*1:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__ram_i__DOT__state_valid_n;
     };
     struct {
+        CData/*1:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__ram_i__DOT__state_valid_n;
         CData/*1:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__ram_i__DOT__state_valid_q;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__ram_i__DOT__data_rvalid_q;
         CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__ram_i__DOT__instr_rvalid_q;
@@ -424,9 +425,9 @@ VL_MODULE(Vtb_top_verilator) {
         IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__if_stage_i__DOT__genblk1__DOT__prefetch_128__DOT__prefetch_buffer_i__DOT__rdata_last_q;
         IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__if_stage_i__DOT__genblk1__DOT__prefetch_128__DOT__prefetch_buffer_i__DOT__rdata;
         IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__if_stage_i__DOT__genblk1__DOT__prefetch_128__DOT__prefetch_buffer_i__DOT__rdata_unaligned;
-        WData/*127:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__if_stage_i__DOT__genblk1__DOT__prefetch_128__DOT__prefetch_buffer_i__DOT__L0_buffer_i__DOT__L0_buffer[4];
     };
     struct {
+        WData/*127:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__if_stage_i__DOT__genblk1__DOT__prefetch_128__DOT__prefetch_buffer_i__DOT__L0_buffer_i__DOT__L0_buffer[4];
         IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__if_stage_i__DOT__genblk1__DOT__prefetch_128__DOT__prefetch_buffer_i__DOT__L0_buffer_i__DOT__addr_q;
         IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__if_stage_i__DOT__genblk1__DOT__prefetch_128__DOT__prefetch_buffer_i__DOT__L0_buffer_i__DOT__instr_addr_int;
         IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__id_stage_i__DOT__imm_i_type;
@@ -490,9 +491,9 @@ VL_MODULE(Vtb_top_verilator) {
         IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__int_div__DOT__div_i__DOT__BReg_DP;
         IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__int_div__DOT__div_i__DOT__BReg_DN;
         IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__int_div__DOT__div_i__DOT__AddMux_D;
-        IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__int_div__DOT__div_i__DOT__AddTmp_D;
     };
     struct {
+        IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__int_div__DOT__div_i__DOT__AddTmp_D;
         IData/*31:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__int_div__DOT__div_i__DOT__OutMux_D;
         IData/*16:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__mult_i__DOT__short_op_a;
         IData/*16:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__mult_i__DOT__short_op_b;
@@ -556,9 +557,9 @@ VL_MODULE(Vtb_top_verilator) {
         QData/*36:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__alu_i__DOT__adder_result_expanded;
         QData/*33:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__mult_i__DOT__short_mac;
         QData/*33:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__mult_i__DOT__short_result;
-        QData/*32:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__mult_i__DOT__dot_short_result;
     };
     struct {
+        QData/*32:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__mult_i__DOT__dot_short_result;
         WData/*67:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__ex_stage_i__DOT__mult_i__DOT__genblk1__DOT__dot_short_mul[3];
         WData/*767:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__cs_registers_i__DOT__pmp_reg_q[24];
         WData/*767:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__cs_registers_i__DOT__pmp_reg_n[24];
@@ -568,7 +569,6 @@ VL_MODULE(Vtb_top_verilator) {
     
     // LOCAL VARIABLES
     // Internals; generally not touched by application code
-    CData/*4:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT____Vcellout__cs_registers_i__irq_id_o;
     CData/*1:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__if_stage_i__DOT____Vcellinp__hwloop_controller_i__hwlp_dec_cnt_id_i;
     CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__if_stage_i__DOT__genblk1__DOT__prefetch_128__DOT__prefetch_buffer_i__DOT____Vcellinp__L0_buffer_i__hwlp_i;
     CData/*0:0*/ tb_top_verilator__DOT__riscv_wrapper_i__DOT__riscv_core_i__DOT__cs_registers_i__DOT____Vlvbound2;

@@ -70,6 +70,7 @@ logic        irq_ack_monitor;
 logic        irq_sd;
 logic [31:0] irq_sd_lines;
 logic        ack_flag;
+logic        irq_sd_lines_changed;
 
 
 // struct 18bit irq_lines
@@ -81,7 +82,7 @@ typedef struct packed {
   logic        irq_nmi;
 } Interrupts_t;
 
-Interrupts_t irq_lines_q, irq_lines_n, irq_lines_mask;
+Interrupts_t irq_lines_q, irq_lines_n;
 Interrupts_t irq_rnd_lines;
 
 
@@ -108,39 +109,7 @@ begin
       // random irq word id stored and updated every time 
       // an interrupt is taken by the core
 
-      if (irq_ack_i) begin
-        case (irq_id_i)
-          NMI_IRQ_ID:      irq_lines_mask.irq_nmi      = 1'b1;
-          FAST14_IRQ_ID:   irq_lines_mask.irq_fast[14] = 1'b1;
-          FAST13_IRQ_ID:   irq_lines_mask.irq_fast[13] = 1'b1;
-          FAST12_IRQ_ID:   irq_lines_mask.irq_fast[12] = 1'b1;
-          FAST11_IRQ_ID:   irq_lines_mask.irq_fast[11] = 1'b1;
-          FAST10_IRQ_ID:   irq_lines_mask.irq_fast[10] = 1'b1;
-          FAST9_IRQ_ID:    irq_lines_mask.irq_fast[9]  = 1'b1;
-          FAST8_IRQ_ID:    irq_lines_mask.irq_fast[8]  = 1'b1;
-          FAST7_IRQ_ID:    irq_lines_mask.irq_fast[7]  = 1'b1;
-          FAST6_IRQ_ID:    irq_lines_mask.irq_fast[6]  = 1'b1;
-          FAST5_IRQ_ID:    irq_lines_mask.irq_fast[5]  = 1'b1;
-          FAST4_IRQ_ID:    irq_lines_mask.irq_fast[4]  = 1'b1;
-          FAST3_IRQ_ID:    irq_lines_mask.irq_fast[3]  = 1'b1;
-          FAST2_IRQ_ID:    irq_lines_mask.irq_fast[2]  = 1'b1;
-          FAST1_IRQ_ID:    irq_lines_mask.irq_fast[1]  = 1'b1;
-          FAST0_IRQ_ID:    irq_lines_mask.irq_fast[0]  = 1'b1;
-          EXTERNAL_IRQ_ID: irq_lines_mask.irq_external = 1'b1;
-          SOFTWARE_IRQ_ID: irq_lines_mask.irq_timer    = 1'b1;
-          TIMER_IRQ_ID:    irq_lines_mask.irq_software = 1'b1;
-          default : /* default */;
-        endcase
-      end else begin
-        irq_lines_mask = '0;
-      end
-
-      if (irq_random) begin
-        irq_lines_n = irq_rnd_lines;
-      end else begin
-        irq_lines_n = irq_lines_q & (~irq_lines_mask); 
-      end
-
+      irq_lines_n = irq_rnd_lines;
     end
 
     PC_TRIG:
@@ -195,10 +164,6 @@ begin
             n >= min_irq_cycles;
             n <= max_irq_cycles;
         };
-        while(wait_cycles.n != 0) begin
-            @(posedge clk_i);
-            wait_cycles.n--;
-        end
 
         irq_rnd_lines = value.n;
         irq_random    = 1'b1;
@@ -207,12 +172,24 @@ begin
         irq_random    = 1'b0;
         
         //we don't care about the ack in this mode
-        for(i=0; i<max_irq_cycles; i++) begin
-            @(posedge clk_i);
+        while (wait_cycles.n) begin
+          @(posedge clk_i)
+            irq_sd_lines <= irq_sd_lines_i;
+
+          if (irq_sd_lines_changed) begin
+            irq_rnd_lines.irq_software = irq_sd_lines_i [3];
+            irq_rnd_lines.irq_timer    = irq_sd_lines_i [7];
+            irq_rnd_lines.irq_external = irq_sd_lines_i [11];
+            irq_rnd_lines.irq_fast     = irq_sd_lines_i [30:16];
+            irq_rnd_lines.irq_nmi      = irq_sd_lines_i [31];
+          end
+          wait_cycles.n--;
         end
     end
 end
 
+// check if signal changed @posedge
+assign irq_sd_lines_changed = (irq_sd_lines != irq_sd_lines_i) ? 1 : 0;
 // SOFTWARE DEFINED INTERRUPTS PROCESS
 // Samples irq lines (word) as defined by software
 

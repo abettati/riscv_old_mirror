@@ -9,15 +9,13 @@
 #define ERR_CODE_WRONG_ORDER 2
 #define ERR_CODE_WRONG_NUM   3
 
-#define OUTPORT                0x10000000
+#define OUTPORT 0x10000000
 
 #define RND_STALL_REG_10       0x16000028
 #define RND_STALL_REG_11       0x1600002C
 #define RND_STALL_REG_12       0x16000030
 #define RND_STALL_REG_13       0x16000034
 #define RND_STALL_IRQ_REG      0x16000038
-
-#define RND_STALL_IRQ_MODE_REG 0x16000028
 
 #define IRQ_MODE_RND 2
 #define IRQ_MODE_SD  4
@@ -55,30 +53,6 @@ volatile uint32_t prev_irq_pending  = 0;
 volatile uint32_t first_irq_pending = 0;
 volatile uint32_t rnd_ie_mask       = 0;
 volatile uint32_t mmstatus          = 0;
-
-
-uint32_t IRQ_ID [IRQ_NUM] = 
-{ 
-  SOFTWARE_IRQ_ID ,  // 0
-  TIMER_IRQ_ID    ,  // 1
-  EXTERNAL_IRQ_ID ,  // 2
-  FAST0_IRQ_ID    ,  // 3
-  FAST1_IRQ_ID    ,  // 4
-  FAST2_IRQ_ID    ,  // 5
-  FAST3_IRQ_ID    ,  // 6
-  FAST4_IRQ_ID    ,  // 7
-  FAST5_IRQ_ID    ,  // 8
-  FAST6_IRQ_ID    ,  // 9
-  FAST7_IRQ_ID    ,  // 10
-  FAST8_IRQ_ID    ,  // 11
-  FAST9_IRQ_ID    ,  // 12
-  FAST10_IRQ_ID   ,  // 13 
-  FAST11_IRQ_ID   ,  // 14 
-  FAST12_IRQ_ID   ,  // 15
-  FAST13_IRQ_ID   ,  // 16 
-  FAST14_IRQ_ID   ,  // 17 
-  NMI_IRQ_ID         // 18
-};
 
 uint32_t IRQ_ID_PRIORITY [IRQ_NUM] = 
 { 
@@ -254,7 +228,6 @@ uint32_t random_num(uint32_t upper_bound, uint32_t lower_bound)
     uint32_t num = (rand() % (upper_bound - lower_bound + 1)) + lower_bound;
     return num;
 } 
-
 void mstatus_enable(uint32_t bit_enabled)
 {
     asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
@@ -262,10 +235,10 @@ void mstatus_enable(uint32_t bit_enabled)
     asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));    
 }
 
-void mstatus_disable(uint32_t bit_enabled)
+void mstatus_disable(uint32_t bit_disabled)
 {
     asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
-    mmstatus &= (~(1 << bit_enabled));                                                 
+    mmstatus &= (~(1 << bit_disabled));                                                 
     asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));    
 }
 
@@ -281,11 +254,8 @@ int main(int argc, char *argv[])
     uint32_t regVal;
     volatile uint32_t* baseAddr;
 
-    // enable mstatus.mie
-    asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       
-    mmstatus |= (1 << 3);                                                 
-    asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));  
-
+    // enable mstatus.mie  
+    mstatus_enable(MSTATUS_MIE_BIT);
 
     // Enable all mie (need to store) 
     regVal = 0xFFFFFFFF;
@@ -293,35 +263,36 @@ int main(int argc, char *argv[])
                   : : [regVal] "r" (regVal));
     
     // set timer_irq_mask_q[TIMER_IRQ_ID] = 1
-    // writew(128,0x15000000);
+     writew(128,0x15000000);
 
 
     // software defined irq gen mode
-    writew(IRQ_MODE_SD,RND_STALL_REG_10);
+    writew(4,0x16000028);
 
     // Sequential test (no masking)
     
-    // disable mstatus.mie
-    mstatus_disable(MSTATUS_MIE_BIT);
+    // disable mstatues.mie
+    mstatus_disable(MSTATUS_MIE_BIT); 
+
 
     for (int i = 0; i < IRQ_NUM; i++)
     {      
         // add new pending irq
-        irq_pending |= (1 << IRQ_ID[i]);
+        irq_pending |= (1 << IRQ_ID_PRIORITY[i]);
         prev_irq_pending = irq_pending;
 
         writew(irq_pending, RND_STALL_IRQ_REG);
 
         // enable mstatus.mie
-        asm volatile("csrwi mstatus, 0x8");
-        
+        mstatus_enable(MSTATUS_MIE_BIT);
+
         // wait for the irq to be served
         while(prev_irq_pending == irq_pending);
 
         // irq_id sampling and testing
-        if(IRQ_ID[i] != irq_id)
+        if(IRQ_ID_PRIORITY[i] != irq_id)
         {
-            printf("TEST1: IRQ served in wrong order %d %d\n", IRQ_ID[i], irq_id);
+            printf("TEST1: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
             return -1;
         }
     };
@@ -331,7 +302,7 @@ int main(int argc, char *argv[])
     // Multiple interrupts at a time
     irq_pending |= 0xFFFFFFFF;
 
-    // disable mstatus.mie
+    // disable mstatues.mie
     mstatus_disable(MSTATUS_MIE_BIT);
 
     writew(irq_pending, RND_STALL_IRQ_REG);
@@ -342,7 +313,7 @@ int main(int argc, char *argv[])
         prev_irq_pending=irq_pending;
         
         // enable mstatus.mie
-        mstatus_enable(MSTATUS_MIE_BIT);
+        mstatus_enable(MSTATUS_MIE_BIT); 
 
         // wait for nex irq to be served
         while(prev_irq_pending==irq_pending);
@@ -378,7 +349,7 @@ int main(int argc, char *argv[])
     // build ie word randomly
     for (int i = 0; i < RND_IE_NUM; ++i)
     {
-        rnd_ie_mask |= (1 << IRQ_ID[random_num(IRQ_NUM, 0)]) ;
+        rnd_ie_mask |= (1 << IRQ_ID_PRIORITY[random_num(IRQ_NUM, 0)]) ;
     }
 
       
@@ -388,17 +359,16 @@ int main(int argc, char *argv[])
     // build irq word randomly
     for (int i = 0; i < RND_IRQ_NUM; ++i)
     {
-        irq_pending |= (1 << IRQ_ID[random_num(IRQ_NUM, 0)]) ;
+        irq_pending |= (1 << IRQ_ID_PRIORITY[random_num(IRQ_NUM, 0)]) ;
     }
     
     first_irq_pending = irq_pending;
     
-    // disable mstatus.mie
+    // disable mstatues.mie
     mstatus_disable(MSTATUS_MIE_BIT);
 
     writew(irq_pending, RND_STALL_IRQ_REG);
 
-    // Scan all interrupt bits following priority order
     for (int i = 0; i < IRQ_NUM; ++i)
     {
         // test if the nmi irq should be served
@@ -406,10 +376,10 @@ int main(int argc, char *argv[])
         {
             // sample irq_pending
             prev_irq_pending=irq_pending;
+            printf("received irq %d\n", irq_id);
 
             // enable mstatus.mie
             mstatus_enable(MSTATUS_MIE_BIT);
-
 
             // wait for next irq to be served
             while(prev_irq_pending==irq_pending);
@@ -430,7 +400,6 @@ int main(int argc, char *argv[])
 
             // enable mstatus.mie
             mstatus_enable(MSTATUS_MIE_BIT);
-
 
             // wait for next irq to be served
             while(prev_irq_pending==irq_pending);

@@ -249,7 +249,7 @@ interrupt_test/interrupt_test.elf: interrupt_test/interrupt_test.c
 		-T interrupt_test/link.ld  \
 		-static \
 		interrupt_test/crt0.S \
-		$^ interrupt_test/syscalls.c custom/vectors.S \
+		$^ interrupt_test/syscalls.c interrupt_test/vectors.S \
 		-I $(RISCV)/riscv32-unknown-elf/include \
 		-L $(RISCV)/riscv32-unknown-elf/lib \
 		-lc -lm -lgcc
@@ -452,7 +452,7 @@ csmith-loop: riscv-fesvr/build.ok riscv-isa-sim/build.ok
 
 # general targets
 .PHONY: clean
-clean: tb-clean verilate-clean vcs-clean firmware-clean csmith-clean custom-clean
+clean: tb-clean verilate-clean vcs-clean firmware-clean csmith-clean custom-clean interrupt-clean
 
 .PHONY: distclean
 distclean: clean
