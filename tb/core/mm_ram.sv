@@ -55,8 +55,9 @@ module mm_ram
     localparam int                        TIMER_IRQ_ID   = 7;
     localparam int                        RND_STALL_REGS = 16;
     localparam int                        RND_IRQ_ID     = 31;
-    localparam int                        IRQ_MAX_LINES  = 524287;
-    localparam int                        IRQ_MIN_LINES  = 0;
+    //localparam int                        IRQ_MAX_LINES  = 524287;
+    localparam int                        IRQ_MAX_ID     = 22;
+    localparam int                        IRQ_MIN_ID     = 16;
 
     // mux for read and writes
     enum logic [1:0]{RAM, MM, RND_STALL, ERR} select_rdata_d, select_rdata_q;
@@ -678,8 +679,8 @@ assign irq_nmi_o      = irq_rnd_lines.irq_nmi;
       .irq_mode_i        ( rnd_stall_regs[10]                           ),
       .irq_min_cycles_i  ( rnd_stall_regs[11]                           ),
       .irq_max_cycles_i  ( rnd_stall_regs[12]                           ),
-      .irq_min_lines_i   ( IRQ_MIN_LINES                                ),
-      .irq_max_lines_i   ( IRQ_MAX_LINES                                ),
+      .irq_min_id_i      ( IRQ_MIN_ID                                   ),
+      .irq_max_id_i      ( IRQ_MAX_ID                                   ),
       .irq_act_id_o      (                                              ),
       .irq_id_we_o       (                                              ),
       .irq_pc_id_i       ( pc_core_id_i                                 ),

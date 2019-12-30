@@ -267,7 +267,7 @@ interrupt-vsim-run: vsim-run
 interrupt-vsim-run-gui: vsim-all interrupt_test/interrupt_test.hex
 interrupt-vsim-run-gui: ALL_VSIM_FLAGS += "+firmware=interrupt_test/interrupt_test.hex"
 interrupt-vsim-run-gui: vsim-run-gui
-interrupt-vsim-run-gui: $(RISCV)/riscv32-unknown-elf/bin/objdump -d interrupt_test/interrupt_test.elf > interrupt_test/interrupt_test_dump.txt
+interrupt-vsim-run-gui: $(RISCV)/riscv32-unknown-elf/bin/objdump interrupt_test/interrupt_test.elf > interrupt_test/interrupt_test_dump.txt
 
 
 .PHONY: interrupt-veri-run

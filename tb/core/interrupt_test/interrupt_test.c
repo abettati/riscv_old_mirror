@@ -11,14 +11,15 @@
 
 #define OUTPORT 0x10000000
 
-#define RND_STALL_REG_10       0x16000028
-#define RND_STALL_REG_11       0x1600002C
-#define RND_STALL_REG_12       0x16000030
-#define RND_STALL_REG_13       0x16000034
-#define RND_STALL_IRQ_REG      0x16000038
+#define RND_STALL_REG_10       0x16000028 // irq_mode
+#define RND_STALL_REG_11       0x1600002C // irq_min_cycles
+#define RND_STALL_REG_12       0x16000030 // irq_max_cycles
+#define RND_STALL_REG_13       0x16000034 // irq_pc_trig
+#define RND_STALL_REG_14       0x16000038 // irq_sd_lines
 
-#define IRQ_MODE_RND 2
-#define IRQ_MODE_SD  4
+#define IRQ_MODE_RND     2
+#define IRQ_MODE_PC_TRIG 3
+#define IRQ_MODE_SD      4
 
 #define MSTATUS_MIE_BIT 3
 
@@ -43,8 +44,12 @@
 #define FAST14_IRQ_ID    30
 #define NMI_IRQ_ID       31
 
-#define RND_IRQ_NUM      100
-#define RND_IE_NUM       100
+#define RND_IRQ_NUM        8
+#define RND_IE_NUM         13
+#define RND_IRQ_MIN_CYCLES 4096
+#define RND_IRQ_MAX_CYCLES 4096
+
+#define MAT_DIM          4
 
 volatile uint32_t irq_processed     = 1;
 volatile uint32_t irq_id            = 0;
@@ -77,6 +82,17 @@ uint32_t IRQ_ID_PRIORITY [IRQ_NUM] =
   TIMER_IRQ_ID       // 18
 };
 
+
+uint32_t res[MAT_DIM][MAT_DIM];
+uint32_t mat1[MAT_DIM][MAT_DIM] = {{1, 1, 1, 1}, 
+                              {2, 2, 2, 2}, 
+                              {3, 3, 3, 3}, 
+                              {4, 4, 4, 4}}; 
+  
+uint32_t mat2[MAT_DIM][MAT_DIM] = {{1, 1, 1, 1}, 
+                              {2, 2, 2, 2}, 
+                              {3, 3, 3, 3}, 
+                              {4, 4, 4, 4}}; 
 
 void print_chr(char ch)
 {
@@ -119,9 +135,8 @@ void writew(uint32_t val, volatile uint32_t *addr)
 #define FAST_IRQ_GENERIC(id)                                                 \
 do {                                                                         \
     irq_id = id;                                                             \
-    asm volatile("csrr %0, mip": "=r" (irq_pending));                        \
     irq_pending &= (~(1 << irq_id));                                         \
-    writew(irq_pending, RND_STALL_IRQ_REG);                                  \
+    writew(irq_pending, RND_STALL_REG_14);                                   \
     asm volatile("csrr %0, mstatus": "=r" (mmstatus));                       \
     mmstatus &= (~(1 << 7));                                                 \
     asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus)); \
@@ -242,6 +257,22 @@ void mstatus_disable(uint32_t bit_disabled)
     asm volatile("csrw mstatus, %[mmstatus]" : : [mmstatus] "r" (mmstatus));    
 }
 
+// integer matrix multiplication
+void mat_mult(uint32_t mat1[MAT_DIM][MAT_DIM], uint32_t mat2[MAT_DIM][MAT_DIM], uint32_t res[MAT_DIM][MAT_DIM])
+{ 
+    uint32_t i, j, k; 
+    for (i = 0; i < MAT_DIM; i++) 
+    {
+        for (j = 0; j < MAT_DIM; j++) 
+        {
+            res[i][j] = 0;
+            for (k = 0; k < MAT_DIM; k++)
+                res[i][j] += mat1[i][k] *
+                             mat2[k][j];
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -281,7 +312,7 @@ int main(int argc, char *argv[])
         irq_pending |= (1 << IRQ_ID_PRIORITY[i]);
         prev_irq_pending = irq_pending;
 
-        writew(irq_pending, RND_STALL_IRQ_REG);
+        writew(irq_pending, RND_STALL_REG_14);
 
         // enable mstatus.mie
         mstatus_enable(MSTATUS_MIE_BIT);
@@ -305,7 +336,7 @@ int main(int argc, char *argv[])
     // disable mstatues.mie
     mstatus_disable(MSTATUS_MIE_BIT);
 
-    writew(irq_pending, RND_STALL_IRQ_REG);
+    writew(irq_pending, RND_STALL_REG_14);
 
     for (int i = 0; i < IRQ_NUM; i++) 
     {
@@ -354,7 +385,7 @@ int main(int argc, char *argv[])
 
       
     // write the mask to mie
-    asm volatile("csrw 0x304, %[regVal]" : : [regVal] "r" (rnd_ie_mask));
+    asm volatile("csrw 0x304, %[rnd_ie_mask]" : : [rnd_ie_mask] "r" (rnd_ie_mask));
       
     // build irq word randomly
     for (int i = 0; i < RND_IRQ_NUM; ++i)
@@ -367,7 +398,7 @@ int main(int argc, char *argv[])
     // disable mstatues.mie
     mstatus_disable(MSTATUS_MIE_BIT);
 
-    writew(irq_pending, RND_STALL_IRQ_REG);
+    writew(irq_pending, RND_STALL_REG_14);
 
     for (int i = 0; i < IRQ_NUM; ++i)
     {
@@ -415,7 +446,7 @@ int main(int argc, char *argv[])
 
     if(irq_pending != ((~rnd_ie_mask) & first_irq_pending))
     {
-        printf("TEST3: wrong number of irq served\n first_irq_pending: %d irq_pending: %d rnd_ie_mask: %d\n", first_irq_pending, irq_pending, rnd_ie_mask);
+        printf("TEST3: wrong number of irq served\n first_irq_pending: %u irq_pending: %u rnd_ie_mask: %u\n", first_irq_pending, irq_pending, rnd_ie_mask);
         return ERR_CODE_WRONG_NUM;
     }
 
@@ -427,24 +458,60 @@ int main(int argc, char *argv[])
     // set hw timer = 3
     //writew(3,0x15000004);
     
-    mstatus_enable(MSTATUS_MIE_BIT);
 
     // Enable all mie (need to store) 
     regVal = 0xFFFFFFFF;
     asm volatile("csrw 0x304, %[regVal]"
                   : : [regVal] "r" (regVal));
 
-    writew(4096,RND_STALL_REG_11);
+    writew(RND_IRQ_MIN_CYCLES, RND_STALL_REG_11);
 
-    writew(4096,RND_STALL_REG_12);
+    writew(RND_IRQ_MAX_CYCLES, RND_STALL_REG_12);
 
     // software defined irq gen mode
     writew(IRQ_MODE_RND, RND_STALL_REG_10);
 
-    while(1)
-    {
-        mstatus_enable(MSTATUS_MIE_BIT);
-    };
+    // while(1)
+    // {
+    //     mstatus_enable(MSTATUS_MIE_BIT);
+    // };
+
+    writew(IRQ_MODE_PC_TRIG, RND_STALL_REG_10);
+
+    
+    ///////////////////////////////
+    // PC Trig Test              //
+    ///////////////////////////////
+    
+    // Test 4: a software interrupt (id = 3) is raised  
+    // as the program counter assumes a desired value
+
+
+    printf("\nTEST 4: PC TRIG\n");
+
+    // set desired PC value
+    writew(0x0000043e, RND_STALL_REG_13);
+    // switch to PC_TRIG mode
+    writew(IRQ_MODE_PC_TRIG, RND_STALL_REG_10);
+    
+    mstatus_enable(MSTATUS_MIE_BIT);
+
+    mat_mult(mat1, mat2, res);
+
+    printf("\nResult matrix is\n"); 
+    for (int i = 0; i < MAT_DIM; i++) 
+    { 
+        // mstatus_enable(MSTATUS_MIE_BIT);
+        for (int j = 0; j < MAT_DIM; j++)
+        {
+            print_dec(res[i][j]);
+            mstatus_enable(MSTATUS_MIE_BIT);
+            print_chr(' ');
+        } 
+        printf("\n"); 
+    } 
+
+
 
     return EXIT_SUCCESS;
 }

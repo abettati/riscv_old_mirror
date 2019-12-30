@@ -113,7 +113,9 @@ if {$rvcores ne ""} {
   add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_mode_i
   add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_sd_lines_i
   add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_rnd_lines_o
+  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_pc_trig_lines
   add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_random
+  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_monitor
 
 
                                                             

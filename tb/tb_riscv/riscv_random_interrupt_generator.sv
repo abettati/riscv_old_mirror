@@ -40,8 +40,8 @@ module riscv_random_interrupt_generator
     input logic  [31:0]   irq_mode_i,
     input logic  [31:0]   irq_min_cycles_i,
     input logic  [31:0]   irq_max_cycles_i,
-    input logic  [31:0]   irq_min_lines_i,
-    input logic  [31:0]   irq_max_lines_i,
+    input logic  [31:0]   irq_min_id_i,
+    input logic  [31:0]   irq_max_id_i,
     output logic [31:0]   irq_act_id_o,
     output logic          irq_id_we_o,
     input logic  [31:0]   irq_pc_id_i,
@@ -57,6 +57,7 @@ endclass : rand_irq_cycles
 
 class rand_irq_id;
     rand int n;
+    rand bit [31:0] rand_word;
 endclass : rand_irq_id
 
 logic [31:0] irq_mode_q;
@@ -83,7 +84,7 @@ typedef struct packed {
 } Interrupts_t;
 
 Interrupts_t irq_lines_q, irq_lines_n;
-Interrupts_t irq_rnd_lines;
+Interrupts_t irq_rnd_lines, irq_pc_trig_lines;
 
 
 assign irq_ack_o       = irq_ack_i;
@@ -115,7 +116,7 @@ begin
     PC_TRIG:
     begin
       // TODO generate individual irq lines
-      irq_lines_n = '0;
+      irq_lines_n = irq_pc_trig_lines;
     end
 
     SOFTWARE_DEFINED:
@@ -142,50 +143,62 @@ end
 
 initial
 begin
-    automatic rand_irq_cycles wait_cycles = new();
-    automatic rand_irq_id value = new();
-    int temp,i, min_irq_cycles, max_irq_cycles, min_irq_lines, max_irq_lines;
-    irq_random     = 1'b0;
-    irq_rnd_lines  = '0;
-    while(1) begin
-        @(posedge clk_i);
+  automatic rand_irq_cycles wait_cycles = new();
+  automatic rand_irq_id value = new();
+  int temp,i, min_irq_cycles, max_irq_cycles, min_irq_id, max_irq_id;
+  irq_random     = 1'b0;
+  irq_rnd_lines  = '0;
+  while(1) begin
+    @(posedge clk_i);
 
-        wait(irq_mode_q == RANDOM);
-        min_irq_lines  = irq_min_lines_i;
-        max_irq_lines  = irq_max_lines_i;
-        min_irq_cycles = irq_min_cycles_i;
-        max_irq_cycles = irq_max_cycles_i;
+    wait(irq_mode_q == RANDOM);
+    min_irq_id  = irq_min_id_i;
+    max_irq_id  = irq_max_id_i;
+    min_irq_cycles = irq_min_cycles_i;
+    max_irq_cycles = irq_max_cycles_i;
 
-        temp = value.randomize() with{
-            n >= min_irq_lines;
-            n <= max_irq_lines;
-        };
-        temp = wait_cycles.randomize() with{
-            n >= min_irq_cycles;
-            n <= max_irq_cycles;
-        };
-
-        irq_rnd_lines = value.n;
-        irq_random    = 1'b1;
-        irq_act_id_o  = value.n;
-        @(posedge clk_i);
-        irq_random    = 1'b0;
-        
-        //we don't care about the ack in this mode
-        while (wait_cycles.n) begin
-          @(posedge clk_i)
-            irq_sd_lines <= irq_sd_lines_i;
-
-          if (irq_sd_lines_changed) begin
-            irq_rnd_lines.irq_software = irq_sd_lines_i [3];
-            irq_rnd_lines.irq_timer    = irq_sd_lines_i [7];
-            irq_rnd_lines.irq_external = irq_sd_lines_i [11];
-            irq_rnd_lines.irq_fast     = irq_sd_lines_i [30:16];
-            irq_rnd_lines.irq_nmi      = irq_sd_lines_i [31];
-          end
-          wait_cycles.n--;
-        end
+    // generate random word and mask it with lower/upper bounds
+    temp = value.randomize();
+    for(int i = min_irq_id-1; i >= 0; i--) begin
+      value.rand_word[i] = 0;
     end
+
+    for(int i = max_irq_id+1; i <= 31; i++) begin
+      value.rand_word[i] = 0;
+    end
+
+    temp = wait_cycles.randomize() with{
+        n >= min_irq_cycles;
+        n <= max_irq_cycles;
+    };
+
+    // build random irq word
+    irq_rnd_lines.irq_software = value.rand_word [3];
+    irq_rnd_lines.irq_timer    = value.rand_word [7];
+    irq_rnd_lines.irq_external = value.rand_word [11];
+    irq_rnd_lines.irq_fast     = value.rand_word [30:16];
+    irq_rnd_lines.irq_nmi      = value.rand_word [31];
+
+    irq_random    = 1'b1;
+    irq_act_id_o  = value.n;
+    @(posedge clk_i);
+    irq_random    = 1'b0;
+        
+    // random irq word: update logic
+    while (wait_cycles.n) begin
+      @(posedge clk_i)
+      irq_sd_lines <= irq_sd_lines_i;
+
+      if (irq_sd_lines_changed) begin
+        irq_rnd_lines.irq_software = irq_sd_lines_i [3];
+        irq_rnd_lines.irq_timer    = irq_sd_lines_i [7];
+        irq_rnd_lines.irq_external = irq_sd_lines_i [11];
+        irq_rnd_lines.irq_fast     = irq_sd_lines_i [30:16];
+        irq_rnd_lines.irq_nmi      = irq_sd_lines_i [31];
+      end
+      wait_cycles.n--;
+    end
+  end
 end
 
 // check if signal changed @posedge
@@ -214,23 +227,34 @@ begin
   end
 end
 
-//Monitor Process
+//PC Trig Process
 initial
 begin
-    int pc_value;
-    irq_monitor    = 1'b0;
-    irq_id_monitor = '0;
-    pc_value = 0;
-    wait(irq_mode_q == PC_TRIG);
-    wait(irq_pc_id_i == irq_pc_trig_i);
-    irq_monitor    = 1'b1;
-    irq_id_monitor = irq_min_lines_i;
-    while(irq_ack_i != 1'b1) begin
-        @(posedge clk_i);   //Keep the request high until the acknowledge is received
-    end
+  int pc_value;
+  irq_monitor    = 1'b0;
+  pc_value = 0;
+  irq_pc_trig_lines = '0;
+  wait(irq_mode_q == PC_TRIG);
+  wait(irq_pc_id_i == irq_pc_trig_i);
+  irq_monitor = 1'b1;
+
+  // build irq monitor word
+  irq_pc_trig_lines.irq_software = 1'b1;
+
+  // irq monitor word: update logic
+  while(~irq_sd_lines_changed) begin
     @(posedge clk_i);
-    irq_monitor    = 1'b0;
-    irq_id_monitor = '0;
+    irq_sd_lines <= irq_sd_lines_i;
+  end
+
+  irq_pc_trig_lines.irq_software = irq_sd_lines_i [3];
+  irq_pc_trig_lines.irq_timer    = irq_sd_lines_i [7];
+  irq_pc_trig_lines.irq_external = irq_sd_lines_i [11];
+  irq_pc_trig_lines.irq_fast     = irq_sd_lines_i [30:16];
+  irq_pc_trig_lines.irq_nmi      = irq_sd_lines_i [31];
+
+  irq_monitor    = 1'b0;
+  irq_id_monitor = '0;
 end
 
 initial
