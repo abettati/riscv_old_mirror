@@ -459,28 +459,11 @@ int main(int argc, char *argv[])
     //writew(3,0x15000004);
     
 
-    // Enable all mie (need to store) 
-    regVal = 0xFFFFFFFF;
-    asm volatile("csrw 0x304, %[regVal]"
-                  : : [regVal] "r" (regVal));
 
-    writew(RND_IRQ_MIN_CYCLES, RND_STALL_REG_11);
-
-    writew(RND_IRQ_MAX_CYCLES, RND_STALL_REG_12);
-
-    // software defined irq gen mode
-    writew(IRQ_MODE_RND, RND_STALL_REG_10);
-
-    // while(1)
-    // {
-    //     mstatus_enable(MSTATUS_MIE_BIT);
-    // };
-
-    writew(IRQ_MODE_PC_TRIG, RND_STALL_REG_10);
 
     
     ///////////////////////////////
-    // PC Trig Test              //
+    // TEST 4: PC Trig Test      //
     ///////////////////////////////
     
     // Test 4: a software interrupt (id = 3) is raised  
@@ -488,6 +471,11 @@ int main(int argc, char *argv[])
 
 
     printf("\nTEST 4: PC TRIG\n");
+
+    // Enable all mie (need to store) 
+    regVal = 0xFFFFFFFF;
+    asm volatile("csrw 0x304, %[regVal]"
+                  : : [regVal] "r" (regVal));
 
     // set desired PC value
     writew(0x0000043e, RND_STALL_REG_13);
@@ -511,7 +499,32 @@ int main(int argc, char *argv[])
         printf("\n"); 
     } 
 
+    /////////////////////////////////
+    // TEST 5: Random IRQs bombing //
+    /////////////////////////////////
+    
+    // Test 5: random irqs arrive randomly 
+    // while the core is executing some task (e.g. matrix mult)
 
+    printf("\nTEST 5: Random IRQs Bombing\n");
+
+
+    // Enable all mie (need to store) 
+    regVal = 0xFFFFFFFF;
+    asm volatile("csrw 0x304, %[regVal]"
+                  : : [regVal] "r" (regVal));
+
+    writew(RND_IRQ_MIN_CYCLES, RND_STALL_REG_11);
+
+    writew(RND_IRQ_MAX_CYCLES, RND_STALL_REG_12);
+
+    // software defined irq gen mode
+    writew(IRQ_MODE_RND, RND_STALL_REG_10);
+
+    for(int i = 0; i< IRQ_NUM; i++)
+    {
+        mstatus_enable(MSTATUS_MIE_BIT);
+    };
 
     return EXIT_SUCCESS;
 }
