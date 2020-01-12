@@ -14,7 +14,7 @@
 module riscv_wrapper
     #(parameter INSTR_RDATA_WIDTH = 128,
       parameter RAM_ADDR_WIDTH = 20,
-      parameter BOOT_ADDR = 'h80,
+      parameter BOOT_ADDR = 'h800,
       parameter PULP_SECURE = 1)
     (input logic         clk_i,
      input logic         rst_ni,
@@ -45,15 +45,16 @@ module riscv_wrapper
     logic                         debug_req_i;
 
     // irq signals
-    logic [0:4]                   irq_id_in;
+    logic [0:5]                   irq_id_in;
     logic                         irq_ack;
-    logic [0:4]                   irq_id_out;
+    logic [0:5]                   irq_id_out;
     logic                         irq_sec;
     logic                         irq_software;
     logic                         irq_timer;    
     logic                         irq_external;
     logic [14:0]                  irq_fast;
     logic                         irq_nmi; 
+    logic [31:0]                  irq_fastx;
 
 
     // interrupts (only timer for now)
@@ -109,6 +110,7 @@ module riscv_wrapper
          .irq_external_i         ( irq_external          ),  // exploded irq lines
          .irq_fast_i             ( irq_fast              ),  // exploded irq lines
          .irq_nmi_i              ( irq_nmi               ),
+         .irq_fastx_i            ( irq_fastx             ),
 
          .irq_ack_o              ( irq_ack               ),
          .irq_id_o               ( irq_id_out            ),
@@ -156,7 +158,8 @@ module riscv_wrapper
          .irq_external_o ( irq_external                   ),
          .irq_fast_o     ( irq_fast                       ),
          .irq_nmi_o      ( irq_nmi                        ),
-         
+         .irq_fastx_o    ( irq_fastx                      ),
+
          .pc_core_id_i   ( riscv_core_i.pc_id             ),
 
          .tests_passed_o ( tests_passed_o                 ),

@@ -78,7 +78,7 @@ module riscv_if_stage
 
     input  logic  [2:0] pc_mux_i,              // sel for pc multiplexer
     input  logic  [2:0] exc_pc_mux_i,          // selects ISR address
-    input  logic  [4:0] exc_vec_pc_mux_i,      // selects ISR address for vectorized interrupt lines
+    input  logic  [6:0] exc_vec_pc_mux_i,      // selects ISR address for vectorized interrupt lines
 
     // jump and branch target and decision
     input  logic [31:0] jump_target_id_i,      // jump target address
@@ -139,7 +139,7 @@ module riscv_if_stage
 
     unique case (exc_pc_mux_i)
       EXC_PC_EXCEPTION:                        exc_pc = { trap_base_addr, 8'h0 }; //1.10 all the exceptions go to base address
-      EXC_PC_IRQ:                              exc_pc = { trap_base_addr, 1'b0, exc_vec_pc_mux_i[4:0], 2'b0 };
+      EXC_PC_IRQ:                              exc_pc = { trap_base_addr, exc_vec_pc_mux_i[6:0], 2'b0 }; // abet, exc_pc { trap_base_addr, 1'b0, exc_vec_pc_mux_i[4:0], 2'b0 };
       EXC_PC_DBD:                              exc_pc = { DM_HaltAddress       };
       default:;
     endcase

@@ -14,8 +14,8 @@
 # //  18 U.S.C. Section 1905.
 # //
 # vsim "+firmware=interrupt_test/interrupt_test.hex" -gui -debugdb tb_top_vopt -do "vsim.tcl" 
-# Start time: 22:45:50 on Dec 30,2019
-# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_17718/linux_x86_64_gcc-5.3.0/export_tramp.so
+# Start time: 18:26:36 on Jan 12,2020
+# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_119343/linux_x86_64_gcc-5.3.0/export_tramp.so
 # Loading sv_std.std
 # Loading work.tb_top(fast)
 # Loading work.riscv_wrapper(fast)
@@ -68,17 +68,21 @@
 # Loading work.riscv_random_stall(fast__1)
 # Loading work.riscv_random_interrupt_generator_sv_unit(fast)
 # Loading work.riscv_random_interrupt_generator(fast)
+# ** Warning: (vsim-3015) [PCDPC] - Port size (8) does not match connection size (7) for port 'exc_cause_o'. The port definition is at: ../../rtl/riscv_controller.sv(115).
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/riscv_core_i/id_stage_i/controller_i File: ../../rtl/riscv_id_stage.sv Line: 1161
+# ** Warning: (vsim-3015) [PCDPC] - Port size (7) does not match connection size (6) for port 'csr_cause_i'. The port definition is at: ../../rtl/riscv_cs_registers.sv(123).
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/riscv_core_i/cs_registers_i File: ../../rtl/riscv_core.sv Line: 981
 # ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_core_i'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(51).
-#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/instr_random_stalls File: mm_ram.sv Line: 599
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/instr_random_stalls File: mm_ram.sv Line: 601
 # ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_mem_o'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(52).
-#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/instr_random_stalls File: mm_ram.sv Line: 599
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/instr_random_stalls File: mm_ram.sv Line: 601
 # ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_core_i'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(51).
-#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 635
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 637
 # ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_mem_o'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(52).
-#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 635
-# Compiling /tmp/bettatia@larain1.ee.ethz.ch_dpi_17718/linux_x86_64_gcc-5.3.0/exportwrapper.c
-# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_17718/linux_x86_64_gcc-5.3.0/vsim_auto_compile.so
-# ** Note: (vsim-8716) Reusing existing debug database vsim.dbg.
+#    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 637
+# Compiling /tmp/bettatia@larain1.ee.ethz.ch_dpi_119343/linux_x86_64_gcc-5.3.0/exportwrapper.c
+# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_119343/linux_x86_64_gcc-5.3.0/vsim_auto_compile.so
+# ** Note: (vsim-8900) Creating design debug database vsim.dbg.
 # do vsim.tcl
 # 1
 # [CORE] Core settings: PULP_SECURE =           1, N_PMP_ENTRIES =          16, N_PMP_CFG           4
@@ -87,6 +91,38 @@
 # ** Warning: (vsim-8315) No condition is true in the unique/priority if/case statement.
 #    Time: 0 ns  Iteration: 1  Process: /tb_top/riscv_wrapper_i/riscv_core_i/RISCY_PMP/pmp_unit_i/#ALWAYS#673 File: ../../rtl/riscv_pmp.sv Line: 677
 # TEST 1
+# IRQ SERVED: irq_ id = 63 
+# IRQ SERVED: irq_ id = 62 
+# IRQ SERVED: irq_ id = 61 
+# IRQ SERVED: irq_ id = 60 
+# IRQ SERVED: irq_ id = 59 
+# IRQ SERVED: irq_ id = 58 
+# IRQ SERVED: irq_ id = 57 
+# IRQ SERVED: irq_ id = 56 
+# IRQ SERVED: irq_ id = 55 
+# IRQ SERVED: irq_ id = 54 
+# IRQ SERVED: irq_ id = 53 
+# IRQ SERVED: irq_ id = 52 
+# IRQ SERVED: irq_ id = 51 
+# IRQ SERVED: irq_ id = 50 
+# IRQ SERVED: irq_ id = 49 
+# IRQ SERVED: irq_ id = 48 
+# IRQ SERVED: irq_ id = 47 
+# IRQ SERVED: irq_ id = 46 
+# IRQ SERVED: irq_ id = 45 
+# IRQ SERVED: irq_ id = 44 
+# IRQ SERVED: irq_ id = 43 
+# IRQ SERVED: irq_ id = 42 
+# IRQ SERVED: irq_ id = 41 
+# IRQ SERVED: irq_ id = 40 
+# IRQ SERVED: irq_ id = 39 
+# IRQ SERVED: irq_ id = 38 
+# IRQ SERVED: irq_ id = 37 
+# IRQ SERVED: irq_ id = 36 
+# IRQ SERVED: irq_ id = 35 
+# IRQ SERVED: irq_ id = 34 
+# IRQ SERVED: irq_ id = 33 
+# IRQ SERVED: irq_ id = 32 
 # IRQ SERVED: irq_ id = 31 
 # IRQ SERVED: irq_ id = 30 
 # IRQ SERVED: irq_ id = 29 
@@ -105,64 +141,8 @@
 # IRQ SERVED: irq_ id = 16 
 # IRQ SERVED: irq_ id = 11 
 # IRQ SERVED: irq_ id = 3 
-# IRQ SERVED: irq_ id = 7 
-# TEST 2: TRIGGER ALL IRQS AT ONCE
-# IRQ SERVED: irq_ id = 31 
-# IRQ SERVED: irq_ id = 30 
-# IRQ SERVED: irq_ id = 29 
-# IRQ SERVED: irq_ id = 28 
-# IRQ SERVED: irq_ id = 27 
-# IRQ SERVED: irq_ id = 26 
-# IRQ SERVED: irq_ id = 25 
-# IRQ SERVED: irq_ id = 24 
-# IRQ SERVED: irq_ id = 23 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 21 
-# IRQ SERVED: irq_ id = 20 
-# IRQ SERVED: irq_ id = 19 
-# IRQ SERVED: irq_ id = 18 
-# IRQ SERVED: irq_ id = 17 
-# IRQ SERVED: irq_ id = 16 
-# IRQ SERVED: irq_ id = 11 
-# IRQ SERVED: irq_ id = 3 
-# IRQ SERVED: irq_ id = 7 
-# STARTING TEST 3: RANDOMIZE 
-# IRQ SERVED: irq_ id = 27 
-# 
-# TEST 4: PC TRIG
-# 
-# Result matrix is
-# 10 10 10 10 
-# 20 20 20 20 
-# 30 30 30 30 
-# 40 40 40 40 
-# 
-# TEST 5: Random IRQs Bombing
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 21 
-# IRQ SERVED: irq_ id = 21 
-# IRQ SERVED: irq_ id = 21 
-# IRQ SERVED: irq_ id = 21 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 20 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 22 
-# IRQ SERVED: irq_ id = 20 
-# IRQ SERVED: irq_ id = 20 
-# IRQ SERVED: irq_ id = 21 
 # EXIT SUCCESS
 # ** Note: $finish    : tb_top.sv(137)
-#    Time: 1590580 ns  Iteration: 1  Instance: /tb_top
+#    Time: 1274210 ns  Iteration: 1  Instance: /tb_top
 # 1
 # Break in Module tb_top at tb_top.sv line 137
-# Break key hit
-# End time: 22:46:41 on Dec 30,2019, Elapsed time: 0:00:51
-# Errors: 0, Warnings: 6

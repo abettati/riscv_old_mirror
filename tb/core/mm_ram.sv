@@ -36,7 +36,7 @@ module mm_ram
      output logic                         data_rvalid_o,
      output logic                         data_gnt_o,
 
-     input logic [4:0]                    irq_id_i,
+     input logic [5:0]                    irq_id_i,
      input logic                          irq_ack_i,
 
      output logic                         irq_software_o,
@@ -44,6 +44,7 @@ module mm_ram
      output logic                         irq_external_o,
      output logic [14:0]                  irq_fast_o,
      output logic                         irq_nmi_o,
+     output logic [31:0]                  irq_fastx_o,
 
      input logic [31:0]                   pc_core_id_i,
 
@@ -148,9 +149,10 @@ module mm_ram
       logic        irq_external;
       logic [14:0] irq_fast; 
       logic        irq_nmi;
-    } Interrupts_t;
+      logic [31:0] irq_fastx;
+    } Interrupts_tb_t;
 
-    Interrupts_t irq_rnd_lines;
+    Interrupts_tb_t irq_rnd_lines;
     
     // uhh, align?
     always_comb data_addr_aligned = {data_addr_i[31:2], 2'b0};
@@ -590,7 +592,7 @@ assign irq_timer_o    = irq_rnd_lines.irq_timer | irq_timer_q;
 assign irq_external_o = irq_rnd_lines.irq_external;
 assign irq_fast_o     = irq_rnd_lines.irq_fast; 
 assign irq_nmi_o      = irq_rnd_lines.irq_nmi;
-
+assign irq_fastx_o    = irq_rnd_lines.irq_fastx;
 
 `ifndef VERILATOR
  
@@ -669,23 +671,23 @@ assign irq_nmi_o      = irq_rnd_lines.irq_nmi;
     riscv_random_interrupt_generator
     random_interrupt_generator_i
     (
-      .rst_ni            ( rst_ni                                       ),
-      .clk_i             ( clk_i                                        ),
-      .irq_i             ( 1'b0                                         ),
-      .irq_id_i          ( irq_id_i                                     ),
-      .irq_ack_i         ( irq_ack_i                                    ),
-      .irq_ack_o         (                                              ),
-      .irq_rnd_lines_o   ( irq_rnd_lines                                ),
-      .irq_mode_i        ( rnd_stall_regs[10]                           ),
-      .irq_min_cycles_i  ( rnd_stall_regs[11]                           ),
-      .irq_max_cycles_i  ( rnd_stall_regs[12]                           ),
-      .irq_min_id_i      ( IRQ_MIN_ID                                   ),
-      .irq_max_id_i      ( IRQ_MAX_ID                                   ),
-      .irq_act_id_o      (                                              ),
-      .irq_id_we_o       (                                              ),
-      .irq_pc_id_i       ( pc_core_id_i                                 ),
-      .irq_pc_trig_i     ( rnd_stall_regs[13]                           ),
-      .irq_sd_lines_i    ( rnd_stall_regs[14]                           )
+      .rst_ni            ( rst_ni                                                   ),
+      .clk_i             ( clk_i                                                    ),
+      .irq_i             ( 1'b0                                                     ),
+      .irq_id_i          ( irq_id_i                                                 ),
+      .irq_ack_i         ( irq_ack_i                                                ),
+      .irq_ack_o         (                                                          ),
+      .irq_rnd_lines_o   ( irq_rnd_lines                                            ),
+      .irq_mode_i        ( rnd_stall_regs[10]                                       ),
+      .irq_min_cycles_i  ( rnd_stall_regs[11]                                       ),
+      .irq_max_cycles_i  ( rnd_stall_regs[12]                                       ),
+      .irq_min_id_i      ( IRQ_MIN_ID                                               ),
+      .irq_max_id_i      ( IRQ_MAX_ID                                               ),
+      .irq_act_id_o      (                                                          ),
+      .irq_id_we_o       (                                                          ),
+      .irq_pc_id_i       ( pc_core_id_i                                             ),
+      .irq_pc_trig_i     ( rnd_stall_regs[13]                                       ),
+      .irq_lines_i       ( {rnd_stall_regs[15][31:0], rnd_stall_regs[14][31:0]}     )
     );
 
 `endif

@@ -33,9 +33,9 @@ module riscv_random_interrupt_generator
     input logic           rst_ni,
     input logic           clk_i,
     input logic           irq_i,
-    input logic   [4:0]   irq_id_i,
+    input logic   [5:0]   irq_id_i,
     input logic           irq_ack_i,
-    output logic [18:0]   irq_rnd_lines_o,
+    output logic [50:0]   irq_rnd_lines_o,
     output logic          irq_ack_o,
     input logic  [31:0]   irq_mode_i,
     input logic  [31:0]   irq_min_cycles_i,
@@ -47,7 +47,7 @@ module riscv_random_interrupt_generator
     input logic  [31:0]   irq_pc_id_i,
     input logic  [31:0]   irq_pc_trig_i,
     // software defined mode i/o
-    input logic  [31:0]   irq_sd_lines_i 
+    input logic  [63:0]   irq_lines_i 
 );
 
 `ifndef VERILATOR
@@ -62,16 +62,16 @@ endclass : rand_irq_id
 
 logic [31:0] irq_mode_q;
 logic        irq_random;
-logic [4:0]  irq_id_random;
+logic [5:0]  irq_id_random;
 logic        irq_ack_random;
 logic        irq_monitor;
-logic [4:0]  irq_id_monitor;
+logic [5:0]  irq_id_monitor;
 logic        irq_ack_monitor;
 
 logic        irq_sd;
-logic [31:0] irq_sd_lines;
+logic [63:0] irq_lines;
 logic        ack_flag;
-logic        irq_sd_lines_changed;
+logic        irq_lines_changed;
 
 
 // struct 18bit irq_lines
@@ -81,10 +81,11 @@ typedef struct packed {
   logic        irq_external;
   logic [14:0] irq_fast;
   logic        irq_nmi;
-} Interrupts_t;
+  logic [31:0] irq_fastx;
+} Interrupts_tb_t;
 
-Interrupts_t irq_lines_q, irq_lines_n;
-Interrupts_t irq_rnd_lines, irq_pc_trig_lines;
+Interrupts_tb_t irq_lines_q, irq_lines_n;
+Interrupts_tb_t irq_rnd_lines, irq_pc_trig_lines,irq_sd_lines;
 
 
 assign irq_ack_o       = irq_ack_i;
@@ -122,12 +123,7 @@ begin
     SOFTWARE_DEFINED:
     begin
       // UPDATE LOGIC:
-      // generate individual irq lines for the sampled word
-      irq_lines_n.irq_software = irq_sd_lines [3];
-      irq_lines_n.irq_timer    = irq_sd_lines [7];
-      irq_lines_n.irq_external = irq_sd_lines [11];
-      irq_lines_n.irq_fast     = irq_sd_lines [30:16];
-      irq_lines_n.irq_nmi      = irq_sd_lines [31];
+      irq_lines_n = irq_sd_lines;
     end
 
     default:
@@ -187,14 +183,14 @@ begin
     // random irq word: update logic
     while (wait_cycles.n) begin
       @(posedge clk_i)
-      irq_sd_lines <= irq_sd_lines_i;
+      irq_lines <= irq_lines_i;
 
-      if (irq_sd_lines_changed) begin
-        irq_rnd_lines.irq_software = irq_sd_lines_i [3];
-        irq_rnd_lines.irq_timer    = irq_sd_lines_i [7];
-        irq_rnd_lines.irq_external = irq_sd_lines_i [11];
-        irq_rnd_lines.irq_fast     = irq_sd_lines_i [30:16];
-        irq_rnd_lines.irq_nmi      = irq_sd_lines_i [31];
+      if (irq_lines_changed) begin
+        irq_rnd_lines.irq_software = irq_lines_i [3];
+        irq_rnd_lines.irq_timer    = irq_lines_i [7];
+        irq_rnd_lines.irq_external = irq_lines_i [11];
+        irq_rnd_lines.irq_fast     = irq_lines_i [30:16];
+        irq_rnd_lines.irq_nmi      = irq_lines_i [31];
       end
       wait_cycles.n--;
     end
@@ -202,7 +198,9 @@ begin
 end
 
 // check if signal changed @posedge
-assign irq_sd_lines_changed = (irq_sd_lines != irq_sd_lines_i) ? 1 : 0;
+assign irq_lines_changed = (irq_lines != irq_lines_i) ? 1 : 0;
+
+
 // SOFTWARE DEFINED INTERRUPTS PROCESS
 // Samples irq lines (word) as defined by software
 
@@ -216,9 +214,15 @@ begin
     wait (irq_mode_q == SOFTWARE_DEFINED);
 
     // blocking wait for a valid sd_id
-    while(irq_sd_lines_i != 0) begin
+    while(irq_lines_i != 0) begin
       @(posedge clk_i);
-        irq_sd_lines = irq_sd_lines_i; 
+        // sample input lines
+        irq_sd_lines.irq_software = irq_lines_i [3];
+        irq_sd_lines.irq_timer    = irq_lines_i [7];
+        irq_sd_lines.irq_external = irq_lines_i [11];
+        irq_sd_lines.irq_fast     = irq_lines_i [30:16];
+        irq_sd_lines.irq_nmi      = irq_lines_i [31];
+        irq_sd_lines.irq_fastx    = irq_lines_i [63:32];
         irq_sd    = 1'b1;
     end
     
@@ -242,16 +246,16 @@ begin
   irq_pc_trig_lines.irq_software = 1'b1;
 
   // irq monitor word: update logic
-  while(~irq_sd_lines_changed) begin
+  while(~irq_lines_changed) begin
     @(posedge clk_i);
-    irq_sd_lines <= irq_sd_lines_i;
+    irq_lines <= irq_lines_i;
   end
 
-  irq_pc_trig_lines.irq_software = irq_sd_lines_i [3];
-  irq_pc_trig_lines.irq_timer    = irq_sd_lines_i [7];
-  irq_pc_trig_lines.irq_external = irq_sd_lines_i [11];
-  irq_pc_trig_lines.irq_fast     = irq_sd_lines_i [30:16];
-  irq_pc_trig_lines.irq_nmi      = irq_sd_lines_i [31];
+  irq_pc_trig_lines.irq_software = irq_lines_i [3];
+  irq_pc_trig_lines.irq_timer    = irq_lines_i [7];
+  irq_pc_trig_lines.irq_external = irq_lines_i [11];
+  irq_pc_trig_lines.irq_fast     = irq_lines_i [30:16];
+  irq_pc_trig_lines.irq_nmi      = irq_lines_i [31];
 
   irq_monitor    = 1'b0;
   irq_id_monitor = '0;

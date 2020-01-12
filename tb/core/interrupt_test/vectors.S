@@ -37,6 +37,38 @@
 .global fast13_irq_handler
 .global fast14_irq_handler
 .global nmi_irq_handler
+.global fastx0_irq_handler
+.global fastx1_irq_handler
+.global fastx2_irq_handler
+.global fastx3_irq_handler
+.global fastx4_irq_handler
+.global fastx5_irq_handler
+.global fastx6_irq_handler
+.global fastx7_irq_handler
+.global fastx8_irq_handler
+.global fastx9_irq_handler
+.global fastx10_irq_handler
+.global fastx11_irq_handler
+.global fastx12_irq_handler
+.global fastx13_irq_handler
+.global fastx14_irq_handler
+.global fastx15_irq_handler
+.global fastx16_irq_handler
+.global fastx17_irq_handler
+.global fastx18_irq_handler
+.global fastx19_irq_handler
+.global fastx20_irq_handler
+.global fastx21_irq_handler
+.global fastx22_irq_handler
+.global fastx23_irq_handler
+.global fastx24_irq_handler
+.global fastx25_irq_handler
+.global fastx26_irq_handler
+.global fastx27_irq_handler
+.global fastx28_irq_handler
+.global fastx29_irq_handler
+.global fastx30_irq_handler
+.global fastx31_irq_handler
 
 
 vector_table: 
@@ -72,6 +104,38 @@ vector_table:
 	j fast13_irq_handler           /* 29 EXC_CAUSE_IRQ_FAST_13    */
 	j fast14_irq_handler           /* 30 EXC_CAUSE_IRQ_FAST_14    */
 	j nmi_irq_handler              /* 31 EXC_CAUSE_IRQ_NM         */
+	j fastx0_irq_handler
+	j fastx1_irq_handler
+	j fastx2_irq_handler
+	j fastx3_irq_handler
+	j fastx4_irq_handler
+	j fastx5_irq_handler
+	j fastx6_irq_handler
+	j fastx7_irq_handler
+	j fastx8_irq_handler
+	j fastx9_irq_handler
+	j fastx10_irq_handler
+	j fastx11_irq_handler
+	j fastx12_irq_handler
+	j fastx13_irq_handler
+	j fastx14_irq_handler
+	j fastx15_irq_handler
+	j fastx16_irq_handler
+	j fastx17_irq_handler
+	j fastx18_irq_handler
+	j fastx19_irq_handler
+	j fastx20_irq_handler
+	j fastx21_irq_handler
+	j fastx22_irq_handler
+	j fastx23_irq_handler
+	j fastx24_irq_handler
+	j fastx25_irq_handler
+	j fastx26_irq_handler
+	j fastx27_irq_handler
+	j fastx28_irq_handler
+	j fastx29_irq_handler
+	j fastx30_irq_handler
+	j fastx31_irq_handler
 
 /* this is fixed to 0x8000, used for PULP_SECURE=0. We redirect this entry to the
 new vector table (which is at mtvec) */

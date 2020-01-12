@@ -107,7 +107,7 @@ module riscv_core
 
   // Interrupt inputs
   output logic        irq_ack_o,
-  output logic [4:0]  irq_id_o,
+  output logic [5:0]  irq_id_o,
 
   input  logic        irq_sec_i,
 
@@ -116,6 +116,7 @@ module riscv_core
   input  logic        irq_external_i,       // exploded irq lines 
   input  logic [14:0] irq_fast_i,           // exploded irq lines
   input  logic        irq_nmi_i,
+  input  logic [31:0] irq_fastx_i,
 
   output logic        sec_lvl_o,
 
@@ -151,7 +152,7 @@ module riscv_core
   logic              pc_set;
   logic [2:0]        pc_mux_id;     // Mux selector for next PC
   logic [2:0]        exc_pc_mux_id; // Mux selector for exception PC
-  logic [5:0]        exc_cause;
+  logic [6:0]        exc_cause;
   logic              trap_addr_mux;
   logic              lsu_load_err;
   logic              lsu_store_err;
@@ -364,7 +365,7 @@ module riscv_core
   logic        irq_ctrl_ack;
   logic        irq_ctrl_kill;
   logic        irq_pending;
-  logic [4:0]  irq_id;
+  logic [5:0]  irq_id;
   logic        irq_sec_ctrl;
  
 
@@ -531,7 +532,7 @@ module riscv_core
 
     .pc_mux_i            ( pc_mux_id         ), // sel for pc multiplexer
     .exc_pc_mux_i        ( exc_pc_mux_id     ),
-    .exc_vec_pc_mux_i    ( exc_cause[4:0]    ),
+    .exc_vec_pc_mux_i    ( exc_cause[6:0]    ),
 
     // from hwloop registers
     .hwlp_start_i        ( hwlp_start        ),
@@ -1013,6 +1014,7 @@ module riscv_core
     .irq_external_i          ( irq_external_i     ),
     .irq_fast_i              ( irq_fast_i         ),
     .irq_nmi_i               ( irq_nmi_i          ),
+    .irq_fastx_i             ( irq_fastx_i        ),
     .irq_pending_o           ( irq_pending        ), // IRQ to ID/Controller
     .irq_id_o                ( irq_id             ),
     // debug

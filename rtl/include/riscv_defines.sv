@@ -206,6 +206,8 @@ typedef enum logic[11:0] {
   CSR_MISA      = 12'h301,
   CSR_MIE       = 12'h304,
   CSR_MTVEC     = 12'h305,
+  CSR_MIEX      = 12'h306,
+  CSR_MTVECX    = 12'h307,
 
   // Machine trap handling
   CSR_MSCRATCH  = 12'h340,
@@ -213,6 +215,7 @@ typedef enum logic[11:0] {
   CSR_MCAUSE    = 12'h342,
   CSR_MTVAL     = 12'h343, // TODO abet needs to be added?
   CSR_MIP       = 12'h344,
+  CSR_MIPX      = 12'h345,
 
   // abet User trap setup
   CSR_USTATUS   = 12'h000,
@@ -416,6 +419,8 @@ parameter EXC_CAUSE_STORE_FAULT  = 6'h07;
 parameter EXC_CAUSE_ECALL_UMODE  = 6'h08;
 parameter EXC_CAUSE_ECALL_MMODE  = 6'h0B;
 
+parameter int unsigned IRQ_ID_BITS = 6;
+
 // Interrupt lines struct
 typedef struct packed {
   logic        irq_software;
@@ -430,7 +435,7 @@ typedef struct packed {
   logic        irq_software;
   logic        irq_timer;
   logic        irq_external;
-  logic [14:0] irq_fast; // 15 fast interrupts,
+  logic [14:0] irq_fast;   // 15 fast interrupts
 } Masked_Interrupts_t;
 
 // Trap mux selector

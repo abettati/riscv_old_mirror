@@ -104,15 +104,15 @@ module riscv_controller
   input  logic        irq_pending_i,
   input  logic        irq_req_ctrl_i,
   input  logic        irq_sec_ctrl_i,
-  input  logic [4:0]  irq_id_ctrl_i,
+  input  logic [5:0]  irq_id_ctrl_i,
   input  logic        m_IE_i,                     // interrupt enable bit from CSR (M mode)
   input  logic        u_IE_i,                     // interrupt enable bit from CSR (U mode)
   input  PrivLvl_t    current_priv_lvl_i,
 
   output logic        irq_ack_o,
-  output logic [4:0]  irq_id_o,
+  output logic [5:0]  irq_id_o,
 
-  output logic [5:0]  exc_cause_o,
+  output logic [7:0]  exc_cause_o,
   output logic        exc_ack_o,
   output logic        exc_kill_o,
 

@@ -211,12 +211,12 @@ module riscv_id_stage
     // Interrupt signals
     input  logic        irq_pending_i,
     input  logic        irq_sec_i,
-    input  logic [4:0]  irq_id_i,
+    input  logic [5:0]  irq_id_i,
     input  logic        m_irq_enable_i,
     input  logic        u_irq_enable_i,
     output logic        irq_ack_o,
-    output logic [4:0]  irq_id_o,
-    output logic [5:0]  exc_cause_o,
+    output logic [5:0]  irq_id_o,
+    output logic [6:0]  exc_cause_o,
 
     // Debug Signal
     output logic        debug_mode_o,
@@ -307,7 +307,7 @@ module riscv_id_stage
 
   // Signals running between controller and exception controller
   logic       irq_req_ctrl, irq_sec_ctrl;
-  logic [4:0] irq_id_ctrl;
+  logic [5:0] irq_id_ctrl;
   logic       exc_ack, exc_kill;// handshake
 
   // Register file interface
