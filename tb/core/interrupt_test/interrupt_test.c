@@ -24,7 +24,9 @@
 
 #define MSTATUS_MIE_BIT 3
 
-#define IRQ_NUM 50
+#define IRQ_NUM 51
+#define STD_IRQ_MASK 0xFFFF0888 
+
 #define SOFTWARE_IRQ_ID  3
 #define TIMER_IRQ_ID     7
 #define EXTERNAL_IRQ_ID  11
@@ -77,8 +79,8 @@
 #define FASTX30_IRQ_ID   62
 #define FASTX31_IRQ_ID   63
 
-#define RND_IRQ_NUM        8
-#define RND_IE_NUM         13
+#define RND_IRQ_NUM        50
+#define RND_IE_NUM         50
 #define RND_IRQ_MIN_CYCLES 4096
 #define RND_IRQ_MAX_CYCLES 4096
 
@@ -89,12 +91,17 @@ volatile uint32_t irq_id                  = 0;
 volatile uint64_t irq_pending             = 0;
 volatile uint32_t irq_pending32_std       = 0;
 volatile uint32_t irq_pending32_x         = 0;
+volatile uint32_t irq_to_test32_std       = 0;
+volatile uint32_t irq_to_test32_x         = 0;
 volatile uint64_t prev_irq_pending        = 0;
-volatile uint64_t prev_irq_pending32_std  = 0;
-volatile uint64_t prev_irq_pending32_x    = 0;
-volatile uint64_t first_irq_pending       = 0;
-volatile uint32_t rnd_ie_mask             = 0;
+volatile uint32_t prev_irq_pending32_std  = 0;
+volatile uint32_t prev_irq_pending32_x    = 0;
+volatile uint32_t first_irq_pending32_std = 0;
+volatile uint32_t first_irq_pending32_x   = 0;
+volatile uint32_t rnd_ie_mask32_std       = 0;
+volatile uint32_t rnd_ie_mask32_x         = 0;
 volatile uint32_t mmstatus                = 0;
+volatile uint32_t bit_to_set              = 0;
 
 uint32_t IRQ_ID_PRIORITY [IRQ_NUM] = 
 { 
@@ -193,6 +200,30 @@ void print_hex(unsigned int val, int digits)
         *((volatile uint32_t *)OUTPORT) = "0123456789ABCDEF"[(val >> i) % 16];
 }
 
+// macro to print out a variable as binary
+#define PRINTF_BINARY_PATTERN_INT8 "%c%c%c%c%c%c%c%c"
+#define PRINTF_BYTE_TO_BINARY_INT8(i)    \
+    (((i) & 0x80ll) ? '1' : '0'), \
+    (((i) & 0x40ll) ? '1' : '0'), \
+    (((i) & 0x20ll) ? '1' : '0'), \
+    (((i) & 0x10ll) ? '1' : '0'), \
+    (((i) & 0x08ll) ? '1' : '0'), \
+    (((i) & 0x04ll) ? '1' : '0'), \
+    (((i) & 0x02ll) ? '1' : '0'), \
+    (((i) & 0x01ll) ? '1' : '0')
+
+#define PRINTF_BINARY_PATTERN_INT16 \
+    PRINTF_BINARY_PATTERN_INT8              PRINTF_BINARY_PATTERN_INT8
+#define PRINTF_BYTE_TO_BINARY_INT16(i) \
+    PRINTF_BYTE_TO_BINARY_INT8((i) >> 8),   PRINTF_BYTE_TO_BINARY_INT8(i)
+#define PRINTF_BINARY_PATTERN_INT32 \
+    PRINTF_BINARY_PATTERN_INT16             PRINTF_BINARY_PATTERN_INT16
+#define PRINTF_BYTE_TO_BINARY_INT32(i) \
+    PRINTF_BYTE_TO_BINARY_INT16((i) >> 16), PRINTF_BYTE_TO_BINARY_INT16(i)
+#define PRINTF_BINARY_PATTERN_INT64    \
+    PRINTF_BINARY_PATTERN_INT32             PRINTF_BINARY_PATTERN_INT32
+#define PRINTF_BYTE_TO_BINARY_INT64(i) \
+    PRINTF_BYTE_TO_BINARY_INT32((i) >> 32), PRINTF_BYTE_TO_BINARY_INT32(i)
 
 /*R/W to memory*/
 
@@ -512,12 +543,7 @@ void mat_mult(uint32_t mat1[MAT_DIM][MAT_DIM], uint32_t mat2[MAT_DIM][MAT_DIM], 
 
 int main(int argc, char *argv[])
 {
-
-    // Use current time as  
-    // seed for random generator 
-
     printf("TEST 1\n");
-    srand(time(0)); 
 
     uint32_t regVal;
     volatile uint32_t* baseAddr;
@@ -535,24 +561,22 @@ int main(int argc, char *argv[])
     // disable mstatues.mie
     mstatus_disable(MSTATUS_MIE_BIT); 
 
-
     for (int i = 0; i < IRQ_NUM; i++)
     {      
         // add new pending irq
         if (IRQ_ID_PRIORITY[i] > 31)
         {
-            /* code */
             irq_pending32_x |= (1 << IRQ_ID_PRIORITY[i]);
-            prev_irq_pending32_x = irq_pending32_x;
         }
         else
         {
-            irq_pending32_std |= (1 << IRQ_ID_PRIORITY[i]);
-            prev_irq_pending32_std = irq_pending32_std;
+            irq_pending32_std |= (1 << IRQ_ID_PRIORITY[i]);     
         }
 
-        writew(irq_pending32_x, RND_STALL_REG_15);
+        prev_irq_pending32_std = irq_pending32_std;
+        prev_irq_pending32_x = irq_pending32_x;
         writew(irq_pending32_std, RND_STALL_REG_14);
+        writew(irq_pending32_x, RND_STALL_REG_15);
 
         // enable mstatus.mie
         mstatus_enable(MSTATUS_MIE_BIT);
@@ -572,126 +596,208 @@ int main(int argc, char *argv[])
     //-------------------------------------------------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------------------------------------------------
 
-    // printf("TEST 2: TRIGGER ALL IRQS AT ONCE\n");
-    // // Multiple interrupts at a time
-    // irq_pending |= 0xFFFFFFFF;
+    printf("TEST 2: TRIGGER ALL IRQS AT ONCE\n");
+    // Multiple interrupts at a time
+    irq_pending32_x   |= 0xFFFFFFFF;
+    irq_pending32_std |= 0xFFFFFFFF;
+    // disable mstatues.mie
+    mstatus_disable(MSTATUS_MIE_BIT);
 
-    // // disable mstatues.mie
-    // mstatus_disable(MSTATUS_MIE_BIT);
+    // for this test we only write once
+    writew(irq_pending32_x, RND_STALL_REG_15);
+    writew(irq_pending32_std, RND_STALL_REG_14);
 
-    // writew(irq_pending, RND_STALL_REG_14);
+    for (int i = 0; i < IRQ_NUM; i++) 
+    {
+        // sample irq_pending
+        prev_irq_pending32_std = irq_pending32_std;
+        prev_irq_pending32_x   = irq_pending32_x;
 
-    // for (int i = 0; i < IRQ_NUM; i++) 
-    // {
-    //     // sample irq_pending
-    //     prev_irq_pending=irq_pending;
-        
-    //     // enable mstatus.mie
-    //     mstatus_enable(MSTATUS_MIE_BIT); 
+        // enable mstatus.mie
+        mstatus_enable(MSTATUS_MIE_BIT); 
 
-    //     // wait for nex irq to be served
-    //     while(prev_irq_pending==irq_pending);
+        // wait for nex irq to be served
+        while(prev_irq_pending32_std == irq_pending32_std && prev_irq_pending32_x == irq_pending32_x);
 
-    //     // irq_id sampling and testing
-    //     if(IRQ_ID_PRIORITY[i] != irq_id)
-    //     {
-    //         printf("TEST2: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
-    //         return ERR_CODE_WRONG_ORDER;
-    //     }
-    // }
+        // irq_id sampling and testing
+        if(IRQ_ID_PRIORITY[i] != irq_id)
+        {
+            printf("TEST2: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
+            return ERR_CODE_WRONG_ORDER;
+        }
+    }
 
+    //-------------------------------------------------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------------------------------------------------
 
-    // printf("STARTING TEST 3: RANDOMIZE \n"); //TODO: improve messages
+    printf("STARTING TEST 3: RANDOMIZE \n"); //TODO: improve messages
     
-    // ///////////////////////////////
-    // // Random test with masking  //
-    // ///////////////////////////////
+    ///////////////////////////////
+    // Random test with masking  //
+    ///////////////////////////////
     
-    // // Test 3 is a random test where two 32 bit-wide 
-    // // words are generated:
-    // // - a mask (rnd_ie_mask)
-    // // - and a value for the irq_pending
-    // //
-    // //
-    
-    
-    // irq_processed = 1;
-    // irq_id        = 0;
-    // rnd_ie_mask   = 0;
-    // irq_pending   = 0;
+    // Test 3 is a random test where two 32 bit-wide 
+    // words are generated:
+    // - a mask (rnd_ie_mask)
+    // - and a value for the irq_pending
+    //
+    //
 
-    // // build ie word randomly
-    // for (int i = 0; i < RND_IE_NUM; ++i)
-    // {
-    //     rnd_ie_mask |= (1 << IRQ_ID_PRIORITY[random_num(IRQ_NUM, 0)]) ;
-    // }
+    // Use current time as  
+    // seed for random generator 
+    srand(time(0)); 
+    
+    irq_processed     = 1;
+    irq_id            = 0;
+    rnd_ie_mask32_x   = 0;
+    irq_pending32_x   = 0;
+    rnd_ie_mask32_std = 0;
+    irq_pending32_std = 0;
+
+    // build ie word randomly
+    for (int i = 0; i < RND_IE_NUM; ++i)
+    {
+        // todo here we can set to 1 irqs already set
+        bit_to_set = random_num(63, 0);
+        if (bit_to_set > 31)
+        {
+            rnd_ie_mask32_x   |= (1 << bit_to_set);
+        }
+        else
+        {
+            rnd_ie_mask32_std |= (1 << bit_to_set);
+        } 
+    }
+
+    // mask to consider only implemented irqs
+    rnd_ie_mask32_std = rnd_ie_mask32_std & STD_IRQ_MASK;
+      
+    // write the mask to mie
+    asm volatile("csrw 0x304, %[rnd_ie_mask32_std]" : : [rnd_ie_mask32_std] "r" (rnd_ie_mask32_std));
+    asm volatile("csrw 0x306, %[rnd_ie_mask32_x]" : : [rnd_ie_mask32_x] "r" (rnd_ie_mask32_x));
 
       
-    // // write the mask to mie
-    // asm volatile("csrw 0x304, %[rnd_ie_mask]" : : [rnd_ie_mask] "r" (rnd_ie_mask));
-      
-    // // build irq word randomly
-    // for (int i = 0; i < RND_IRQ_NUM; ++i)
-    // {
-    //     irq_pending |= (1 << IRQ_ID_PRIORITY[random_num(IRQ_NUM, 0)]) ;
-    // }
+    // build irq word randomly
+    for (int i = 0; i < RND_IRQ_NUM; ++i)
+    {
+        // todo here we can set to 1 also non-implemented irqs + irqs already set
+        bit_to_set = random_num(63, 0);
+        if (bit_to_set > 31)
+        {
+            irq_pending32_x   |= (1 << bit_to_set);
+        }
+        else
+        {
+            irq_pending32_std |= (1 << bit_to_set);
+        } 
+    }
     
-    // first_irq_pending = irq_pending;
+    // mask to consider only implemented irqs
+    irq_pending32_std = irq_pending32_std & STD_IRQ_MASK;
+
+    first_irq_pending32_std = irq_pending32_std;
+    first_irq_pending32_x   = irq_pending32_x;
+
+    uint32_t irq_to_serve_num = 0;
+    uint32_t irq_served_num = 0;
+
+    // build words to be tested
+    for (int i = 0; i < 32; ++i)
+    {
+        if ((1 << i) & first_irq_pending32_x & rnd_ie_mask32_x)
+        {
+            irq_to_test32_x |= (1 << i);
+        }
+
+        // nmi special case
+        if (i == NMI_IRQ_ID && (1 << NMI_IRQ_ID & first_irq_pending32_x))
+        {
+            irq_to_test32_std |= (1 << NMI_IRQ_ID);        
+        }
+        else if ((1 << i) & first_irq_pending32_std & rnd_ie_mask32_std)
+        {
+            irq_to_test32_std |= (1 << i);
+        }
+
+    }
     
-    // // disable mstatues.mie
-    // mstatus_disable(MSTATUS_MIE_BIT);
+    // disable mstatues.mie
+    mstatus_disable(MSTATUS_MIE_BIT);
 
-    // writew(irq_pending, RND_STALL_REG_14);
+    // for this test we only write once
+    writew(irq_pending32_x, RND_STALL_REG_15);
+    writew(irq_pending32_std, RND_STALL_REG_14);
 
-    // for (int i = 0; i < IRQ_NUM; ++i)
-    // {
-    //     // test if the nmi irq should be served
-    //     if(i==0 && ((1 << IRQ_ID_PRIORITY[0]) & irq_pending))
-    //     {
-    //         // sample irq_pending
-    //         prev_irq_pending=irq_pending;
-    //         printf("received irq %d\n", irq_id);
+    for (int i = 0; i < IRQ_NUM; ++i)
+    {
+        if (IRQ_ID_PRIORITY[i] > 31 && (1 << IRQ_ID_PRIORITY[i] & irq_to_test32_x))
+        {   
+            // sample irq_pending
+            prev_irq_pending32_x = irq_pending32_x;
 
-    //         // enable mstatus.mie
-    //         mstatus_enable(MSTATUS_MIE_BIT);
+            // enable mstatus.mie
+            mstatus_enable(MSTATUS_MIE_BIT);
 
-    //         // wait for next irq to be served
-    //         while(prev_irq_pending==irq_pending);
+            // wait for next irq to be served
+            while(prev_irq_pending32_x == irq_pending32_x)
+            { printf("waiting for irq %u \n", IRQ_ID_PRIORITY[i]);}
 
-    //         // irq_id sampling and testing
-    //         if(IRQ_ID_PRIORITY[i] != irq_id)
-    //         {
-    //             printf("TEST3: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
-    //             return ERR_CODE_WRONG_NUM;
-    //         }
-    //     }
+            // irq_id sampling and testing
+            if(IRQ_ID_PRIORITY[i] != irq_id)
+            {
+                printf("TEST3: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
+                return ERR_CODE_WRONG_NUM;
+            }
+        }
+        else if (IRQ_ID_PRIORITY[i] <= 31 && (1 << IRQ_ID_PRIORITY[i] & irq_to_test32_std))
+        {
+            // sample irq_pending
+            prev_irq_pending32_std = irq_pending32_std;
 
-    //     // test if the i-th irq should be served
-    //     else if ( i !=0 && ((1 << IRQ_ID_PRIORITY[i]) & rnd_ie_mask & irq_pending))
-    //     {
-    //         // sample irq_pending
-    //         prev_irq_pending=irq_pending;
+            // enable mstatus.mie
+            mstatus_enable(MSTATUS_MIE_BIT);
 
-    //         // enable mstatus.mie
-    //         mstatus_enable(MSTATUS_MIE_BIT);
+            // wait for next irq to be served
+            while(prev_irq_pending32_std == irq_pending32_std)
+            { printf("waiting for irq %u \n", IRQ_ID_PRIORITY[i]);}
 
-    //         // wait for next irq to be served
-    //         while(prev_irq_pending==irq_pending);
+            // irq_id sampling and testing
+            if(IRQ_ID_PRIORITY[i] != irq_id)
+            {
+                printf("TEST3: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
+                return ERR_CODE_WRONG_NUM;
+            }
+        }
+    }
 
-    //         // irq_id sampling and testing
-    //         if(IRQ_ID_PRIORITY[i] != irq_id)
-    //         {
-    //             printf("TEST3: IRQ served in wrong order %d %d\n", IRQ_ID_PRIORITY[i], irq_id);
-    //             return ERR_CODE_WRONG_NUM;
-    //         }
-    //     }
-    // }
+    if(irq_pending32_std != ((~rnd_ie_mask32_std) & first_irq_pending32_std))
+    {
+        printf("TEST3: wrong number of irq served\n"
+            "first_irq_pending32_std: "PRINTF_BINARY_PATTERN_INT32"\n"
+            "rnd_ie_mask32_std:       "PRINTF_BINARY_PATTERN_INT32"\n"
+            "irq_to_test32_std:       "PRINTF_BINARY_PATTERN_INT32"\n"
+            "irq_pending32_std:       "PRINTF_BINARY_PATTERN_INT32"\n",
+            PRINTF_BYTE_TO_BINARY_INT32(first_irq_pending32_std),  
+            PRINTF_BYTE_TO_BINARY_INT32(rnd_ie_mask32_std),
+            PRINTF_BYTE_TO_BINARY_INT32(irq_to_test32_std),
+            PRINTF_BYTE_TO_BINARY_INT32(irq_pending32_std));
+        return ERR_CODE_WRONG_NUM;
+    }
 
-    // if(irq_pending != ((~rnd_ie_mask) & first_irq_pending))
-    // {
-    //     printf("TEST3: wrong number of irq served\n first_irq_pending: %u irq_pending: %u rnd_ie_mask: %u\n", first_irq_pending, irq_pending, rnd_ie_mask);
-    //     return ERR_CODE_WRONG_NUM;
-    // }
+    if(irq_pending32_x   != ((~rnd_ie_mask32_x) & first_irq_pending32_x))
+    {
+        printf("TEST3: wrong number of irq served\n"
+            "first_irq_pending32_x: "PRINTF_BINARY_PATTERN_INT32"\n"
+            "rnd_ie_mask32_x:       "PRINTF_BINARY_PATTERN_INT32"\n"
+            "irq_to_test32_x:       "PRINTF_BINARY_PATTERN_INT32"\n"
+            "irq_pending32_x:       "PRINTF_BINARY_PATTERN_INT32"\n",
+            PRINTF_BYTE_TO_BINARY_INT32(first_irq_pending32_x),  
+            PRINTF_BYTE_TO_BINARY_INT32(rnd_ie_mask32_x),
+            PRINTF_BYTE_TO_BINARY_INT32(irq_to_test32_x),
+            PRINTF_BYTE_TO_BINARY_INT32(irq_pending32_x));
+        return ERR_CODE_WRONG_NUM;
+        return ERR_CODE_WRONG_NUM;
+    }
 
 
     // // writew(2,0x1600002C);

@@ -14,8 +14,8 @@
 # //  18 U.S.C. Section 1905.
 # //
 # vsim "+firmware=interrupt_test/interrupt_test.hex" -gui -debugdb tb_top_vopt -do "vsim.tcl" 
-# Start time: 18:26:36 on Jan 12,2020
-# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_119343/linux_x86_64_gcc-5.3.0/export_tramp.so
+# Start time: 11:58:17 on Jan 14,2020
+# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_92217/linux_x86_64_gcc-5.3.0/export_tramp.so
 # Loading sv_std.std
 # Loading work.tb_top(fast)
 # Loading work.riscv_wrapper(fast)
@@ -80,9 +80,9 @@
 #    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 637
 # ** Warning: (vsim-3015) [PCDPC] - Port size (32) does not match connection size (22) for port 'addr_mem_o'. The port definition is at: ../../tb/tb_riscv/riscv_random_stall.sv(52).
 #    Time: 0 ns  Iteration: 0  Instance: /tb_top/riscv_wrapper_i/ram_i/data_random_stalls File: mm_ram.sv Line: 637
-# Compiling /tmp/bettatia@larain1.ee.ethz.ch_dpi_119343/linux_x86_64_gcc-5.3.0/exportwrapper.c
-# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_119343/linux_x86_64_gcc-5.3.0/vsim_auto_compile.so
-# ** Note: (vsim-8900) Creating design debug database vsim.dbg.
+# Compiling /tmp/bettatia@larain1.ee.ethz.ch_dpi_92217/linux_x86_64_gcc-5.3.0/exportwrapper.c
+# Loading /tmp/bettatia@larain1.ee.ethz.ch_dpi_92217/linux_x86_64_gcc-5.3.0/vsim_auto_compile.so
+# ** Note: (vsim-8716) Reusing existing debug database vsim.dbg.
 # do vsim.tcl
 # 1
 # [CORE] Core settings: PULP_SECURE =           1, N_PMP_ENTRIES =          16, N_PMP_CFG           4
@@ -141,8 +141,112 @@
 # IRQ SERVED: irq_ id = 16 
 # IRQ SERVED: irq_ id = 11 
 # IRQ SERVED: irq_ id = 3 
+# IRQ SERVED: irq_ id = 7 
+# TEST 2: TRIGGER ALL IRQS AT ONCE
+# IRQ SERVED: irq_ id = 63 
+# IRQ SERVED: irq_ id = 62 
+# IRQ SERVED: irq_ id = 61 
+# IRQ SERVED: irq_ id = 60 
+# IRQ SERVED: irq_ id = 59 
+# IRQ SERVED: irq_ id = 58 
+# IRQ SERVED: irq_ id = 57 
+# IRQ SERVED: irq_ id = 56 
+# IRQ SERVED: irq_ id = 55 
+# IRQ SERVED: irq_ id = 54 
+# IRQ SERVED: irq_ id = 53 
+# IRQ SERVED: irq_ id = 52 
+# IRQ SERVED: irq_ id = 51 
+# IRQ SERVED: irq_ id = 50 
+# IRQ SERVED: irq_ id = 49 
+# IRQ SERVED: irq_ id = 48 
+# IRQ SERVED: irq_ id = 47 
+# IRQ SERVED: irq_ id = 46 
+# IRQ SERVED: irq_ id = 45 
+# IRQ SERVED: irq_ id = 44 
+# IRQ SERVED: irq_ id = 43 
+# IRQ SERVED: irq_ id = 42 
+# IRQ SERVED: irq_ id = 41 
+# IRQ SERVED: irq_ id = 40 
+# IRQ SERVED: irq_ id = 39 
+# IRQ SERVED: irq_ id = 38 
+# IRQ SERVED: irq_ id = 37 
+# IRQ SERVED: irq_ id = 36 
+# IRQ SERVED: irq_ id = 35 
+# IRQ SERVED: irq_ id = 34 
+# IRQ SERVED: irq_ id = 33 
+# IRQ SERVED: irq_ id = 32 
+# IRQ SERVED: irq_ id = 31 
+# IRQ SERVED: irq_ id = 30 
+# IRQ SERVED: irq_ id = 29 
+# IRQ SERVED: irq_ id = 28 
+# IRQ SERVED: irq_ id = 27 
+# IRQ SERVED: irq_ id = 26 
+# IRQ SERVED: irq_ id = 25 
+# IRQ SERVED: irq_ id = 24 
+# IRQ SERVED: irq_ id = 23 
+# IRQ SERVED: irq_ id = 22 
+# IRQ SERVED: irq_ id = 21 
+# IRQ SERVED: irq_ id = 20 
+# IRQ SERVED: irq_ id = 19 
+# IRQ SERVED: irq_ id = 18 
+# IRQ SERVED: irq_ id = 17 
+# IRQ SERVED: irq_ id = 16 
+# IRQ SERVED: irq_ id = 11 
+# IRQ SERVED: irq_ id = 3 
+# IRQ SERVED: irq_ id = 7 
+# STARTING TEST 3: RANDOMIZE 
+# IRQ SERVED: irq_ id = 63 
+# IRQ SERVED: irq_ id = 62 
+# IRQ SERVED: irq_ id = 61 
+# IRQ SERVED: irq_ id = 60 
+# IRQ SERVED: irq_ id = 59 
+# IRQ SERVED: irq_ id = 58 
+# IRQ SERVED: irq_ id = 57 
+# IRQ SERVED: irq_ id = 56 
+# IRQ SERVED: irq_ id = 55 
+# IRQ SERVED: irq_ id = 54 
+# IRQ SERVED: irq_ id = 53 
+# IRQ SERVED: irq_ id = 52 
+# IRQ SERVED: irq_ id = 51 
+# IRQ SERVED: irq_ id = 50 
+# IRQ SERVED: irq_ id = 49 
+# IRQ SERVED: irq_ id = 48 
+# IRQ SERVED: irq_ id = 47 
+# IRQ SERVED: irq_ id = 46 
+# IRQ SERVED: irq_ id = 45 
+# IRQ SERVED: irq_ id = 44 
+# IRQ SERVED: irq_ id = 43 
+# IRQ SERVED: irq_ id = 42 
+# IRQ SERVED: irq_ id = 41 
+# IRQ SERVED: irq_ id = 40 
+# IRQ SERVED: irq_ id = 38 
+# IRQ SERVED: irq_ id = 37 
+# IRQ SERVED: irq_ id = 36 
+# IRQ SERVED: irq_ id = 35 
+# IRQ SERVED: irq_ id = 34 
+# IRQ SERVED: irq_ id = 33 
+# IRQ SERVED: irq_ id = 32 
+# IRQ SERVED: irq_ id = 31 
+# IRQ SERVED: irq_ id = 30 
+# IRQ SERVED: irq_ id = 29 
+# IRQ SERVED: irq_ id = 28 
+# IRQ SERVED: irq_ id = 27 
+# IRQ SERVED: irq_ id = 26 
+# IRQ SERVED: irq_ id = 25 
+# IRQ SERVED: irq_ id = 24 
+# IRQ SERVED: irq_ id = 23 
+# IRQ SERVED: irq_ id = 22 
+# IRQ SERVED: irq_ id = 21 
+# IRQ SERVED: irq_ id = 20 
+# IRQ SERVED: irq_ id = 19 
+# IRQ SERVED: irq_ id = 18 
+# IRQ SERVED: irq_ id = 17 
+# IRQ SERVED: irq_ id = 16 
+# IRQ SERVED: irq_ id = 11 
+# IRQ SERVED: irq_ id = 3 
+# IRQ SERVED: irq_ id = 7 
 # EXIT SUCCESS
 # ** Note: $finish    : tb_top.sv(137)
-#    Time: 1274210 ns  Iteration: 1  Instance: /tb_top
+#    Time: 4034320 ns  Iteration: 1  Instance: /tb_top
 # 1
 # Break in Module tb_top at tb_top.sv line 137
