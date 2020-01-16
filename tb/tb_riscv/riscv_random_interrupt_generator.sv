@@ -30,24 +30,24 @@ import perturbation_defines::*;
 
 module riscv_random_interrupt_generator
 (
-    input logic           rst_ni,
-    input logic           clk_i,
-    input logic           irq_i,
-    input logic   [5:0]   irq_id_i,
-    input logic           irq_ack_i,
-    output logic [50:0]   irq_rnd_lines_o,
-    output logic          irq_ack_o,
-    input logic  [31:0]   irq_mode_i,
-    input logic  [31:0]   irq_min_cycles_i,
-    input logic  [31:0]   irq_max_cycles_i,
-    input logic  [31:0]   irq_min_id_i,
-    input logic  [31:0]   irq_max_id_i,
-    output logic [31:0]   irq_act_id_o,
-    output logic          irq_id_we_o,
-    input logic  [31:0]   irq_pc_id_i,
-    input logic  [31:0]   irq_pc_trig_i,
+    input logic                        rst_ni,
+    input logic                        clk_i,
+    input logic                        irq_i,
+    input logic  [5:0]                 irq_id_i,
+    input logic                        irq_ack_i,
+    output logic [IRQ_LINES_NUM-1:0]   irq_rnd_lines_o,
+    output logic                       irq_ack_o,
+    input logic  [31:0]                irq_mode_i,
+    input logic  [31:0]                irq_min_cycles_i,
+    input logic  [31:0]                irq_max_cycles_i,
+    input logic  [31:0]                irq_min_id_i,
+    input logic  [31:0]                irq_max_id_i,
+    output logic [31:0]                irq_act_id_o,
+    output logic                       irq_id_we_o,
+    input logic  [31:0]                irq_pc_id_i,
+    input logic  [31:0]                irq_pc_trig_i,
     // software defined mode i/o
-    input logic  [63:0]   irq_lines_i 
+    input logic  [63:0]                irq_lines_i 
 );
 
 `ifndef VERILATOR
@@ -57,7 +57,7 @@ endclass : rand_irq_cycles
 
 class rand_irq_id;
     rand int n;
-    rand bit [31:0] rand_word;
+    rand bit [63:0] rand_word; 
 endclass : rand_irq_id
 
 logic [31:0] irq_mode_q;
@@ -159,7 +159,7 @@ begin
       value.rand_word[i] = 0;
     end
 
-    for(int i = max_irq_id+1; i <= 31; i++) begin
+    for(int i = max_irq_id+1; i <= 63; i++) begin
       value.rand_word[i] = 0;
     end
 
@@ -168,12 +168,13 @@ begin
         n <= max_irq_cycles;
     };
 
-    // build random irq word
+    // map random irq word to physical lines
     irq_rnd_lines.irq_software = value.rand_word [3];
     irq_rnd_lines.irq_timer    = value.rand_word [7];
     irq_rnd_lines.irq_external = value.rand_word [11];
     irq_rnd_lines.irq_fast     = value.rand_word [30:16];
     irq_rnd_lines.irq_nmi      = value.rand_word [31];
+    irq_rnd_lines.irq_fastx    = value.rand_word [63:32];
 
     irq_random    = 1'b1;
     irq_act_id_o  = value.n;
@@ -191,6 +192,7 @@ begin
         irq_rnd_lines.irq_external = irq_lines_i [11];
         irq_rnd_lines.irq_fast     = irq_lines_i [30:16];
         irq_rnd_lines.irq_nmi      = irq_lines_i [31];
+        irq_rnd_lines.irq_fastx    = irq_lines_i [63:32];
       end
       wait_cycles.n--;
     end

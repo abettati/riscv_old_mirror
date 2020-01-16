@@ -420,7 +420,7 @@ parameter EXC_CAUSE_ECALL_UMODE  = 6'h08;
 parameter EXC_CAUSE_ECALL_MMODE  = 6'h0B;
 
 parameter int unsigned IRQ_ID_BITS = 6;
-
+parameter int unsigned IRQ_LINES_NUM = 51;  // number of physical irq lines to core
 // Interrupt lines struct
 typedef struct packed {
   logic        irq_software;
