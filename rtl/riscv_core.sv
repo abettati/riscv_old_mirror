@@ -110,11 +110,11 @@ module riscv_core
   output logic [5:0]  irq_id_o,
 
   input  logic        irq_sec_i,
-
-  input  logic        irq_software_i,       // exploded irq lines
-  input  logic        irq_timer_i,          // exploded irq lines
-  input  logic        irq_external_i,       // exploded irq lines 
-  input  logic [14:0] irq_fast_i,           // exploded irq lines
+  
+  input  logic        irq_software_i,
+  input  logic        irq_timer_i,   
+  input  logic        irq_external_i, 
+  input  logic [14:0] irq_fast_i,
   input  logic        irq_nmi_i,
   input  logic [31:0] irq_fastx_i,
 
@@ -130,8 +130,6 @@ module riscv_core
 
   input  logic [N_EXT_PERF_COUNTERS-1:0] ext_perf_counters_i
 );
-  // abet Import the riscv_defines pkg
-  import riscv_defines::*;
 
   localparam N_HWLP      = 2;
   localparam N_HWLP_BITS = $clog2(N_HWLP);
@@ -532,7 +530,7 @@ module riscv_core
 
     .pc_mux_i            ( pc_mux_id         ), // sel for pc multiplexer
     .exc_pc_mux_i        ( exc_pc_mux_id     ),
-    .exc_vec_pc_mux_i    ( exc_cause[6:0]    ),
+    .exc_vec_pc_mux_i    ( exc_cause         ),
 
     // from hwloop registers
     .hwlp_start_i        ( hwlp_start        ),
