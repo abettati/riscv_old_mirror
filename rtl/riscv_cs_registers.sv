@@ -54,6 +54,7 @@ module riscv_cs_registers
   input  logic  [3:0]     core_id_i,
   input  logic  [5:0]     cluster_id_i,
   output logic [23:0]     mtvec_o,
+  output logic [23:0]     mtvecx_o,
   output logic [23:0]     utvec_o,
 
   // Used for boot address
@@ -626,7 +627,7 @@ if(PULP_SECURE==1) begin
         mepc_n = csr_wdata_int & ~32'b1; // force 16-bit alignment
       end
       // mcause
-      CSR_MCAUSE: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[4:0]};
+      CSR_MCAUSE: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[5:0]};
       // TODO abet: should mip (h344) be added in write logic?
       CSR_DCSR:
                if (csr_we_int)
@@ -896,7 +897,7 @@ end else begin //PULP_SECURE == 0
         mepc_n = csr_wdata_int & ~32'b1; // force 16-bit alignment
       end
       // mcause
-      CSR_MCAUSE: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[4:0]};
+      CSR_MCAUSE: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[5:0]};
       // TODO abet: should mip (h344) be added in write logic?
       CSR_DCSR:
                if (csr_we_int)
@@ -1101,6 +1102,7 @@ end //PULP_SECURE
   assign fprec_o         = (FPU == 1) ? fprec_q : '0;
 
   assign mtvec_o         = mtvec_q;
+  assign mtvecx_o        = mtvecx_q;
   assign utvec_o         = utvec_q;
 
   assign mepc_o          = mepc_q;
@@ -1154,6 +1156,7 @@ end //PULP_SECURE
             uepc_q         <= '0;
             ucause_q       <= '0;
             mtvec_q        <= '0;
+            mtvecx_q       <= 24'h1; //abet
             utvec_q        <= '0;
             priv_lvl_q     <= PRIV_LVL_M;
             irq_req_q      <= '0;
@@ -1164,10 +1167,11 @@ end //PULP_SECURE
             uepc_q         <= uepc_n;
             ucause_q       <= ucause_n;
             mtvec_q        <= mtvec_n;
+            mtvecx_q       <= mtvecx_n;
             utvec_q        <= utvec_n;
             priv_lvl_q     <= priv_lvl_n;
             irq_req_q      <= irq_req_n;
-            irq_reqx_q      <= irq_reqx_n;
+            irq_reqx_q     <= irq_reqx_n;
           end
         end
 
@@ -1177,6 +1181,7 @@ end //PULP_SECURE
         assign uepc_q       = '0;
         assign ucause_q     = '0;
         assign mtvec_q      = boot_addr_i[30:7];
+        assign mtvecx_q     = 24'h1; // abet 24'h80 | boot_addr_i[30:7]  
         assign utvec_q      = '0;
         assign priv_lvl_q   = PRIV_LVL_M;
 

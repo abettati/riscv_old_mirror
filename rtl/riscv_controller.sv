@@ -75,7 +75,7 @@ module riscv_controller
   output logic        pc_set_o,                   // jump to address set by pc_mux
   output logic [2:0]  pc_mux_o,                   // Selector in the Fetch stage to select the rigth PC (normal, jump ...)
   output logic [2:0]  exc_pc_mux_o,               // Selects target PC for exception
-  output logic        trap_addr_mux_o,            // Selects trap address base
+  output logic [2:0]  trap_addr_mux_o,            // Selects trap address base
 
   // LSU
   input  logic        data_req_ex_i,              // data memory access is currently performed in EX stage
@@ -112,7 +112,7 @@ module riscv_controller
   output logic        irq_ack_o,
   output logic [5:0]  irq_id_o,
 
-  output logic [7:0]  exc_cause_o,
+  output logic [5:0]  exc_cause_o,
   output logic        exc_ack_o,
   output logic        exc_kill_o,
 
@@ -129,7 +129,7 @@ module riscv_controller
   output logic        csr_save_if_o,
   output logic        csr_save_id_o,
   output logic        csr_save_ex_o,
-  output logic [5:0]  csr_cause_o,
+  output logic [6:0]  csr_cause_o,
   output logic        csr_irq_sec_o,
   output logic        csr_restore_mret_id_o,
   output logic        csr_restore_uret_id_o,
@@ -699,19 +699,26 @@ module riscv_controller
         pc_set_o          = 1'b1;
         pc_mux_o          = PC_EXCEPTION;
         exc_pc_mux_o      = EXC_PC_IRQ;
-        exc_cause_o       = {1'b0,irq_id_ctrl_i};
-
+        exc_cause_o       = {1'b1,irq_id_ctrl_i[4:0]};
         csr_irq_sec_o     = irq_sec_ctrl_i;
+
+        // check if irq_id > 31
+        if (irq_id_ctrl_i[5]) begin
+          if(irq_sec_ctrl_i)
+            trap_addr_mux_o  = TRAP_MACHINEX;
+          else
+            trap_addr_mux_o  = current_priv_lvl_i == PRIV_LVL_U ? TRAP_USER : TRAP_MACHINEX;
+        end else begin
+          if(irq_sec_ctrl_i)
+            trap_addr_mux_o  = TRAP_MACHINE;
+          else
+            trap_addr_mux_o  = current_priv_lvl_i == PRIV_LVL_U ? TRAP_USER : TRAP_MACHINE;
+        end
+
+        // only for standard irqs (irq_id < 32) we save csr_cause
         csr_save_cause_o  = 1'b1;
-        csr_cause_o       = {1'b1,irq_id_ctrl_i};
-
-        csr_save_id_o     = 1'b1;
-
-        if(irq_sec_ctrl_i)
-          trap_addr_mux_o  = TRAP_MACHINE;
-        else
-          trap_addr_mux_o  = current_priv_lvl_i == PRIV_LVL_U ? TRAP_USER : TRAP_MACHINE;
-
+        csr_cause_o       = {1'b1,irq_id_ctrl_i[5:0]};
+        csr_save_id_o     = 1'b1; // abet does this go in the if irq_id < 32 aswell?
         irq_ack_o         = 1'b1;
         exc_ack_o         = 1'b1;
         ctrl_fsm_ns       = DECODE;
@@ -725,19 +732,27 @@ module riscv_controller
         pc_set_o          = 1'b1;
         pc_mux_o          = PC_EXCEPTION;
         exc_pc_mux_o      = EXC_PC_IRQ;
-        exc_cause_o       = {1'b0,irq_id_ctrl_i};
-
+        exc_cause_o       = {1'b1,irq_id_ctrl_i[4:0]};
         csr_irq_sec_o     = irq_sec_ctrl_i;
+
+        // if irq_id > 31 serve a fastx irq
+        if (irq_id_ctrl_i[5]) begin
+          if(irq_sec_ctrl_i)
+            trap_addr_mux_o  = TRAP_MACHINEX;
+          else
+            trap_addr_mux_o  = current_priv_lvl_i == PRIV_LVL_U ? TRAP_USER : TRAP_MACHINEX;
+        // else serve a std irq
+        end else begin
+          if(irq_sec_ctrl_i)
+            trap_addr_mux_o  = TRAP_MACHINE;
+          else
+            trap_addr_mux_o  = current_priv_lvl_i == PRIV_LVL_U ? TRAP_USER : TRAP_MACHINE;
+        end
+
+        // only for standard irqs (irq_id < 32) we save csr_cause
         csr_save_cause_o  = 1'b1;
-        csr_cause_o       = {1'b1,irq_id_ctrl_i};
-
-        csr_save_if_o     = 1'b1;
-
-        if(irq_sec_ctrl_i)
-          trap_addr_mux_o  = TRAP_MACHINE;
-        else
-          trap_addr_mux_o  = current_priv_lvl_i == PRIV_LVL_U ? TRAP_USER : TRAP_MACHINE;
-
+        csr_cause_o       = {1'b1,irq_id_ctrl_i[5:0]};
+        csr_save_if_o     = 1'b1; // abet does this go in the if irq_id < 32 aswell?
         irq_ack_o         = 1'b1;
         exc_ack_o         = 1'b1;
         ctrl_fsm_ns       = DECODE;

@@ -87,7 +87,7 @@ module riscv_id_stage
     output logic        pc_set_o,
     output logic [2:0]  pc_mux_o,
     output logic [2:0]  exc_pc_mux_o,
-    output logic        trap_addr_mux_o,
+    output logic [2:0]  trap_addr_mux_o,
 
     input  logic        illegal_c_insn_i,
     input  logic        is_compressed_i,
@@ -173,7 +173,7 @@ module riscv_id_stage
     output logic [1:0]  csr_op_ex_o,
     input  PrivLvl_t    current_priv_lvl_i,
     output logic        csr_irq_sec_o,
-    output logic [5:0]  csr_cause_o,
+    output logic [6:0]  csr_cause_o,
     output logic        csr_save_if_o,
     output logic        csr_save_id_o,
     output logic        csr_save_ex_o,
@@ -216,7 +216,7 @@ module riscv_id_stage
     input  logic        u_irq_enable_i,
     output logic        irq_ack_o,
     output logic [5:0]  irq_id_o,
-    output logic [6:0]  exc_cause_o,
+    output logic [5:0]  exc_cause_o,
 
     // Debug Signal
     output logic        debug_mode_o,

@@ -150,8 +150,8 @@ module riscv_core
   logic              pc_set;
   logic [2:0]        pc_mux_id;     // Mux selector for next PC
   logic [2:0]        exc_pc_mux_id; // Mux selector for exception PC
-  logic [6:0]        exc_cause;
-  logic              trap_addr_mux;
+  logic [5:0]        exc_cause;
+  logic [2:0]        trap_addr_mux;
   logic              lsu_load_err;
   logic              lsu_store_err;
 
@@ -251,7 +251,7 @@ module riscv_core
   // CSR control
   logic        csr_access_ex;
   logic [1:0]  csr_op_ex;
-  logic [23:0] mtvec, utvec;
+  logic [23:0] mtvec, mtvecx, utvec;
 
   logic        csr_access;
   logic [1:0]  csr_op;
@@ -307,7 +307,7 @@ module riscv_core
   logic        csr_save_if;
   logic        csr_save_id;
   logic        csr_save_ex;
-  logic [5:0]  csr_cause;
+  logic [6:0]  csr_cause;
   logic        csr_restore_mret_id;
   logic        csr_restore_uret_id;
 
@@ -494,6 +494,7 @@ module riscv_core
 
     // trap vector location
     .m_trap_base_addr_i  ( mtvec             ),
+    .m_trap_base_addrx_i ( mtvecx            ),
     .u_trap_base_addr_i  ( utvec             ),
     .trap_addr_mux_i     ( trap_addr_mux     ),
 
@@ -530,7 +531,7 @@ module riscv_core
 
     .pc_mux_i            ( pc_mux_id         ), // sel for pc multiplexer
     .exc_pc_mux_i        ( exc_pc_mux_id     ),
-    .exc_vec_pc_mux_i    ( exc_cause         ),
+    .exc_vec_pc_mux_i    ( exc_cause[4:0]    ),
 
     // from hwloop registers
     .hwlp_start_i        ( hwlp_start        ),
@@ -985,6 +986,7 @@ module riscv_core
     .core_id_i               ( core_id_i          ),
     .cluster_id_i            ( cluster_id_i       ),
     .mtvec_o                 ( mtvec              ),
+    .mtvecx_o                ( mtvecx             ),
     .utvec_o                 ( utvec              ),
     // boot address
     .boot_addr_i             ( boot_addr_i[31:1]  ),

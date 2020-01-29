@@ -556,7 +556,7 @@ int main(int argc, char *argv[])
     // disable mstatues.mie
     mstatus_disable(MSTATUS_MIE_BIT); 
 
-    for (int i = 0; i < IRQ_NUM; i++)
+    for (int i = 32; i < IRQ_NUM; i++)
     {      
         // add new pending irq
         if (IRQ_ID_PRIORITY[i] > 31)
@@ -588,6 +588,7 @@ int main(int argc, char *argv[])
     };
 
     printf("OK\n");
+
     // TODO: needs to make sure preivous test finished
 
     //-------------------------------------------------------------------------------------------------------------------------------------------

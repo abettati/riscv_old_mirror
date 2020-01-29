@@ -439,8 +439,9 @@ typedef struct packed {
 } Masked_Interrupts_t;
 
 // Trap mux selector
-parameter TRAP_MACHINE      = 1'b0;
-parameter TRAP_USER         = 1'b1;
+parameter TRAP_MACHINE      = 2'b00;
+parameter TRAP_USER         = 2'b01;
+parameter TRAP_MACHINEX     = 2'b10;
 
 // Debug Cause
 parameter DBG_CAUSE_EBREAK     = 3'h1;

@@ -91,7 +91,8 @@ if {$rvcores ne ""} {
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mie_q
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/miex_q 
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mip
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mipx 
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mipx
+  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mtvecx_q 
   add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_pending_o
                   
 
