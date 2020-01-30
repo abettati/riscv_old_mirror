@@ -110,7 +110,7 @@ module riscv_controller
   input  PrivLvl_t    current_priv_lvl_i,
 
   output logic        irq_ack_o,
-  output logic [5:0]  irq_id_o,
+  output logic [4:0]  irq_id_o,
 
   output logic [5:0]  exc_cause_o,
   output logic        exc_ack_o,
@@ -268,7 +268,8 @@ module riscv_controller
     halt_if_o              = 1'b0;
     halt_id_o              = 1'b0;
     irq_ack_o              = 1'b0;
-    irq_id_o               = irq_id_ctrl_i;
+    irq_id_o = irq_id_ctrl_i[4:0];
+    
     boot_done              = 1'b0;
     jump_in_dec            = jump_in_dec_i == BRANCH_JALR || jump_in_dec_i == BRANCH_JAL;
     branch_in_id           = jump_in_id_i == BRANCH_COND;
@@ -704,6 +705,7 @@ module riscv_controller
 
         // check if irq_id > 31
         if (irq_id_ctrl_i[5]) begin
+          irq_ack_o         = 1'b1;
           if(irq_sec_ctrl_i)
             trap_addr_mux_o  = TRAP_MACHINEX;
           else
@@ -719,7 +721,7 @@ module riscv_controller
         csr_save_cause_o  = 1'b1;
         csr_cause_o       = {1'b1,irq_id_ctrl_i[5:0]};
         csr_save_id_o     = 1'b1; // abet does this go in the if irq_id < 32 aswell?
-        irq_ack_o         = 1'b1;
+        
         exc_ack_o         = 1'b1;
         ctrl_fsm_ns       = DECODE;
       end
@@ -737,6 +739,7 @@ module riscv_controller
 
         // if irq_id > 31 serve a fastx irq
         if (irq_id_ctrl_i[5]) begin
+          irq_ack_o         = 1'b1;
           if(irq_sec_ctrl_i)
             trap_addr_mux_o  = TRAP_MACHINEX;
           else
@@ -753,7 +756,6 @@ module riscv_controller
         csr_save_cause_o  = 1'b1;
         csr_cause_o       = {1'b1,irq_id_ctrl_i[5:0]};
         csr_save_if_o     = 1'b1; // abet does this go in the if irq_id < 32 aswell?
-        irq_ack_o         = 1'b1;
         exc_ack_o         = 1'b1;
         ctrl_fsm_ns       = DECODE;
       end

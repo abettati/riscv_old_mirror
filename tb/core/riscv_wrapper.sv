@@ -45,9 +45,9 @@ module riscv_wrapper
     logic                         debug_req_i;
 
     // irq signals
-    logic [0:5]                   irq_id_in;
+    logic [0:4]                   irq_id_in;
     logic                         irq_ack;
-    logic [0:5]                   irq_id_out;
+    logic [0:4]                   irq_id_out;
     logic                         irq_sec;
     logic                         irq_software;
     logic                         irq_timer;    

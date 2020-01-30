@@ -36,7 +36,7 @@ module mm_ram
      output logic                         data_rvalid_o,
      output logic                         data_gnt_o,
 
-     input logic [5:0]                    irq_id_i,
+     input logic [4:0]                    irq_id_i,
      input logic                          irq_ack_i,
 
      output logic                         irq_software_o,

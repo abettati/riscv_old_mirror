@@ -107,7 +107,7 @@ module riscv_core
 
   // Interrupt inputs
   output logic        irq_ack_o,
-  output logic [5:0]  irq_id_o,
+  output logic [4:0]  irq_id_o,
 
   input  logic        irq_sec_i,
   
