@@ -899,6 +899,9 @@ int main(int argc, char *argv[])
 
     mat_mult(mat1, mat2, res);
 
+    // disable irqs and check the result
+    mstatus_disable(MSTATUS_MIE_BIT);
+
     for (int i = 0; i < MAT_DIM; i++) 
     { 
         // mstatus_enable(MSTATUS_MIE_BIT);
@@ -906,13 +909,11 @@ int main(int argc, char *argv[])
         {
             if(res[i][j] != res_expected[i][j])
             {
-                printf("\nERR: wrong result\n");
-                return ERR_CODE_TEST_5;
+                printf("\nERR: wrong\nExpected %d Got %d\n", res_expected[i][j], res[i][j]);
+                //return ERR_CODE_TEST_5;
             }
         }  
     } 
-
-    printf("OK\n");
 
     return EXIT_SUCCESS;
 }
