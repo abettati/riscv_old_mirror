@@ -358,14 +358,10 @@ module riscv_core
   logic [31:0]                      instr_addr_pmp;
   logic                             instr_err_pmp;
 
-  // abet
-  // handshake signals to/from controller
-  logic        irq_ctrl_ack;
-  logic        irq_ctrl_kill;
+  // interrupt signals
   logic        irq_pending;
   logic [5:0]  irq_id;
-  logic        irq_sec_ctrl;
- 
+
 
   //Simchecker signal
   logic is_interrupt;

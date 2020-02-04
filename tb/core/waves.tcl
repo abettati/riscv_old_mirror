@@ -65,67 +65,7 @@ if {$rvcores ne ""} {
   add wave -group "LSU"                                      $rvcores/load_store_unit_i/*
   add wave -group "CSR"                                      $rvcores/cs_registers_i/*
   add wave -group "MM RAM"                                   $mm_ram/*
-  
-  # abet TODO find a better way to do multiline
-
-  add wave -group "ABET DEBUG"                               $rvcores/clk_i
-  add wave -group "ABET DEBUG" -group "IF"                   $rvcores/if_stage_i/pc_if_o
-  add wave -group "ABET DEBUG" -group "IF"                   $rvcores/if_stage_i/exc_pc
-  add wave -group "ABET DEBUG" -group "IF"                   $rvcores/if_stage_i/exc_vec_pc_mux_i
-  add wave -group "ABET DEBUG" -group "IF"                   $rvcores/if_stage_i/trap_base_addr
-
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/csr_addr_i
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/csr_wdata_i
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_software_i
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_timer_i
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_external_i
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_fast_i
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_nmi_i
-
-  add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/irq_id_o
-  add wave -group "ABET DEBUG" -group "ID/CTRL"              $rvcores/id_stage_i/controller_i/ctrl_fsm_cs  
-
-  add wave -group "ABET DEBUG" -group "ID/INT_CTRL"          $rvcores/id_stage_i/int_controller_i/*
-  
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mstatus_q
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mie_q
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/miex_q 
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mip
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mipx
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/mtvecx_q 
-  add wave -group "ABET DEBUG" -group "CSR"                  $rvcores/cs_registers_i/irq_pending_o
-                  
-
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/data_addr_i
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/rnd_stall_regs[14]
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/rnd_stall_regs[15]
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/rnd_stall_req
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/rnd_stall_we
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/rnd_stall_wdata
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_ack_i
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_id_i
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_software_o
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_timer_o   
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_external_o
-  add wave -group "ABET DEBUG" -group "MM RAM"               $mm_ram/irq_fast_o    
-  
-  #add wave -group "ABET DEBUG" -group "INT DEMUX"            $mm_ram/interrupt_demux_i/*
-
-  add wave -group "ABET DEBUG" -group "HW TIMER"             $mm_ram/timer_wdata
-  add wave -group "ABET DEBUG" -group "HW TIMER"             $mm_ram/timer_wdata
-  add wave -group "ABET DEBUG" -group "HW TIMER"             $mm_ram/irq_timer_q
-  
-  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_ack_i
-  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_id_i
-  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_mode_i
-  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_lines_i
-  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_rnd_lines_o
-  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_pc_trig_lines
-  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_random
-  add wave -group "ABET DEBUG" -group "RND IRQ GEN"          $mm_ram/random_interrupt_generator_i/irq_monitor
-
-
-                                                            
+                                                              
 }
 
 configure wave -namecolwidth  250

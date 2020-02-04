@@ -703,13 +703,14 @@ module riscv_controller
         exc_cause_o       = {1'b1,irq_id_ctrl_i[4:0]};
         csr_irq_sec_o     = irq_sec_ctrl_i;
 
-        // check if irq_id > 31
+        // if irq_id > 31 serve a fastx irq
         if (irq_id_ctrl_i[5]) begin
           irq_ack_o         = 1'b1;
           if(irq_sec_ctrl_i)
             trap_addr_mux_o  = TRAP_MACHINEX;
           else
             trap_addr_mux_o  = current_priv_lvl_i == PRIV_LVL_U ? TRAP_USER : TRAP_MACHINEX;
+        // else serve a std irq
         end else begin
           if(irq_sec_ctrl_i)
             trap_addr_mux_o  = TRAP_MACHINE;
@@ -717,10 +718,9 @@ module riscv_controller
             trap_addr_mux_o  = current_priv_lvl_i == PRIV_LVL_U ? TRAP_USER : TRAP_MACHINE;
         end
 
-        // only for standard irqs (irq_id < 32) we save csr_cause
         csr_save_cause_o  = 1'b1;
         csr_cause_o       = {1'b1,irq_id_ctrl_i[5:0]};
-        csr_save_id_o     = 1'b1; // abet does this go in the if irq_id < 32 aswell?
+        csr_save_id_o     = 1'b1;
         
         exc_ack_o         = 1'b1;
         ctrl_fsm_ns       = DECODE;
@@ -752,10 +752,9 @@ module riscv_controller
             trap_addr_mux_o  = current_priv_lvl_i == PRIV_LVL_U ? TRAP_USER : TRAP_MACHINE;
         end
 
-        // only for standard irqs (irq_id < 32) we save csr_cause
         csr_save_cause_o  = 1'b1;
         csr_cause_o       = {1'b1,irq_id_ctrl_i[5:0]};
-        csr_save_if_o     = 1'b1; // abet does this go in the if irq_id < 32 aswell?
+        csr_save_if_o     = 1'b1;
         exc_ack_o         = 1'b1;
         ctrl_fsm_ns       = DECODE;
       end

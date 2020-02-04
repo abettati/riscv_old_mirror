@@ -27,7 +27,7 @@ MEMORY
 SECTIONS
 {
   /* we want a fixed entry point */
-  /* abet need to change this to make room for fastx interrupts*/
+  /* Changed this from 0x80 to make room for fastx interrupts*/
   PROVIDE(__boot_address = 0x800);
 
   /* stack and heap related settings */

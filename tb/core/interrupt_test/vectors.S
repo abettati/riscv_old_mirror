@@ -17,7 +17,7 @@
 .section .vectors, "ax"
 .option norvc
 
-/* abet added this to declar IRQ routine */
+/* Needed to declare IRQ routine */
 .global timer_irq_handler
 .global software_irq_handler
 .global external_irq_handler

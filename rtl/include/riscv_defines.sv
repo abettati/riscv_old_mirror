@@ -213,15 +213,14 @@ typedef enum logic[11:0] {
   CSR_MSCRATCH  = 12'h340,
   CSR_MEPC      = 12'h341,
   CSR_MCAUSE    = 12'h342,
-  CSR_MTVAL     = 12'h343, // TODO abet needs to be added?
   CSR_MIP       = 12'h344,
   CSR_MIPX      = 12'h345,
 
-  // abet User trap setup
+  // User trap setup
   CSR_USTATUS   = 12'h000,
   CSR_UTVEC     = 12'h005,
 
-  // abet User trap handling
+  // User trap handling
   CSR_UEPC      = 12'h041,
   CSR_UCAUSE    = 12'h042,
 
@@ -255,13 +254,6 @@ typedef enum logic[11:0] {
   CSR_DSCRATCH0 = 12'h7b2, // optional
   CSR_DSCRATCH1 = 12'h7b3 // optional
 
-  // TODO abet : these are not implemented
-  // Machine Counter/Timers
-  // CSR_MCOUNTINHIBIT      = 12'h320,
-  // CSR_MCYCLE             = 12'hB00,
-  // CSR_MCYCLEH            = 12'hB80,
-  // CSR_MINSTRET           = 12'hB02,
-  // CSR_MINSTRETH          = 12'hB82
 } csr_num_e;
 
 // abet CSR operations

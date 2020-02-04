@@ -165,6 +165,7 @@ module riscv_cs_registers
   localparam PERF_APU_ID     = PERF_EXT_ID + N_EXT_CNT;
   localparam MTVEC_MODE      = 2'b01;
   localparam MTVECX_MODE     = 2'b01;
+  localparam MTVECX_BASE     = 24'h1; // no need to be 4-byte alligned, not risc-v compliant
 
   localparam MAX_N_PMP_ENTRIES = 16;
   localparam MAX_N_PMP_CFG     =  4;
@@ -277,7 +278,6 @@ module riscv_cs_registers
   logic [23:0] mtvecx_n, mtvecx_q;
   logic [23:0] utvec_n, utvec_q;
 
-  // abet
   Interrupts_t mip;
   logic [31:0] mipx;
   Masked_Interrupts_t mie_q, mie_n;
@@ -318,7 +318,7 @@ module riscv_cs_registers
   assign irq_req_n.irq_nmi      = irq_nmi_i;
   assign irq_reqx_n             = irq_fastx_i;
 
-  // abet mip CSR is purely combintational
+  // mip CSR is purely combintational
   // must be able to re-enable the clock upon WFI
   assign mip.irq_software = irq_req_q.irq_software & mie_q.irq_software;
   assign mip.irq_timer    = irq_req_q.irq_timer    & mie_q.irq_timer;
@@ -390,7 +390,7 @@ if(PULP_SECURE==1) begin
       CSR_MEPC: csr_rdata_int = mepc_q;
       // mcause: exception cause
       CSR_MCAUSE: csr_rdata_int = {mcause_q[5], 26'b0, mcause_q[4:0]};
-      // abet mip: interrupt pending
+      // mip: interrupt pending
       CSR_MIP: begin
         csr_rdata_int                                     = '0;
         csr_rdata_int[CSR_MSIX_BIT]                       = mip.irq_software;
@@ -428,7 +428,7 @@ if(PULP_SECURE==1) begin
       CSR_PMPCFG1: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[1] : '0;
       CSR_PMPCFG2: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[2] : '0;
       CSR_PMPCFG3: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpcfg_packed[3] : '0;
-      // TODO abet how do I write this with mnemonics?
+      // TODO write this with mnemonics in riscv_defines.sv
       12'h3Bx: csr_rdata_int = USE_PMP ? pmp_reg_q.pmpaddr[csr_addr_i[3:0]] : '0;
 
       /* USER CSR */
@@ -480,7 +480,7 @@ end else begin //PULP_SECURE == 0
                                 };
       // misa: machine isa register
       CSR_MISA: csr_rdata_int = MISA_VALUE;
-      // abet mie: machine interrupt enable
+      // mie: machine interrupt enable
       CSR_MIE: begin
         csr_rdata_int                                     = '0;
         csr_rdata_int[CSR_MSIX_BIT]                       = mie_q.irq_software;
@@ -501,7 +501,7 @@ end else begin //PULP_SECURE == 0
       CSR_MEPC: csr_rdata_int = mepc_q;
       // mcause: exception cause
       CSR_MCAUSE: csr_rdata_int = {mcause_q[5], 26'b0, mcause_q[4:0]};
-      // abet mip: interrupt pending
+      // mip: interrupt pending
       CSR_MIP: begin
         csr_rdata_int                                     = '0;
         csr_rdata_int[CSR_MSIX_BIT]                       = mip.irq_software;
@@ -571,7 +571,6 @@ if(PULP_SECURE==1) begin
     pmpaddr_we               = '0;
     pmpcfg_we                = '0;
 
-    // abet
     mie_n                    = mie_q;
     miex_n                   = miex_q;
     mtvecx_n                 = mtvecx_q;
@@ -599,7 +598,7 @@ if(PULP_SECURE==1) begin
           mprv: csr_wdata_int[`MSTATUS_MPRV_BITS]
         };
       end
-      // abet mie: machine interrupt enable
+      // mie: machine interrupt enable
       CSR_MIE: if (csr_we_int) begin
         mie_n.irq_software = csr_wdata_int[CSR_MSIX_BIT];
         mie_n.irq_timer    = csr_wdata_int[CSR_MTIX_BIT];
@@ -628,7 +627,7 @@ if(PULP_SECURE==1) begin
       end
       // mcause
       CSR_MCAUSE: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[5:0]};
-      // TODO abet: should mip (h344) be added in write logic?
+
       CSR_DCSR:
                if (csr_we_int)
                begin
@@ -849,7 +848,6 @@ end else begin //PULP_SECURE == 0
     pmpaddr_we               = '0;
     pmpcfg_we                = '0;
 
-    //abet
     mie_n                    = mie_q;
     miex_n                   = miex_q;
     mtvecx_n                 = mtvecx_q;
@@ -877,7 +875,7 @@ end else begin //PULP_SECURE == 0
           mprv: csr_wdata_int[`MSTATUS_MPRV_BITS]
         };
       end
-      // abet mie: machine interrupt enable
+      // mie: machine interrupt enable
       CSR_MIE: if(csr_we_int) begin
         mie_n.irq_software = csr_wdata_int[CSR_MSIX_BIT];
         mie_n.irq_timer    = csr_wdata_int[CSR_MTIX_BIT];
@@ -898,7 +896,7 @@ end else begin //PULP_SECURE == 0
       end
       // mcause
       CSR_MCAUSE: if (csr_we_int) mcause_n = {csr_wdata_int[31], csr_wdata_int[5:0]};
-      // TODO abet: should mip (h344) be added in write logic?
+
       CSR_DCSR:
                if (csr_we_int)
                begin
@@ -1156,7 +1154,7 @@ end //PULP_SECURE
             uepc_q         <= '0;
             ucause_q       <= '0;
             mtvec_q        <= '0;
-            mtvecx_q       <= 24'h1; //abet
+            mtvecx_q       <= MTVECX_BASE;
             utvec_q        <= '0;
             priv_lvl_q     <= PRIV_LVL_M;
             irq_req_q      <= '0;
@@ -1181,7 +1179,7 @@ end //PULP_SECURE
         assign uepc_q       = '0;
         assign ucause_q     = '0;
         assign mtvec_q      = boot_addr_i[30:7];
-        assign mtvecx_q     = 24'h1; // abet 24'h80 | boot_addr_i[30:7]  
+        assign mtvecx_q     = MTVECX_BASE;
         assign utvec_q      = '0;
         assign priv_lvl_q   = PRIV_LVL_M;
 
